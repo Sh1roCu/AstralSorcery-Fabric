@@ -106,9 +106,7 @@ public class TileLightwell extends TileEntityNetwork<ForwardingStarlightReceiver
         }
 
         if (this.activeRecipe == null) {
-            if (RecipeUtil.getRecipeManager() == null) return;
-
-            this.activeRecipe = this.getTileData().findMatchingRecipe(catalyst)
+            this.activeRecipe = RecipeFinder.of(level).findLightwellRecipe(catalyst,this.getTileData().getContainedFluid())
                     .map(RecipeHolder::value)
                     .orElse(null);
         }
