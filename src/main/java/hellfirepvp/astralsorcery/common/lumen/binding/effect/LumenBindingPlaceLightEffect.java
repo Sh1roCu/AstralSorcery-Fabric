@@ -42,17 +42,19 @@ public class LumenBindingPlaceLightEffect extends LumenBindingEffect {
     public static final StreamCodec<RegistryFriendlyByteBuf, LumenBindingPlaceLightEffect> STREAM_CODEC = StreamCodec.unit(INSTANCE);
 
     public static void attachEventListeners() {
-        PlayerBlockBreakEvents.AFTER.register(BaseEvent.LOWEST, LumenBindingPlaceLightEffect::onBlockBreak);
+        PlayerBlockBreakEvents.BEFORE.register(BaseEvent.LOWEST, LumenBindingPlaceLightEffect::onBlockBreak);
     }
 
-    private static void onBlockBreak(Level level, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity) {
-        if (level.isClientSide()) return;
+    private static boolean onBlockBreak(Level level, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity) {
+        if (level.isClientSide()) return true;
         int light = level.getRawBrightness(pos, 0);
-        if (light >= 2) return;
+        if (light >= 2) return true;
 
         forEachEffect(player, LumenBindingPlaceLightEffect.class, (stack, effect) -> {
             level.setBlock(pos, BlocksAS.FLARE_LIGHT.defaultBlockState(), Block.UPDATE_ALL);
         });
+
+        return true;
     }
 
     @Override

@@ -82,19 +82,19 @@ public class RootPerkEvorsio extends RootPerk<AbstractPerk.Data> {
     @Override
     protected void attachEventListeners() {
         super.attachEventListeners();
-        PlayerBlockBreakEvents.AFTER.register(this::onBreak);
+        PlayerBlockBreakEvents.BEFORE.register(this::onBreak);
     }
 
-    protected void onBreak(Level world, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity) {
-        if (!(player instanceof ServerPlayer sPlayer)) return;
+    protected boolean onBreak(Level world, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity) {
+        if (!(player instanceof ServerPlayer sPlayer)) return true;
         EnvType side = this.getSide(sPlayer);
-        if (side != EnvType.SERVER) return;
+        if (side != EnvType.SERVER) return true;
         PlayerProgress progress = ResearchManager.getProgress(sPlayer, side);
-        if (!progress.getPerkData().hasPerkEffect(this)) return;
+        if (!progress.getPerkData().hasPerkEffect(this)) return true;
         PerkAttributeMap perkMap = PerkManager.getOrCreateAttributes(sPlayer);
 
         float breakSpeed = sPlayer.getDestroySpeed(state);
-        if (breakSpeed < 0) return;
+        if (breakSpeed < 0) return true;
         breakSpeed = Math.max(0.005F, breakSpeed);
 
         float xp = breakSpeed * 5F;
@@ -106,6 +106,8 @@ public class RootPerkEvorsio extends RootPerk<AbstractPerk.Data> {
         xp = AttributeEvent.postProcessModded(sPlayer, PerksAS.AttributeTypes.PERK_EXPERIENCE, xp);
 
         ResearchHelper.addPerkExp(sPlayer, xp);
+
+        return true;
     }
 
     @Override

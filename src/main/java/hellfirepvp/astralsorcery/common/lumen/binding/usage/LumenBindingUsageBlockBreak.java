@@ -50,12 +50,13 @@ public class LumenBindingUsageBlockBreak extends LumenBindingUsage {
     }
 
     public static void attachEventListeners() {
-        PlayerBlockBreakEvents.AFTER.register(BaseEvent.LOWEST, LumenBindingUsageBlockBreak::onBlockBreak);
+        PlayerBlockBreakEvents.BEFORE.register(BaseEvent.LOWEST, LumenBindingUsageBlockBreak::onBlockBreak);
     }
 
-    private static void onBlockBreak(Level world, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity) {
-        if (world.isClientSide()) return;
+    private static boolean onBlockBreak(Level world, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity) {
+        if (world.isClientSide()) return true;
         drainAll(player, 1F, LumenBindingUsageBlockBreak.class);
+        return true;
     }
 
     @Override

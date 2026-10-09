@@ -67,10 +67,10 @@ public class AstralSorceryFabric implements ModInitializer {
         UseBlockCallback.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LOW);
         UseBlockCallback.EVENT.addPhaseOrdering(LOW, LOWEST);
 
-        PlayerBlockBreakEvents.AFTER.addPhaseOrdering(HIGHEST, HIGH);
-        PlayerBlockBreakEvents.AFTER.addPhaseOrdering(HIGH, Event.DEFAULT_PHASE);
-        PlayerBlockBreakEvents.AFTER.addPhaseOrdering(Event.DEFAULT_PHASE, LOW);
-        PlayerBlockBreakEvents.AFTER.addPhaseOrdering(LOW, LOWEST);
+        PlayerBlockBreakEvents.BEFORE.addPhaseOrdering(HIGHEST, HIGH);
+        PlayerBlockBreakEvents.BEFORE.addPhaseOrdering(HIGH, Event.DEFAULT_PHASE);
+        PlayerBlockBreakEvents.BEFORE.addPhaseOrdering(Event.DEFAULT_PHASE, LOW);
+        PlayerBlockBreakEvents.BEFORE.addPhaseOrdering(LOW, LOWEST);
 
         ServerLivingEntityEvents.ALLOW_DAMAGE.addPhaseOrdering(HIGHEST, HIGH);
         ServerLivingEntityEvents.ALLOW_DAMAGE.addPhaseOrdering(HIGH, Event.DEFAULT_PHASE);

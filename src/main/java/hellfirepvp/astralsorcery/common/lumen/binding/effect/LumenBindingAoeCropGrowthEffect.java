@@ -47,11 +47,11 @@ public class LumenBindingAoeCropGrowthEffect extends LumenBindingEffect {
     public static final StreamCodec<RegistryFriendlyByteBuf, LumenBindingAoeCropGrowthEffect> STREAM_CODEC = StreamCodec.unit(INSTANCE);
 
     public static void attachEventListeners() {
-        PlayerBlockBreakEvents.AFTER.register(BaseEvent.LOWEST, LumenBindingAoeCropGrowthEffect::onBlockBreak);
+        PlayerBlockBreakEvents.BEFORE.register(BaseEvent.LOWEST, LumenBindingAoeCropGrowthEffect::onBlockBreak);
     }
 
-    private static void onBlockBreak(Level world, Player player, BlockPos brokenPos, BlockState state, @Nullable BlockEntity blockEntity) {
-        if (!(player instanceof ServerPlayer sPlayer)) return;
+    private static boolean onBlockBreak(Level world, Player player, BlockPos brokenPos, BlockState state, @Nullable BlockEntity blockEntity) {
+        if (!(player instanceof ServerPlayer sPlayer)) return true;
         ServerLevel sLevel = sPlayer.serverLevel();
 
         RandomSource rand = sLevel.getRandom();
@@ -70,6 +70,7 @@ public class LumenBindingAoeCropGrowthEffect extends LumenBindingEffect {
                 });
             });
         });
+        return true;
     }
 
     @Override

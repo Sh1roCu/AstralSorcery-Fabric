@@ -58,14 +58,16 @@ public class AttributeTypeMiningSize extends PerkAttributeType {
     @Override
     protected void attachListeners() {
         super.attachListeners();
-        PlayerBlockBreakEvents.AFTER.register(this::onBlockBreak);
+        PlayerBlockBreakEvents.BEFORE.register(this::onBlockBreak);
     }
 
-    private void onBlockBreak(Level world, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity) {
-        if (!(world instanceof ServerLevel sLevel)) return;
-        if (!(player instanceof ServerPlayer sPlayer)) return;
+    private boolean onBlockBreak(Level world, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity) {
+        if (!(world instanceof ServerLevel sLevel)) return true;
+        if (!(player instanceof ServerPlayer sPlayer)) return true;
 
         forAllValidBreakablePositions(sLevel, sPlayer, pos, sPlayer.gameMode::destroyBlock);
+
+        return true;
     }
 
     public static void sendBlockBreakProgressSync(ServerLevel sLevel, ServerPlayer breaker, BlockPos pos, int progressStage) {
