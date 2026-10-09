@@ -8,10 +8,12 @@
 
 package hellfirepvp.astralsorcery.common.event;
 
+import cn.sh1rocu.astralsorcery.api.event.PlayerEvent;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -24,6 +26,12 @@ public class InventoryChangeEvent extends PlayerEvent {
 
     private final ItemStack newStack;
 
+    public static final Event<Callback> EVENT = EventFactory.createArrayBacked(Callback.class, callbacks -> event -> {
+        for (Callback callback : callbacks) {
+            callback.post(event);
+        }
+    });
+
     public InventoryChangeEvent(ServerPlayer player, ItemStack newStack) {
         super(player);
         this.newStack = newStack;
@@ -35,5 +43,9 @@ public class InventoryChangeEvent extends PlayerEvent {
 
     public ItemStack getNewStack() {
         return this.newStack.copy();
+    }
+
+    public interface Callback {
+        void post(InventoryChangeEvent event);
     }
 }

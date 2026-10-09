@@ -9,28 +9,28 @@
 package hellfirepvp.astralsorcery.common.perk.tree.perk;
 
 import com.mojang.datafixers.Products;
-import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.config.ConfigEntry;
 import hellfirepvp.astralsorcery.common.constellation.BaseConstellation;
-import hellfirepvp.astralsorcery.common.lib.ConstellationsAS;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
-import hellfirepvp.astralsorcery.common.lib.types.PerkDataTypesAS;
 import hellfirepvp.astralsorcery.common.perk.convert.PerkAttributeConverter;
 import hellfirepvp.astralsorcery.common.perk.modifier.PerkAttributeModifier;
-import hellfirepvp.astralsorcery.common.perk.tree.*;
+import hellfirepvp.astralsorcery.common.perk.tree.AbstractPerk;
+import hellfirepvp.astralsorcery.common.perk.tree.AttributeModifierPerk;
+import hellfirepvp.astralsorcery.common.perk.tree.PerkCategory;
+import hellfirepvp.astralsorcery.common.perk.tree.PerkTreePoint;
 import hellfirepvp.astralsorcery.common.perk.tree.point.ConstellationPerkTreePoint;
 import hellfirepvp.astralsorcery.common.perk.tree.requirement.PerkRequirement;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.util.DiminishingMultiplier;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.codec.CodecProducts;
+import net.fabricmc.api.EnvType;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.*;
@@ -92,10 +92,10 @@ public abstract class RootPerk<D extends AbstractPerk.Data> extends AttributeMod
     }
 
     @Override
-    public void clearCaches(LogicalSide side) {
+    public void clearCaches(EnvType side) {
         super.clearCaches(side);
 
-        if (side.isServer()) {
+        if (side == EnvType.SERVER) {
             this.diminishingMultipliers.clear();
         }
     }

@@ -11,12 +11,13 @@ package hellfirepvp.astralsorcery.common.network.play;
 import hellfirepvp.astralsorcery.common.network.PlayPacketHandler;
 import hellfirepvp.astralsorcery.common.research.ResearchNode;
 import hellfirepvp.astralsorcery.common.research.data.ResearchNodeLoader;
-import net.minecraft.network.FriendlyByteBuf;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
 
@@ -48,9 +49,10 @@ public class PktSyncResearchNodes extends PlayPacketHandler.ToClient<PktSyncRese
         return CODEC;
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
-    public void handle(Request payload, IPayloadContext context) {
-        context.enqueueWork(() -> ResearchNodeLoader.getInstance().updateServerNodes(payload.nodes()));
+    public void receive(Request payload, ClientPlayNetworking.Context context) {
+        context.client().execute(() -> ResearchNodeLoader.getInstance().updateServerNodes(payload.nodes()));
     }
 
     public static record Request(List<ResearchNode> nodes) implements CustomPacketPayload {

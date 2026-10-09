@@ -12,12 +12,12 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.lib.types.LumenBindingUsageTypesAS;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -56,16 +56,16 @@ public class LumenBindingUsageDamageDealt extends LumenBindingUsage {
         return this.direct;
     }
 
-    public static void attachEventListeners(IEventBus bus) {
-        bus.addListener(LumenBindingUsageDamageDealt::onDamageDealtDirectly);
+    public static void attachEventListeners() {
+        ServerLivingEntityEvents.AFTER_DAMAGE.register(LumenBindingUsageDamageDealt::onDamageDealtDirectly);
     }
 
-    private static void onDamageDealtDirectly(LivingDamageEvent.Post event) {
-        if (event.getSource().getDirectEntity() instanceof LivingEntity attacker) {
+    private static void onDamageDealtDirectly(LivingEntity entity, DamageSource source, float baseDamageTaken, float damageTaken, boolean blocked) {
+        if (source.getDirectEntity() instanceof LivingEntity attacker) {
             if (attacker.level().isClientSide()) return;
 
             forEachUsage(attacker, LumenBindingUsageDamageDealt.class, (stack, usage) -> {
-                if (usage.isDirect() != event.getSource().isDirect()) return;
+                if (usage.isDirect() != source.isDirect()) return;
 
                 drainUsedLumen(attacker, stack, usage, 1F);
             });

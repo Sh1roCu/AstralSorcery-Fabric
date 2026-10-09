@@ -20,33 +20,33 @@ import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 public class PatternAltarT4 extends PatternAltarT3 {
 
     public PatternAltarT4() {
-        this.addBlock(BlocksAS.ALTAR_RADIANCE.get().defaultBlockState(), 0, 0, 0);
-        this.addBlockCube(BlocksAS.SOOTY_MARBLE_RAW.get().defaultBlockState(), -6, 0, -6, -6, 0,  6);
-        this.addBlockCube(BlocksAS.SOOTY_MARBLE_RAW.get().defaultBlockState(),  6, 0, -6,  6, 0,  6);
-        this.addBlockCube(BlocksAS.SOOTY_MARBLE_RAW.get().defaultBlockState(), -6, 0, -6,  6, 0, -6);
-        this.addBlockCube(BlocksAS.SOOTY_MARBLE_RAW.get().defaultBlockState(), -6, 0,  6,  6, 0,  6);
+        this.addBlock(BlocksAS.ALTAR_RADIANCE.defaultBlockState(), 0, 0, 0);
+        this.addBlockCube(BlocksAS.SOOTY_MARBLE_RAW.defaultBlockState(), -6, 0, -6, -6, 0,  6);
+        this.addBlockCube(BlocksAS.SOOTY_MARBLE_RAW.defaultBlockState(),  6, 0, -6,  6, 0,  6);
+        this.addBlockCube(BlocksAS.SOOTY_MARBLE_RAW.defaultBlockState(), -6, 0, -6,  6, 0, -6);
+        this.addBlockCube(BlocksAS.SOOTY_MARBLE_RAW.defaultBlockState(), -6, 0,  6,  6, 0,  6);
 
-        this.addBlockCube(BlocksAS.MARBLE_RUNED.get().defaultBlockState(), -7, 0, -7, -7, 0,  7);
-        this.addBlockCube(BlocksAS.MARBLE_RUNED.get().defaultBlockState(),  7, 0, -7,  7, 0,  7);
-        this.addBlockCube(BlocksAS.MARBLE_RUNED.get().defaultBlockState(), -7, 0, -7,  7, 0, -7);
-        this.addBlockCube(BlocksAS.MARBLE_RUNED.get().defaultBlockState(), -7, 0,  7,  7, 0,  7);
+        this.addBlockCube(BlocksAS.MARBLE_RUNED.defaultBlockState(), -7, 0, -7, -7, 0,  7);
+        this.addBlockCube(BlocksAS.MARBLE_RUNED.defaultBlockState(),  7, 0, -7,  7, 0,  7);
+        this.addBlockCube(BlocksAS.MARBLE_RUNED.defaultBlockState(), -7, 0, -7,  7, 0, -7);
+        this.addBlockCube(BlocksAS.MARBLE_RUNED.defaultBlockState(), -7, 0,  7,  7, 0,  7);
 
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get().defaultBlockState(),  7, 0,  7);
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get().defaultBlockState(), -7, 0,  7);
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get().defaultBlockState(),  7, 0, -7);
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get().defaultBlockState(), -7, 0, -7);
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get().defaultBlockState(),  7, 0,  0);
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get().defaultBlockState(), -7, 0,  0);
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get().defaultBlockState(),  0, 0,  7);
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get().defaultBlockState(),  0, 0, -7);
+        this.addBlock(BlocksAS.MARBLE_CHISELED.defaultBlockState(),  7, 0,  7);
+        this.addBlock(BlocksAS.MARBLE_CHISELED.defaultBlockState(), -7, 0,  7);
+        this.addBlock(BlocksAS.MARBLE_CHISELED.defaultBlockState(),  7, 0, -7);
+        this.addBlock(BlocksAS.MARBLE_CHISELED.defaultBlockState(), -7, 0, -7);
+        this.addBlock(BlocksAS.MARBLE_CHISELED.defaultBlockState(),  7, 0,  0);
+        this.addBlock(BlocksAS.MARBLE_CHISELED.defaultBlockState(), -7, 0,  0);
+        this.addBlock(BlocksAS.MARBLE_CHISELED.defaultBlockState(),  0, 0,  7);
+        this.addBlock(BlocksAS.MARBLE_CHISELED.defaultBlockState(),  0, 0, -7);
 
         this.addPillar(BlocksAS.MARBLE_PILLAR,  7, 1,  7, 2);
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get().defaultBlockState(),  7, 3,  7);
+        this.addBlock(BlocksAS.MARBLE_CHISELED.defaultBlockState(),  7, 3,  7);
         this.addPillar(BlocksAS.MARBLE_PILLAR, -7, 1,  7, 2);
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get().defaultBlockState(), -7, 3,  7);
+        this.addBlock(BlocksAS.MARBLE_CHISELED.defaultBlockState(), -7, 3,  7);
         this.addPillar(BlocksAS.MARBLE_PILLAR, -7, 1, -7, 2);
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get().defaultBlockState(), -7, 3, -7);
+        this.addBlock(BlocksAS.MARBLE_CHISELED.defaultBlockState(), -7, 3, -7);
         this.addPillar(BlocksAS.MARBLE_PILLAR,  7, 1, -7, 2);
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get().defaultBlockState(),  7, 3, -7);
+        this.addBlock(BlocksAS.MARBLE_CHISELED.defaultBlockState(),  7, 3, -7);
     }
 }

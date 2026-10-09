@@ -16,16 +16,15 @@ import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.loot.*;
 import hellfirepvp.astralsorcery.common.loot.condition.LockableTileEntityCondition;
 import hellfirepvp.astralsorcery.common.loot.condition.PlayerNearbyCondition;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.loot.BlockLootSubProvider;
-import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
@@ -35,12 +34,9 @@ import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
-import net.neoforged.neoforge.registries.DeferredBlock;
-import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -49,14 +45,14 @@ import java.util.stream.Collectors;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class AstralBlockLootTableProvider extends BlockLootSubProvider {
+public class AstralBlockLootTableProvider extends FabricBlockLootTableProvider {
 
-    protected AstralBlockLootTableProvider(HolderLookup.Provider registries) {
-        super(Set.of(), FeatureFlags.REGISTRY.allFlags(), registries);
+    public AstralBlockLootTableProvider(FabricDataOutput dataOutput, CompletableFuture<HolderLookup.Provider> registryLookup) {
+        super(dataOutput, registryLookup);
     }
 
     @Override
-    protected void generate() {
+    public void generate() {
         HolderLookup.RegistryLookup<Enchantment> enchantments = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
 
         this.dropSelf(BlocksAS.MARBLE_ARCH);
@@ -67,7 +63,7 @@ public class AstralBlockLootTableProvider extends BlockLootSubProvider {
         this.dropSelf(BlocksAS.MARBLE_RAW);
         this.dropSelf(BlocksAS.MARBLE_RUNED);
         this.dropSelf(BlocksAS.MARBLE_STAIRS);
-        this.add(BlocksAS.MARBLE_SLAB.get(), this::createSlabItemTable);
+        this.add(BlocksAS.MARBLE_SLAB, this::createSlabItemTable);
         this.dropSelf(BlocksAS.SOOTY_MARBLE_ARCH);
         this.dropSelf(BlocksAS.SOOTY_MARBLE_BRICKS);
         this.dropSelf(BlocksAS.SOOTY_MARBLE_CHISELED);
@@ -76,7 +72,7 @@ public class AstralBlockLootTableProvider extends BlockLootSubProvider {
         this.dropSelf(BlocksAS.SOOTY_MARBLE_RAW);
         this.dropSelf(BlocksAS.SOOTY_MARBLE_RUNED);
         this.dropSelf(BlocksAS.SOOTY_MARBLE_STAIRS);
-        this.add(BlocksAS.SOOTY_MARBLE_SLAB.get(), this::createSlabItemTable);
+        this.add(BlocksAS.SOOTY_MARBLE_SLAB, this::createSlabItemTable);
         this.dropSelf(BlocksAS.INFUSED_WOOD_RAW);
         this.dropSelf(BlocksAS.INFUSED_WOOD_ARCH);
         this.dropSelf(BlocksAS.INFUSED_WOOD_COLUMN);
@@ -85,9 +81,9 @@ public class AstralBlockLootTableProvider extends BlockLootSubProvider {
         this.dropSelf(BlocksAS.INFUSED_WOOD_INFUSED);
         this.dropSelf(BlocksAS.INFUSED_WOOD_PLANKS);
         this.dropSelf(BlocksAS.INFUSED_WOOD_STAIRS);
-        this.add(BlocksAS.INFUSED_WOOD_SLAB.get(), this::createSlabItemTable);
+        this.add(BlocksAS.INFUSED_WOOD_SLAB, this::createSlabItemTable);
 
-        this.add(BlocksAS.AQUAMARINE_SHALE.get(), block -> {
+        this.add(BlocksAS.AQUAMARINE_SHALE, block -> {
             return this.createSilkTouchDispatchTable(block,
                     LootItem.lootTableItem(ItemsAS.AQUAMARINE)
                             .apply(SetItemCountFunction.setCount(UniformGenerator.between(1, 3)))
@@ -97,7 +93,7 @@ public class AstralBlockLootTableProvider extends BlockLootSubProvider {
                             .apply(ApplyExplosionDecay.explosionDecay())
             );
         });
-        this.add(BlocksAS.ROCK_CRYSTAL_ORE.get(), block -> {
+        this.add(BlocksAS.ROCK_CRYSTAL_ORE, block -> {
             return LootTable.lootTable()
                     .withPool(LootPool.lootPool()
                             .setRolls(UniformGenerator.between(1F, 3F))
@@ -106,10 +102,10 @@ public class AstralBlockLootTableProvider extends BlockLootSubProvider {
                                     .apply(GenerateCrystalPropertiesFunction.randomProperties())
                                     .apply(ApplyExplosionDecay.explosionDecay())));
         });
-        this.add(BlocksAS.STARMETAL_ORE.get(), b -> this.createOreDrop(b, ItemsAS.RAW_STARMETAL.asItem()));
+        this.add(BlocksAS.STARMETAL_ORE, b -> this.createOreDrop(b, ItemsAS.RAW_STARMETAL.asItem()));
         this.dropSelf(BlocksAS.RAW_STARMETAL_BLOCK);
 
-        this.add(BlocksAS.GLIMMER_AMARANTH.get(), block -> {
+        this.add(BlocksAS.GLIMMER_AMARANTH, block -> {
             return createShearsDispatchTable(block,
                     LootItem.lootTableItem(Items.GLOWSTONE_DUST)
                             .apply(SetItemCountFunction.setCount(UniformGenerator.between(1, 5)))
@@ -124,12 +120,12 @@ public class AstralBlockLootTableProvider extends BlockLootSubProvider {
         this.dropSelf(BlocksAS.ORCHID);
         this.dropSelf(BlocksAS.PROTEA);
         this.dropSelf(BlocksAS.THISTLE);
-        this.dropPottedContents(BlocksAS.POTTED_GLIMMER_AMARANTH.get());
-        this.dropPottedContents(BlocksAS.POTTED_HYACINTH.get());
-        this.dropPottedContents(BlocksAS.POTTED_IRIS.get());
-        this.dropPottedContents(BlocksAS.POTTED_ORCHID.get());
-        this.dropPottedContents(BlocksAS.POTTED_PROTEA.get());
-        this.dropPottedContents(BlocksAS.POTTED_THISTLE.get());
+        this.dropPottedContents(BlocksAS.POTTED_GLIMMER_AMARANTH);
+        this.dropPottedContents(BlocksAS.POTTED_HYACINTH);
+        this.dropPottedContents(BlocksAS.POTTED_IRIS);
+        this.dropPottedContents(BlocksAS.POTTED_ORCHID);
+        this.dropPottedContents(BlocksAS.POTTED_PROTEA);
+        this.dropPottedContents(BlocksAS.POTTED_THISTLE);
 
         this.dropSelf(BlocksAS.ALTAR_ILLUMINATION);
         this.dropSelf(BlocksAS.ALTAR_RESONANCE);
@@ -137,14 +133,14 @@ public class AstralBlockLootTableProvider extends BlockLootSubProvider {
         this.dropSelf(BlocksAS.ALTAR_RADIANCE);
 
         this.dropSelf(BlocksAS.FOCUS_RELAY);
-        this.add(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER.get(), block -> {
+        this.add(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER, block -> {
             return LootTable.lootTable()
                     .apply(ApplyExplosionDecay.explosionDecay())
                     .apply(CopyCrystalPropertiesFunction.copyProperties())
                     .withPool(LootPool.lootPool()
                             .setRolls(ConstantValue.exactly(1))
                             .add(LootItem.lootTableItem(ItemsAS.CELESTIAL_CRYSTAL)
-                                    .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER.get())
+                                    .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER)
                                             .setProperties(StatePropertiesPredicate.Builder.properties()
                                                     .hasProperty(CelestialCrystalClusterBlock.STAGE, 4)))
                             )
@@ -152,7 +148,7 @@ public class AstralBlockLootTableProvider extends BlockLootSubProvider {
                     .withPool(LootPool.lootPool()
                             .setRolls(ConstantValue.exactly(1))
                             .add(LootItem.lootTableItem(ItemsAS.STARDUST)
-                                    .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER.get())
+                                    .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER)
                                             .setProperties(StatePropertiesPredicate.Builder.properties()
                                                     .hasProperty(CelestialCrystalClusterBlock.STAGE, 1)))
                             )
@@ -160,7 +156,7 @@ public class AstralBlockLootTableProvider extends BlockLootSubProvider {
                     .withPool(LootPool.lootPool()
                             .setRolls(UniformGenerator.between(1F, 2F))
                             .add(LootItem.lootTableItem(ItemsAS.STARDUST)
-                                    .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER.get())
+                                    .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER)
                                             .setProperties(StatePropertiesPredicate.Builder.properties()
                                                     .hasProperty(CelestialCrystalClusterBlock.STAGE, 2)))
                             )
@@ -168,7 +164,7 @@ public class AstralBlockLootTableProvider extends BlockLootSubProvider {
                     .withPool(LootPool.lootPool()
                             .setRolls(UniformGenerator.between(1F, 2F))
                             .add(LootItem.lootTableItem(ItemsAS.STARDUST)
-                                    .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER.get())
+                                    .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER)
                                             .setProperties(StatePropertiesPredicate.Builder.properties()
                                                     .hasProperty(CelestialCrystalClusterBlock.STAGE, 3)))
                             )
@@ -176,13 +172,13 @@ public class AstralBlockLootTableProvider extends BlockLootSubProvider {
                     .withPool(LootPool.lootPool()
                             .setRolls(ConstantValue.exactly(2))
                             .add(LootItem.lootTableItem(ItemsAS.STARDUST)
-                                    .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER.get())
+                                    .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER)
                                             .setProperties(StatePropertiesPredicate.Builder.properties()
                                                     .hasProperty(CelestialCrystalClusterBlock.STAGE, 4)))
                             )
                     );
         });
-        this.add(BlocksAS.GEM_CRYSTAL_CLUSTER.get(), block -> {
+        this.add(BlocksAS.GEM_CRYSTAL_CLUSTER, block -> {
             return LootTable.lootTable()
                     .apply(ApplyExplosionDecay.explosionDecay())
                     .apply(GenerateDynamismGemRollsFunction.randomProperties())
@@ -205,7 +201,7 @@ public class AstralBlockLootTableProvider extends BlockLootSubProvider {
                                             .setProperties(StatePropertiesPredicate.Builder.properties()
                                                     .hasProperty(GemCrystalClusterBlock.STAGE, GemCrystalClusterBlock.GrowthStageType.STAGE_2_SKY)))));
         });
-        this.add(BlocksAS.LUMEN_CRYSTAL_CLUSTER.get(), block -> {
+        this.add(BlocksAS.LUMEN_CRYSTAL_CLUSTER, block -> {
             return LootTable.lootTable()
                     .apply(ApplyExplosionDecay.explosionDecay())
                     .withPool(LootPool.lootPool()
@@ -223,50 +219,39 @@ public class AstralBlockLootTableProvider extends BlockLootSubProvider {
         this.dropSelf(BlocksAS.CHALICE);
         this.dropSelf(BlocksAS.ATTUNEMENT_ALTAR);
         this.dropSelf(BlocksAS.TREE_BEACON);
-        this.add(BlocksAS.CELESTIAL_GATEWAY.get(),
+        this.add(BlocksAS.CELESTIAL_GATEWAY,
                 LootTable.lootTable().withPool(
                         this.applyExplosionCondition(
-                                BlocksAS.CELESTIAL_GATEWAY.get(),
+                                BlocksAS.CELESTIAL_GATEWAY,
                                 LootPool.lootPool()
                                         .setRolls(ConstantValue.exactly(1.0F))
-                                        .add(LootItem.lootTableItem(BlocksAS.CELESTIAL_GATEWAY.get())
+                                        .add(LootItem.lootTableItem(BlocksAS.CELESTIAL_GATEWAY)
                                                 .apply(CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY)
                                                         .include(DataComponents.CUSTOM_NAME)
-                                                        .include(DataComponentsAS.COLOR.get())))
-                                        .add(LootItem.lootTableItem(ItemsAS.AQUAMARINE.get())
+                                                        .include(DataComponentsAS.COLOR)))
+                                        .add(LootItem.lootTableItem(ItemsAS.AQUAMARINE)
                                                 .when(LockableTileEntityCondition.lockable()))
                         )
                 ));
 
-        this.add(BlocksAS.LENS.get(),
+        this.add(BlocksAS.LENS,
                 this.createSingleItemTable(BlocksAS.LENS)
                         .apply(CopyCrystalPropertiesFunction.copyProperties()));
-        this.add(BlocksAS.PRISM.get(),
+        this.add(BlocksAS.PRISM,
                 this.createSingleItemTable(BlocksAS.PRISM)
                         .apply(CopyCrystalPropertiesFunction.copyProperties()));
-        this.add(BlocksAS.STARLIGHT_FOCUS_ROCK_CRYSTAL.get(),
+        this.add(BlocksAS.STARLIGHT_FOCUS_ROCK_CRYSTAL,
                 this.createSingleItemTable(BlocksAS.STARLIGHT_FOCUS_ROCK_CRYSTAL)
                         .apply(CopyCrystalPropertiesFunction.copyProperties())
                         .apply(CopyConstellationFunction.copyConstellation()));
-        this.add(BlocksAS.STARLIGHT_FOCUS_CELESTIAL_CRYSTAL.get(),
+        this.add(BlocksAS.STARLIGHT_FOCUS_CELESTIAL_CRYSTAL,
                 this.createSingleItemTable(BlocksAS.STARLIGHT_FOCUS_CELESTIAL_CRYSTAL)
                         .apply(CopyCrystalPropertiesFunction.copyProperties())
                         .apply(CopyConstellationFunction.copyConstellation()));
         this.dropSelf(BlocksAS.STELLAR_FILAMENT);
-        this.add(BlocksAS.CAVE_ILLUMINATOR.get(),
+        this.add(BlocksAS.CAVE_ILLUMINATOR,
                 this.createSingleItemTable(BlocksAS.CAVE_ILLUMINATOR)
                         .apply(CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY)
-                                .include(DataComponentsAS.COLOR.get())));
-    }
-
-    private void dropSelf(DeferredBlock<? extends Block> deferredBlock) {
-        this.dropSelf(deferredBlock.get());
-    }
-
-    @Override
-    protected Iterable<Block> getKnownBlocks() {
-        return BlocksAS.BLOCK_REGISTER.getEntries().stream()
-                .map(DeferredHolder::get)
-                .collect(Collectors.toUnmodifiableList());
+                                .include(DataComponentsAS.COLOR)));
     }
 }

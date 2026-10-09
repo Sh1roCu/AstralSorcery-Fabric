@@ -8,8 +8,11 @@
 
 package hellfirepvp.astralsorcery.common.item.tool;
 
+import cn.sh1rocu.astralsorcery.api.extension.IMaxDamageItem;
+import cn.sh1rocu.astralsorcery.api.extension.INoRepairItem;
 import hellfirepvp.astralsorcery.common.crystal.CrystalPropertyCalculator;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.Tier;
@@ -22,11 +25,11 @@ import net.minecraft.world.item.component.ItemAttributeModifiers;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class CrystalSwordItem extends SwordItem implements CrystalToolItem {
+public class CrystalSwordItem extends SwordItem implements CrystalToolItem, IMaxDamageItem, INoRepairItem {
 
     public CrystalSwordItem() {
         this(ItemsAS.CRYSTAL_TOOL_TIER, new Properties()
-                .setNoRepair()
+                // .setNoRepair() impl via mixin
                 .attributes(swordAttributes()));
     }
 
@@ -45,6 +48,6 @@ public class CrystalSwordItem extends SwordItem implements CrystalToolItem {
 
     @Override
     public int getMaxDamage(ItemStack stack) {
-        return CrystalPropertyCalculator.getToolDurability(super.getMaxDamage(stack), stack, 1.5F);
+        return CrystalPropertyCalculator.getToolDurability(stack.getOrDefault(DataComponents.MAX_DAMAGE, 0), stack, 1.5F);
     }
 }

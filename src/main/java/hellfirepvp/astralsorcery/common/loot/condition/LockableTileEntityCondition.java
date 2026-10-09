@@ -49,7 +49,7 @@ public class LockableTileEntityCondition implements LootItemCondition {
 
     @Override
     public LootItemConditionType getType() {
-        return LootAS.LOCKABLE_TILE_ENTITY_CONDITION.get();
+        return LootAS.LOCKABLE_TILE_ENTITY_CONDITION;
     }
 
     public static LootItemCondition.Builder lockable() {

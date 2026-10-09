@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.entity;
 
+import cn.sh1rocu.astralsorcery.util.Constants;
 import com.google.common.collect.Lists;
 import hellfirepvp.astralsorcery.client.effect.EffectHelper;
 import hellfirepvp.astralsorcery.client.effect.function.FXAlphaFunction;
@@ -19,9 +20,10 @@ import hellfirepvp.astralsorcery.common.event.helper.DamageCancellingHelper;
 import hellfirepvp.astralsorcery.common.lib.EntitiesAS;
 import hellfirepvp.astralsorcery.common.lib.SoundsAS;
 import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
-import hellfirepvp.astralsorcery.common.util.ClientObject;
 import hellfirepvp.astralsorcery.common.util.ServerSoundHelper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -38,8 +40,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -69,7 +69,7 @@ public class EntityGrapplingHook extends ThrowableProjectile {
     }
 
     public EntityGrapplingHook(LivingEntity shooter, Level level) {
-        this(EntitiesAS.GRAPPLING_HOOK.get(), shooter, level);
+        this(EntitiesAS.GRAPPLING_HOOK, shooter, level);
     }
 
     protected EntityGrapplingHook(EntityType<? extends ThrowableProjectile> entityType, LivingEntity shooter, Level level) {
@@ -105,7 +105,8 @@ public class EntityGrapplingHook extends ThrowableProjectile {
         if (idPull > 0) {
             try {
                 return (LivingEntity) this.level().getEntity(idPull);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
         return null;
     }
@@ -226,7 +227,7 @@ public class EntityGrapplingHook extends ThrowableProjectile {
         this.previousDist = roughDst;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void playDespawnParticles() {
         if (this.isPulling()) return;
 
@@ -262,15 +263,15 @@ public class EntityGrapplingHook extends ThrowableProjectile {
 
     @Override
     public AABB getBoundingBoxForCulling() {
-        return AABB.INFINITE;
+        return Constants.INFINITE_AABB;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public List<Vector3> buildLine(float partial) {
         return this.buildLine(partial, 0);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public List<Vector3> buildLine(float partial, float offset) {
         Entity thrower = this.getOwner();
         if (thrower == null) {
@@ -285,9 +286,9 @@ public class EntityGrapplingHook extends ThrowableProjectile {
         int iter = (int) lineLength;
         for (int xx = 1; xx < iter - 1; xx++) {
             float dist = xx * (lineLength / iter);
-            double dx = (interpThrower.getX() - interpHook.getX())                              / iter * xx + offset + Mth.sin(dist / 10.0F) * this.pullFactor;
-            double dy = (interpThrower.getY() - interpHook.getY() + thrower.getBbHeight() / 2F) / iter * xx + offset + Mth.sin(dist / 7.0F)  * this.pullFactor;
-            double dz = (interpThrower.getZ() - interpHook.getZ())                              / iter * xx + offset + Mth.sin(dist / 2.0F)  * this.pullFactor;
+            double dx = (interpThrower.getX() - interpHook.getX()) / iter * xx + offset + Mth.sin(dist / 10.0F) * this.pullFactor;
+            double dy = (interpThrower.getY() - interpHook.getY() + thrower.getBbHeight() / 2F) / iter * xx + offset + Mth.sin(dist / 7.0F) * this.pullFactor;
+            double dz = (interpThrower.getZ() - interpHook.getZ()) / iter * xx + offset + Mth.sin(dist / 2.0F) * this.pullFactor;
             list.add(new Vector3(dx, dy, dz));
         }
 

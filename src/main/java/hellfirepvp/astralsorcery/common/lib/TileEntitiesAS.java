@@ -13,13 +13,12 @@ import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.tile.*;
 import hellfirepvp.astralsorcery.common.util.data.TileRegistryObject;
 import net.minecraft.Util;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.neoforged.neoforge.registries.DeferredBlock;
-import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -30,8 +29,9 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  */
 public class TileEntitiesAS {
 
-    public static final DeferredRegister<BlockEntityType<?>> TILE_REGISTER =
-            DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, AstralSorcery.MODID);
+    public static void init() {
+
+    }
 
     public static final TileRegistryObject<TileAltar> ALTAR =
             register("altar", TileAltar::new,
@@ -100,17 +100,16 @@ public class TileEntitiesAS {
             register("cave_illuminator", TileCaveIlluminator::new,
                     BlocksAS.CAVE_ILLUMINATOR);
 
+    public static final TileRegistryObject<TileStructureMarker> STRUCTURE_MARKER =
+            register("structure_marker", TileStructureMarker::new,
+                    BlocksAS.STRUCTURE_MARKER);
+
     private static <T extends BlockEntity> TileRegistryObject<T> register(String name,
                                                                           BlockEntityType.BlockEntitySupplier<T> tileCtor,
-                                                                          DeferredBlock<?>... validBlocks) {
+                                                                          Block... validBlocks) {
         String fullKey = AstralSorcery.MODID + "_" + name;
         Type<?> dataFixerType = Util.fetchChoiceType(References.BLOCK_ENTITY, fullKey);
-        return new TileRegistryObject<>(TILE_REGISTER.register(name, () -> {
-            Block[] blocks = new Block[validBlocks.length];
-            for (int i = 0; i < validBlocks.length; i++) {
-                blocks[i] = validBlocks[i].value();
-            }
-            return BlockEntityType.Builder.of(tileCtor, blocks).build(dataFixerType);
-        }));
+        BlockEntityType<T> be = BlockEntityType.Builder.of(tileCtor, validBlocks).build(dataFixerType);
+        return new TileRegistryObject<>(Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, AstralSorcery.key(name), be));
     }
 }

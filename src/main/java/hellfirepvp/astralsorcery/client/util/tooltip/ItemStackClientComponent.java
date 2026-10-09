@@ -38,7 +38,7 @@ public class ItemStackClientComponent implements ClientTooltipComponent {
     public ItemStackClientComponent(ItemStack stack, int count) {
         this.stack = stack.copyWithCount(1);
         this.display = Component.literal(count + "x ")
-                .append(stack.getHoverName()).withStyle(stack.getRarity().getStyleModifier());
+                .append(stack.getHoverName()).withStyle(stack.getRarity().color());
     }
 
     public static ItemStackClientComponent create(ItemStackTooltip component) {

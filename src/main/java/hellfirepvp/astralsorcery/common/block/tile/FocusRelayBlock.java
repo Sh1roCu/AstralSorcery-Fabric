@@ -47,7 +47,7 @@ public class FocusRelayBlock extends BaseTileBlock<TileFocusRelay> {
     private static final VoxelShape SHAPE = Block.box(2, 0, 2, 14, 2, 14);
 
     public FocusRelayBlock(Properties properties) {
-        super(properties, TileEntitiesAS.FOCUS_RELAY);
+        super(properties, () -> TileEntitiesAS.FOCUS_RELAY);
     }
 
     @Override

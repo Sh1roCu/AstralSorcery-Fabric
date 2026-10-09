@@ -18,12 +18,12 @@ import hellfirepvp.astralsorcery.client.util.RenderQuadUtil;
 import hellfirepvp.astralsorcery.client.util.RenderUtil;
 import hellfirepvp.astralsorcery.common.research.ResearchNode;
 import hellfirepvp.astralsorcery.common.research.tome.TomePage;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 
@@ -34,7 +34,7 @@ import javax.annotation.Nullable;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public abstract class RenderPage {
 
     @Nullable
@@ -73,13 +73,16 @@ public abstract class RenderPage {
         RenderSystem.disableBlend();
     }
 
-    public void preRender(GuiGraphics guiGraphics, int x, int y, float pTicks, float mouseX, float mouseY) {}
+    public void preRender(GuiGraphics guiGraphics, int x, int y, float pTicks, float mouseX, float mouseY) {
+    }
 
     public abstract void render(GuiGraphics guiGraphics, int x, int y, float pTicks, float mouseX, float mouseY);
 
-    public void postRender(GuiGraphics guiGraphics, int x, int y, float pTicks, float mouseX, float mouseY) {}
+    public void postRender(GuiGraphics guiGraphics, int x, int y, float pTicks, float mouseX, float mouseY) {
+    }
 
-    public void tick() {}
+    public void tick() {
+    }
 
     public boolean propagateMouseClick(double mouseX, double mouseZ) {
         return false;

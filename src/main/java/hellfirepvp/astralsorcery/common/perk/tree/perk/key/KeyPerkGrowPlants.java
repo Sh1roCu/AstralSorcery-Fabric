@@ -31,7 +31,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.Collection;
@@ -60,8 +60,8 @@ public class KeyPerkGrowPlants extends KeyPerk implements TickablePerk {
     }
 
     @Override
-    public void tick(Player player, LogicalSide side) {
-        if (!side.isServer()) return;
+    public void tick(Player player, EnvType side) {
+        if (side != EnvType.SERVER) return;
         if (!(player.level() instanceof ServerLevel sLevel)) return;
         PlayerProgress progress = ResearchManager.getProgress(player, side);
         if (!progress.getPerkData().hasPerkEffect(this)) return;

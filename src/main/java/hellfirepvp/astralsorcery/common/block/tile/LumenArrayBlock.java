@@ -13,7 +13,6 @@ import hellfirepvp.astralsorcery.common.block.tile.base.BaseTickTileBlock;
 import hellfirepvp.astralsorcery.common.lib.TileEntitiesAS;
 import hellfirepvp.astralsorcery.common.lumen.LumenStack;
 import hellfirepvp.astralsorcery.common.lumen.capability.LumenHandlerView;
-import hellfirepvp.astralsorcery.common.tile.TileLightwell;
 import hellfirepvp.astralsorcery.common.tile.TileLumenArray;
 import hellfirepvp.astralsorcery.common.util.InteractUtil;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
@@ -24,7 +23,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
@@ -35,7 +33,8 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
+
+import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -50,10 +49,10 @@ public class LumenArrayBlock extends BaseTickTileBlock<TileLumenArray> {
     public static final BooleanProperty ENABLED = BlockStateProperties.ENABLED;
 
     public LumenArrayBlock(Properties properties) {
-        this(properties, TileEntitiesAS.LUMEN_ARRAY);
+        this(properties, () -> TileEntitiesAS.LUMEN_ARRAY);
     }
 
-    protected LumenArrayBlock(Properties properties, TileRegistryObject<?> tileType) {
+    protected LumenArrayBlock(Properties properties, Supplier<TileRegistryObject<?>> tileType) {
         super(properties, MiscUtil.cast(tileType));
         this.registerDefaultState(this.stateDefinition.any().setValue(ENABLED, true));
     }
@@ -117,17 +116,18 @@ public class LumenArrayBlock extends BaseTickTileBlock<TileLumenArray> {
         }
     }
 
-    @Override
-    public boolean hasDynamicLightEmission(BlockState state) {
-        return true;
-    }
-
-    @Override
-    public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
-        AuxiliaryLightManager lightMgr = level.getAuxLightManager(pos);
-        if (lightMgr == null) return 0;
-        return lightMgr.getLightAt(pos);
-    }
+    // TODO?
+//    @Override
+//    public boolean hasDynamicLightEmission(BlockState state) {
+//        return true;
+//    }
+//
+//    @Override
+//    public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
+//        AuxiliaryLightManager lightMgr = level.getAuxLightManager(pos);
+//        if (lightMgr == null) return 0;
+//        return lightMgr.getLightAt(pos);
+//    }
 
     @Override
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {

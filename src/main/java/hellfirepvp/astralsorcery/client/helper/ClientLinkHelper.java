@@ -9,12 +9,6 @@
 package hellfirepvp.astralsorcery.client.helper;
 
 import hellfirepvp.astralsorcery.common.linking.session.ActiveLinkSession;
-import hellfirepvp.astralsorcery.common.network.play.PktRequestCancelLinkSession;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.client.event.InputEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import javax.annotation.Nullable;
 import java.util.Optional;

@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.block.tile;
 
+import com.google.common.base.Suppliers;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.block.tile.base.BaseTickTileBlock;
@@ -33,6 +34,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import java.util.function.Supplier;
+
 /**
  * This class is part of the Astral Sorcery Mod
  * The complete source code for this mod can be found on GitHub.
@@ -42,20 +45,20 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  */
 public class AltarBlock extends BaseTickTileBlock<TileAltar> {
 
-    public static final MapCodec<AltarBlock> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+    public static final Supplier<MapCodec<AltarBlock>> CODEC = Suppliers.memoize(() -> RecordCodecBuilder.mapCodec(inst -> inst.group(
             propertiesCodec(),
             TileAltar.AltarType.CODEC.fieldOf("altar_type").forGetter(AltarBlock::getAltarType)
-    ).apply(inst, AltarBlock::new));
+    ).apply(inst, (a, b) -> new AltarBlock(a, () -> b))));
 
-    private final TileAltar.AltarType altarType;
+    private final Supplier<TileAltar.AltarType> altarTypeSupplier;
 
-    public AltarBlock(Properties properties, TileAltar.AltarType altarType) {
-        super(properties, TileEntitiesAS.ALTAR);
-        this.altarType = altarType;
+    public AltarBlock(Properties properties, Supplier<TileAltar.AltarType> altarTypeSupplier) {
+        super(properties, () -> TileEntitiesAS.ALTAR);
+        this.altarTypeSupplier = altarTypeSupplier;
     }
 
     public TileAltar.AltarType getAltarType() {
-        return this.altarType;
+        return this.altarTypeSupplier.get();
     }
 
     @Override
@@ -70,7 +73,7 @@ public class AltarBlock extends BaseTickTileBlock<TileAltar> {
                 if (stack.is(ItemsAS.WAND)) {
                     if (altar.getTileData().getActiveRecipe().isPresent()) return ItemInteractionResult.CONSUME;
                     if (!altar.getTileData().hasStructure()) return ItemInteractionResult.CONSUME;
-                    return altar.findMatchingRecipe(level).map(recipe -> {
+                    return altar.findMatchingRecipe(level, sPlayer.getUUID()).map(recipe -> {
                         altar.startCrafting(recipe, sPlayer.getUUID());
                         return ItemInteractionResult.SUCCESS;
                     }).orElse(ItemInteractionResult.CONSUME);
@@ -113,6 +116,6 @@ public class AltarBlock extends BaseTickTileBlock<TileAltar> {
 
     @Override
     protected MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
+        return CODEC.get();
     }
 }

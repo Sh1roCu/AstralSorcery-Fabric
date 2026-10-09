@@ -40,10 +40,15 @@ import java.util.function.Predicate;
 public abstract class MixinParticleEngine {
 
     @Inject(
-            method = "render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/culling/Frustum;Ljava/util/function/Predicate;)V",
+            method = "render",
             at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;depthMask(Z)V", shift = At.Shift.BEFORE)
     )
-    public void renderParticles(LightTexture lightTexture, Camera camera, float partialTick, Frustum frustum, Predicate<ParticleRenderType> renderTypePredicate, CallbackInfo ci) {
+    public void renderParticles(LightTexture lightTexture, Camera camera, float partialTick, CallbackInfo ci) {
+        // for Fabric
+        Predicate<ParticleRenderType> renderTypePredicate = type -> true;
+        Frustum frustum = null;
+        //
+
         EffectHandler.getInstance().render(camera, frustum, renderTypePredicate, partialTick);
 
         if (renderTypePredicate.test(ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT)) {

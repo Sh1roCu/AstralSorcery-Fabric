@@ -8,13 +8,11 @@
 
 package hellfirepvp.astralsorcery.common.starlight;
 
+import cn.sh1rocu.astralsorcery.api.event.LevelEvent;
 import hellfirepvp.astralsorcery.common.starlight.api.ITransmissionTickable;
-import hellfirepvp.astralsorcery.common.starlight.api.TransmissionNode;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.event.level.LevelEvent;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
 import java.util.*;
 
@@ -32,20 +30,20 @@ public class StarlightNetworkTickHelper {
     private final Map<ResourceKey<Level>, List<ITransmissionTickable>> nodeUpdates = new HashMap<>();
     private static final Object accessLock = new Object();
 
-    private StarlightNetworkTickHelper() {}
+    private StarlightNetworkTickHelper() {
+    }
 
     public static StarlightNetworkTickHelper getInstance() {
         return INSTANCE;
     }
 
-    public void attachEventListeners(IEventBus bus) {
-        bus.addListener(this::onLevelTick);
-        bus.addListener(this::onWorldLoad);
-        bus.addListener(this::onWorldUnload);
+    public void attachEventListeners() {
+        ServerTickEvents.END_WORLD_TICK.register(this::onLevelTick);
+        LevelEvent.LOAD.register(this::onWorldLoad);
+        LevelEvent.UNLOAD.register(this::onWorldUnload);
     }
 
-    private void onLevelTick(LevelTickEvent.Post event) {
-        Level level = event.getLevel();
+    private void onLevelTick(Level level) {
         if (level.isClientSide()) return;
         ResourceKey<Level> dimKey = level.dimension();
 

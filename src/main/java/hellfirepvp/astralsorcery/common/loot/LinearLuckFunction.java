@@ -19,17 +19,13 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.functions.ApplyBonusCount;
-import net.minecraft.world.level.storage.loot.functions.ApplyExplosionDecay;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 import java.util.List;
-import java.util.Random;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -74,7 +70,7 @@ public class LinearLuckFunction extends LootItemConditionalFunction {
                 luck = livingEntity.getEffect(MobEffects.LUCK).getAmplifier() + 1;
             }
             for (Holder<Enchantment> enchantmentHolder : this.getEnchantments()) {
-                luck += tool.getEnchantmentLevel(enchantmentHolder);
+                luck += EnchantmentHelper.getItemEnchantmentLevel(enchantmentHolder, tool);
             }
 
             RandomSource rand = context.getRandom();
@@ -89,6 +85,6 @@ public class LinearLuckFunction extends LootItemConditionalFunction {
 
     @Override
     public LootItemFunctionType<? extends LootItemConditionalFunction> getType() {
-        return LootAS.LINEAR_LUCK_FUNCTION.get();
+        return LootAS.LINEAR_LUCK_FUNCTION;
     }
 }

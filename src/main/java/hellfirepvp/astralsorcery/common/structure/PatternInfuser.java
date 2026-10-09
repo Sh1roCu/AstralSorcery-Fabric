@@ -23,65 +23,65 @@ import net.minecraft.world.level.block.Blocks;
 public class PatternInfuser extends StructureBlockArray implements PillarStructure {
 
     public PatternInfuser() {
-        this.addBlock(BlocksAS.INFUSER.get(), 0, 0, 0);
+        this.addBlock(BlocksAS.INFUSER, 0, 0, 0);
 
-        this.addBlock(BlocksAS.MARBLE_RAW.get(), -2, -2, -2);
-        this.addBlock(BlocksAS.MARBLE_RAW.get(), -2, -2, -1);
-        this.addBlock(BlocksAS.MARBLE_RAW.get(), -2, -2,  0);
-        this.addBlock(BlocksAS.MARBLE_RAW.get(), -2, -2,  1);
-        this.addBlock(BlocksAS.MARBLE_RAW.get(), -2, -2,  2);
-        this.addBlock(BlocksAS.MARBLE_RAW.get(),  2, -2, -2);
-        this.addBlock(BlocksAS.MARBLE_RAW.get(),  2, -2, -1);
-        this.addBlock(BlocksAS.MARBLE_RAW.get(),  2, -2,  0);
-        this.addBlock(BlocksAS.MARBLE_RAW.get(),  2, -2,  1);
-        this.addBlock(BlocksAS.MARBLE_RAW.get(),  2, -2,  2);
-        this.addBlock(BlocksAS.MARBLE_RAW.get(), -1, -2, -2);
-        this.addBlock(BlocksAS.MARBLE_RAW.get(),  0, -2, -2);
-        this.addBlock(BlocksAS.MARBLE_RAW.get(),  1, -2, -2);
-        this.addBlock(BlocksAS.MARBLE_RAW.get(), -1, -2,  2);
-        this.addBlock(BlocksAS.MARBLE_RAW.get(),  0, -2,  2);
-        this.addBlock(BlocksAS.MARBLE_RAW.get(),  1, -2,  2);
+        this.addBlock(BlocksAS.MARBLE_RAW, -2, -2, -2);
+        this.addBlock(BlocksAS.MARBLE_RAW, -2, -2, -1);
+        this.addBlock(BlocksAS.MARBLE_RAW, -2, -2,  0);
+        this.addBlock(BlocksAS.MARBLE_RAW, -2, -2,  1);
+        this.addBlock(BlocksAS.MARBLE_RAW, -2, -2,  2);
+        this.addBlock(BlocksAS.MARBLE_RAW,  2, -2, -2);
+        this.addBlock(BlocksAS.MARBLE_RAW,  2, -2, -1);
+        this.addBlock(BlocksAS.MARBLE_RAW,  2, -2,  0);
+        this.addBlock(BlocksAS.MARBLE_RAW,  2, -2,  1);
+        this.addBlock(BlocksAS.MARBLE_RAW,  2, -2,  2);
+        this.addBlock(BlocksAS.MARBLE_RAW, -1, -2, -2);
+        this.addBlock(BlocksAS.MARBLE_RAW,  0, -2, -2);
+        this.addBlock(BlocksAS.MARBLE_RAW,  1, -2, -2);
+        this.addBlock(BlocksAS.MARBLE_RAW, -1, -2,  2);
+        this.addBlock(BlocksAS.MARBLE_RAW,  0, -2,  2);
+        this.addBlock(BlocksAS.MARBLE_RAW,  1, -2,  2);
 
         this.addBlock(Blocks.LAPIS_BLOCK.defaultBlockState(), 0, -1, 0);
 
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(), -1, -1, -1);
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(), -1, -1,  1);
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(),  0, -1, -1);
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(),  0, -1,  1);
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(),  1, -1, -1);
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(),  1, -1,  1);
+        this.addBlock(BlocksAS.MARBLE_RUNED, -1, -1, -1);
+        this.addBlock(BlocksAS.MARBLE_RUNED, -1, -1,  1);
+        this.addBlock(BlocksAS.MARBLE_RUNED,  0, -1, -1);
+        this.addBlock(BlocksAS.MARBLE_RUNED,  0, -1,  1);
+        this.addBlock(BlocksAS.MARBLE_RUNED,  1, -1, -1);
+        this.addBlock(BlocksAS.MARBLE_RUNED,  1, -1,  1);
 
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(), -1, -1, -1);
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(),  1, -1, -1);
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(), -1, -1,  0);
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(),  1, -1,  0);
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(), -1, -1,  1);
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(),  1, -1,  1);
+        this.addBlock(BlocksAS.MARBLE_RUNED, -1, -1, -1);
+        this.addBlock(BlocksAS.MARBLE_RUNED,  1, -1, -1);
+        this.addBlock(BlocksAS.MARBLE_RUNED, -1, -1,  0);
+        this.addBlock(BlocksAS.MARBLE_RUNED,  1, -1,  0);
+        this.addBlock(BlocksAS.MARBLE_RUNED, -1, -1,  1);
+        this.addBlock(BlocksAS.MARBLE_RUNED,  1, -1,  1);
 
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(), -1, -1, -3);
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(), -1, -1,  3);
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(),  0, -1, -3);
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(),  0, -1,  3);
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(),  1, -1, -3);
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(),  1, -1,  3);
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(),  3, -1, -1);
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(), -3, -1, -1);
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(),  3, -1,  0);
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(), -3, -1,  0);
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(),  3, -1,  1);
-        this.addBlock(BlocksAS.MARBLE_RUNED.get(), -3, -1,  1);
+        this.addBlock(BlocksAS.MARBLE_RUNED, -1, -1, -3);
+        this.addBlock(BlocksAS.MARBLE_RUNED, -1, -1,  3);
+        this.addBlock(BlocksAS.MARBLE_RUNED,  0, -1, -3);
+        this.addBlock(BlocksAS.MARBLE_RUNED,  0, -1,  3);
+        this.addBlock(BlocksAS.MARBLE_RUNED,  1, -1, -3);
+        this.addBlock(BlocksAS.MARBLE_RUNED,  1, -1,  3);
+        this.addBlock(BlocksAS.MARBLE_RUNED,  3, -1, -1);
+        this.addBlock(BlocksAS.MARBLE_RUNED, -3, -1, -1);
+        this.addBlock(BlocksAS.MARBLE_RUNED,  3, -1,  0);
+        this.addBlock(BlocksAS.MARBLE_RUNED, -3, -1,  0);
+        this.addBlock(BlocksAS.MARBLE_RUNED,  3, -1,  1);
+        this.addBlock(BlocksAS.MARBLE_RUNED, -3, -1,  1);
 
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get(), -2, -1, -2);
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get(),  2, -1, -2);
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get(), -2, -1,  2);
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get(),  2, -1,  2);
-        this.addBlock(this.getPillarState(BlocksAS.MARBLE_PILLAR.get(), PillarBlock.PillarType.MIDDLE), -2,  0, -2);
-        this.addBlock(this.getPillarState(BlocksAS.MARBLE_PILLAR.get(), PillarBlock.PillarType.MIDDLE),  2,  0, -2);
-        this.addBlock(this.getPillarState(BlocksAS.MARBLE_PILLAR.get(), PillarBlock.PillarType.MIDDLE), -2,  0,  2);
-        this.addBlock(this.getPillarState(BlocksAS.MARBLE_PILLAR.get(), PillarBlock.PillarType.MIDDLE),  2,  0,  2);
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get(), -2,  1, -2);
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get(),  2,  1, -2);
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get(), -2,  1,  2);
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get(),  2,  1,  2);
+        this.addBlock(BlocksAS.MARBLE_CHISELED, -2, -1, -2);
+        this.addBlock(BlocksAS.MARBLE_CHISELED,  2, -1, -2);
+        this.addBlock(BlocksAS.MARBLE_CHISELED, -2, -1,  2);
+        this.addBlock(BlocksAS.MARBLE_CHISELED,  2, -1,  2);
+        this.addBlock(this.getPillarState(BlocksAS.MARBLE_PILLAR, PillarBlock.PillarType.MIDDLE), -2,  0, -2);
+        this.addBlock(this.getPillarState(BlocksAS.MARBLE_PILLAR, PillarBlock.PillarType.MIDDLE),  2,  0, -2);
+        this.addBlock(this.getPillarState(BlocksAS.MARBLE_PILLAR, PillarBlock.PillarType.MIDDLE), -2,  0,  2);
+        this.addBlock(this.getPillarState(BlocksAS.MARBLE_PILLAR, PillarBlock.PillarType.MIDDLE),  2,  0,  2);
+        this.addBlock(BlocksAS.MARBLE_CHISELED, -2,  1, -2);
+        this.addBlock(BlocksAS.MARBLE_CHISELED,  2,  1, -2);
+        this.addBlock(BlocksAS.MARBLE_CHISELED, -2,  1,  2);
+        this.addBlock(BlocksAS.MARBLE_CHISELED,  2,  1,  2);
     }
 }

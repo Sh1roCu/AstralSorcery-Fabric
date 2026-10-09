@@ -13,12 +13,14 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.lumen.transfer.LumenNetworkHelper;
 import hellfirepvp.astralsorcery.common.util.ChunkUtil;
-import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
+import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
 import hellfirepvp.astralsorcery.common.util.data.ObserverRegistryObject;
 import hellfirepvp.astralsorcery.common.util.data.TileRegistryObject;
 import hellfirepvp.observerlib.api.ChangeSubscriber;
 import hellfirepvp.observerlib.api.ObserverHelper;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Tuple;
@@ -26,8 +28,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -63,7 +63,7 @@ public abstract class TileEntityTick<T extends TileEntityTick.Data> extends Tile
         this.tick(level);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void clientTick(Level level) {
         this.tick(level);
     }
@@ -175,9 +175,11 @@ public abstract class TileEntityTick<T extends TileEntityTick.Data> extends Tile
         return false;
     }
 
-    protected void onSkyStateChange() {}
+    protected void onSkyStateChange() {
+    }
 
-    protected void onStructureStateChange() {}
+    protected void onStructureStateChange() {
+    }
 
     public boolean shouldRemoveStructureObserver(BlockState currentState, BlockState newState) {
         return currentState != newState;

@@ -11,12 +11,13 @@ package hellfirepvp.astralsorcery.common.lumen.binding.usage;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.lib.types.LumenBindingUsageTypesAS;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -44,12 +45,12 @@ public class LumenBindingUsageDamageTaken extends LumenBindingUsage {
         return new LumenBindingUsageDamageTaken(lumenCost, consumptionChance);
     }
 
-    public static void attachEventListeners(IEventBus bus) {
-        bus.addListener(LumenBindingUsageDamageTaken::onDamageTaken);
+    public static void attachEventListeners() {
+        ServerLivingEntityEvents.AFTER_DAMAGE.register(LumenBindingUsageDamageTaken::onDamageTaken);
     }
 
-    private static void onDamageTaken(LivingDamageEvent.Post event) {
-        if (event.getEntity() instanceof LivingEntity attacked) {
+    private static void onDamageTaken(Entity entity, DamageSource source, float baseDamageTaken, float damageTaken, boolean blocked) {
+        if (entity instanceof LivingEntity attacked) {
             if (attacked.level().isClientSide()) return;
 
             drainAll(attacked, 1F, LumenBindingUsageDamageTaken.class);

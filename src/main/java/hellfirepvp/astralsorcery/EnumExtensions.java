@@ -8,13 +8,7 @@
 
 package hellfirepvp.astralsorcery;
 
-import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Style;
 import net.minecraft.world.item.Rarity;
-import net.neoforged.fml.common.asm.enumextension.EnumProxy;
-
-import java.util.function.UnaryOperator;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -25,11 +19,7 @@ import java.util.function.UnaryOperator;
  */
 public class EnumExtensions {
 
-    public static final EnumProxy<Rarity> RARITY_RELIC = new EnumProxy<>(
-            Rarity.class, -1, AstralSorcery.MODID + ":relic",
-            (UnaryOperator<Style>) style -> style.withColor(ColorsAS.RARITY_RELIC.getColor()));
-    public static final EnumProxy<Rarity> RARITY_ARTIFACT = new EnumProxy<>(
-            Rarity.class, -1, AstralSorcery.MODID + ":artifact",
-            (UnaryOperator<Style>) style -> style.withColor(ColorsAS.RARITY_ARTIFACT.getColor()));
+    public static final Rarity RARITY_RELIC = Rarity.ASTRALSORCERY_RELIC;
+    public static final Rarity RARITY_ARTIFACT = Rarity.ASTRALSORCERY_ARTIFACT;
 
 }

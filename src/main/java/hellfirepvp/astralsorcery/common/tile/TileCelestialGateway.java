@@ -22,7 +22,6 @@ import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
 import hellfirepvp.astralsorcery.common.component.ColorComponent;
 import hellfirepvp.astralsorcery.common.lib.*;
 import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
-import hellfirepvp.astralsorcery.common.lumen.capability.LumenStackList;
 import hellfirepvp.astralsorcery.common.tile.base.TileDataOwned;
 import hellfirepvp.astralsorcery.common.tile.base.TileEntityTick;
 import hellfirepvp.astralsorcery.common.util.ClientObject;
@@ -34,6 +33,8 @@ import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.ObserverRegistryObject;
 import hellfirepvp.astralsorcery.common.util.data.TileRegistryObject;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -45,12 +46,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import org.apache.commons.lang3.ObjectUtils;
 
 import javax.annotation.Nullable;
@@ -100,7 +98,7 @@ public class TileCelestialGateway extends TileEntityTick<TileCelestialGateway.Da
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void clientTick(Level level) {
         super.clientTick(level);
 
@@ -108,7 +106,7 @@ public class TileCelestialGateway extends TileEntityTick<TileCelestialGateway.Da
         this.playGatewayEffects();
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     protected void setupGatewayUIEffect() {
         if (!this.hasStructure() || !this.doesSeeSky()) {
             this.colorSphereEffect.ifPresent(EntityFX::requestRemoval);
@@ -155,7 +153,7 @@ public class TileCelestialGateway extends TileEntityTick<TileCelestialGateway.Da
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     protected void playGatewayEffects() {
         if (!this.hasStructure() || !this.doesSeeSky()) return;
 
@@ -272,7 +270,7 @@ public class TileCelestialGateway extends TileEntityTick<TileCelestialGateway.Da
 
     @Override
     public Component getName() {
-        return ObjectUtils.firstNonNull(this.getCustomName(), BlocksAS.CELESTIAL_GATEWAY.get().getName());
+        return ObjectUtils.firstNonNull(this.getCustomName(), BlocksAS.CELESTIAL_GATEWAY.getName());
     }
 
     @Override

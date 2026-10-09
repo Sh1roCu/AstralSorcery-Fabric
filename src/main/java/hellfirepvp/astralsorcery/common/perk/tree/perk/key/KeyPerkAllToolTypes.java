@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.perk.tree.perk.key;
 
+import cn.sh1rocu.astralsorcery.api.event.SimpleHarvestCheckCallback;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.lib.types.PerkDataTypesAS;
@@ -20,18 +21,17 @@ import hellfirepvp.astralsorcery.common.perk.tree.requirement.PerkRequirement;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.SidedHelper;
-import hellfirepvp.astralsorcery.common.util.event.SidedEventBus;
+import net.fabricmc.api.EnvType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.ItemAbilities;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.*;
@@ -59,9 +59,10 @@ public class KeyPerkAllToolTypes extends KeyPerk {
     }
 
     @Override
-    protected void attachEventListeners(SidedEventBus sidedEventBus) {
-        super.attachEventListeners(sidedEventBus);
-        sidedEventBus.addListener(PlayerEvent.HarvestCheck.class, SidedEventBus.entityEvent(), this::onHarvestCheck);
+    protected void attachEventListeners() {
+        super.attachEventListeners();
+        // PlayerEvent.HarvestCheck.EVENT.register(this::onHarvestCheck);
+        SimpleHarvestCheckCallback.EVENT.register(this::onHarvestCheck);
     }
 
     @Override
@@ -69,21 +70,25 @@ public class KeyPerkAllToolTypes extends KeyPerk {
         return TYPE;
     }
 
-    private void onHarvestCheck(PlayerEvent.HarvestCheck event) {
-        if (event.canHarvest()) return;
+    private boolean onHarvestCheck(boolean canHarvest, Player player, BlockState state) {
+        if (canHarvest) return true;
 
-        LogicalSide side = this.getSide(event.getEntity());
-        PlayerProgress progress = ResearchManager.getProgress(event.getEntity(), side);
+        boolean[] result = {canHarvest};
+
+        EnvType side = this.getSide(player);
+        PlayerProgress progress = ResearchManager.getProgress(player, side);
         if (progress.getPerkData().hasPerkEffect(this)) {
-            wrapMineableStack(event.getEntity().getInventory().getSelected()).ifPresent(checkTool -> {
-                event.setCanHarvest(checkTool.isCorrectToolForDrops(event.getTargetBlock()));
+            wrapMineableStack(player.getInventory().getSelected()).ifPresent(checkTool -> {
+                result[0] = checkTool.isCorrectToolForDrops(state);
             });
         }
+
+        return result[0];
     }
 
     public static void adjustHarvestSpeed(Inventory playerInv, BlockState state, CallbackInfoReturnable<Float> returnOvr) {
         Player thisPlayer = playerInv.player;
-        LogicalSide side = SidedHelper.getSide(thisPlayer);
+        EnvType side = SidedHelper.getSide(thisPlayer);
         PlayerProgress progress = ResearchManager.getProgress(thisPlayer, side);
         if (progress.getPerkData().hasPerkEffect(perk -> perk instanceof KeyPerkAllToolTypes)) {
             wrapMineableStack(playerInv.getSelected()).ifPresent(checkTool -> {
@@ -99,7 +104,8 @@ public class KeyPerkAllToolTypes extends KeyPerk {
     private static Optional<ItemStack> wrapMineableStack(ItemStack tool) {
         if (tool.isEmpty()) return Optional.empty();
         if (!tool.has(DataComponents.TOOL)) return Optional.empty();
-        if (!tool.canPerformAction(ItemAbilities.PICKAXE_DIG)) return Optional.empty();
+        // if (!tool.canPerformAction(ItemAbilities.PICKAXE_DIG)) return Optional.empty();
+        if (!(tool.getItem() instanceof PickaxeItem || tool.is(ItemTags.PICKAXES))) return Optional.empty();
 
         Tool toolCmp = tool.getOrDefault(DataComponents.TOOL, EMPTY);
         float fastestSpeed = (float) toolCmp.rules().stream()

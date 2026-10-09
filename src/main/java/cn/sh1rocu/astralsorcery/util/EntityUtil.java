@@ -1,0 +1,36 @@
+package cn.sh1rocu.astralsorcery.util;
+
+import cn.sh1rocu.astralsorcery.mixin.accessor.common.EntityAccessor;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
+
+import java.util.function.BiPredicate;
+
+public class EntityUtil {
+
+    private EntityUtil() {
+    }
+
+    public static boolean isInFluid(Entity entity) {
+        return ((EntityAccessor) entity).as$fluidHeight().object2DoubleEntrySet().stream().anyMatch(e -> e.getDoubleValue() > 0);
+    }
+
+    public static boolean isInFluid(Entity entity, FluidState fluidState) {
+        return fluidState.getTags().anyMatch(tag -> isInFluid(entity, tag));
+    }
+
+    public static boolean isInFluid(Entity entity, TagKey<Fluid> tagKey) {
+        return entity.getFluidHeight(tagKey) > 0.0D;
+    }
+
+    public static boolean isInFluid(Entity entity, BiPredicate<TagKey<Fluid>, Double> predicate) {
+        return isInFluid(entity, predicate, false);
+    }
+
+    public static boolean isInFluid(Entity entity, BiPredicate<TagKey<Fluid>, Double> predicate, boolean forAllTypes) {
+        return forAllTypes ? ((EntityAccessor) entity).as$fluidHeight().object2DoubleEntrySet().stream().allMatch(e -> predicate.test(e.getKey(), e.getDoubleValue()))
+                : ((EntityAccessor) entity).as$fluidHeight().object2DoubleEntrySet().stream().anyMatch(e -> predicate.test(e.getKey(), e.getDoubleValue()));
+    }
+}

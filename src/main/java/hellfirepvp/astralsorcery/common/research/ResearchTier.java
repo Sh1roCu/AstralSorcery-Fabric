@@ -8,22 +8,18 @@
 
 package hellfirepvp.astralsorcery.common.research;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.network.codec.NeoForgeStreamCodecs;
 import com.mojang.serialization.Codec;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.resource.AssetLocation;
 import hellfirepvp.astralsorcery.client.resource.query.TextureQuery;
-import hellfirepvp.astralsorcery.common.research.data.ResearchNodeLoader;
 import hellfirepvp.astralsorcery.common.util.data.IntRectangle;
 import net.minecraft.Util;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
-import net.neoforged.neoforge.network.codec.NeoForgeStreamCodecs;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 
 /**

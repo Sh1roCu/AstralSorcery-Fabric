@@ -22,7 +22,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -94,7 +94,7 @@ public class KnowledgeShareItem extends ItemCustom {
     }
 
     private void storeKnowledge(ServerPlayer sPlayer, ItemStack stack) {
-        PlayerProgress progress = ResearchManager.getProgress(sPlayer, LogicalSide.SERVER);
+        PlayerProgress progress = ResearchManager.getProgress(sPlayer, EnvType.SERVER);
 
         //Copy shareable progress into a new blank progress
         PlayerProgress storedProgress = PlayerProgress.blankProgress();

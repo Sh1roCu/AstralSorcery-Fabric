@@ -15,13 +15,13 @@ import hellfirepvp.astralsorcery.common.perk.tree.AbstractPerk;
 import hellfirepvp.astralsorcery.common.perk.tree.PerkDataType;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
 import java.util.Optional;
@@ -73,12 +73,13 @@ public class PktSyncPerkActivity extends PlayPacketHandler.ToClient<PktSyncPerkA
         return CODEC;
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
-    public void handle(Request payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
+    public void receive(Request payload, ClientPlayNetworking.Context context) {
+        context.client().execute(() -> {
             switch (payload.actionType()) {
                 case REMOVE_LISTED -> {
-                    PerkApplicationManager.modifySources(context.player(), LogicalSide.CLIENT, payload.perks(), PerkManager.Action.REMOVE);
+                    PerkApplicationManager.modifySources(context.player(), EnvType.CLIENT, payload.perks(), PerkManager.Action.REMOVE);
                 }
                 case APPLY_ALL -> {
                     PerkManager.clientRefreshAllPerks();

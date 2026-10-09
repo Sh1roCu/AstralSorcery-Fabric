@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.tile;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -20,6 +21,7 @@ import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.tank.FluidTankView;
+import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -30,8 +32,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -53,8 +53,7 @@ public class TileLumenCrystallizerRenderer implements BlockEntityRenderer<TileLu
         FluidStack contained = tank.getFluidInTank(0);
         if (contained.isEmpty()) return;
 
-        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(contained.getFluidType());
-        ColorWrapper color = ColorWrapper.transparent(ext.getTintColor(contained));
+        ColorWrapper color = ColorWrapper.transparent(FluidVariantRendering.getColor(contained.getFluidVariant()));
         RenderType rendertype = RenderType.entityTranslucent(InventoryMenu.BLOCK_ATLAS);
         TextureAtlasSprite tas = RenderSpriteUtil.getTexture(contained);
         VertexConsumer vb = bufferSource.getBuffer(rendertype);

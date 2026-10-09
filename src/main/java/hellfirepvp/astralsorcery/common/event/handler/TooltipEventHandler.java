@@ -8,9 +8,9 @@
 
 package hellfirepvp.astralsorcery.common.event.handler;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.common.util.AttributeTooltipContext;
 import hellfirepvp.astralsorcery.common.component.DynamicTooltipComponent;
 import hellfirepvp.astralsorcery.common.component.IdentifierComponent;
-import hellfirepvp.astralsorcery.common.component.StoredLumenComponent;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
 import net.minecraft.Util;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -19,9 +19,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.common.util.AttributeTooltipContext;
-import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -37,16 +34,16 @@ import java.util.function.Consumer;
  */
 public class TooltipEventHandler {
 
-    public static void attachListeners(IEventBus bus) {
-        bus.addListener(TooltipEventHandler::onTooltip);
+    public static void attachListeners() {
+        // impl via mixin
+        // ItemTooltipCallback.EVENT.register(TooltipEventHandler::onTooltip);
     }
 
-    private static void onTooltip(ItemTooltipEvent event) {
+    public static void onTooltip(ItemStack stack, Item.TooltipContext tooltipContext, @Nullable Player player, TooltipFlag tooltipType, List<Component> tip) {
         List<Component> newLines = new ArrayList<>();
-        addComponentTooltip(event.getItemStack(), event.getContext(), newLines::add, event.getEntity(), event.getFlags());
-        addStoredLumenTooltip(event.getItemStack(), newLines::add);
+        addComponentTooltip(stack, tooltipContext, newLines::add, player, tooltipType);
+        addStoredLumenTooltip(stack, newLines::add);
 
-        List<Component> tip = event.getToolTip();
         tip.addAll(Math.min(1, tip.size()), newLines);
     }
 

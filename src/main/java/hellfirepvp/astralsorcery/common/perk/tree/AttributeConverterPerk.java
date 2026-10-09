@@ -21,7 +21,7 @@ import hellfirepvp.astralsorcery.common.util.codec.SetCodec;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -59,7 +59,7 @@ public abstract class AttributeConverterPerk<D extends AbstractPerk.Data> extend
     }
 
     @Override
-    protected boolean addTooltip(Collection<MutableComponent> tooltip, PlayerProgress progress, @Nullable Player player, LogicalSide side) {
+    protected boolean addTooltip(Collection<MutableComponent> tooltip, PlayerProgress progress, @Nullable Player player, EnvType side) {
         boolean addLine = super.addTooltip(tooltip, progress, player, side);
         if (!this.canSee(progress)) {
             return addLine;
@@ -69,7 +69,7 @@ public abstract class AttributeConverterPerk<D extends AbstractPerk.Data> extend
     }
 
     @Override
-    public Collection<PerkAttributeConverter> getConverters(Player player, LogicalSide side, boolean ignoreRequirements) {
+    public Collection<PerkAttributeConverter> getConverters(Player player, EnvType side, boolean ignoreRequirements) {
         if (!ignoreRequirements && ResearchManager.getProgress(player, side).getPerkData().isPerkSealed(this)) {
             return Collections.emptyList();
         }

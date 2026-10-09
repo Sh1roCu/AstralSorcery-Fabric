@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.recipe.builder;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.fluids.crafing.SizedFluidIngredient;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.recipe.liquid.interaction.LiquidInteractionRecipe;
 import hellfirepvp.astralsorcery.common.recipe.liquid.interaction.result.LiquidInteractionResult;
@@ -21,7 +22,6 @@ import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 
 import javax.annotation.Nullable;
 import java.util.LinkedHashMap;

@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.visual.type;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.network.PacketDistributor;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.effect.EffectHelper;
 import hellfirepvp.astralsorcery.client.effect.function.FXAlphaFunction;
@@ -15,7 +16,6 @@ import hellfirepvp.astralsorcery.client.effect.function.FXColorFunction;
 import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
 import hellfirepvp.astralsorcery.client.resource.AbstractRenderTexture;
-import hellfirepvp.astralsorcery.client.util.EffectUtil;
 import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
 import hellfirepvp.astralsorcery.common.network.play.PktPlayVisualEffect;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
@@ -24,14 +24,13 @@ import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.visual.VectorPosEffect;
 import hellfirepvp.astralsorcery.common.visual.VisualEffectTypes;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 
@@ -58,13 +57,13 @@ public class CelestialStrikeEffect extends VectorPosEffect {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void playEffect(RandomSource rand) {
         Vector3 center = this.getPos();
         Vector3 beamPos = center.copy();
 
         spawnBeam(beamPos, 16, FXColorFunction.WHITE, 25);
-        for (ColorWrapper color : new ColorWrapper[] {ColorsAS.CELESTIAL_STRIKE_LIGHT, ColorsAS.CELESTIAL_STRIKE_DARK}) {
+        for (ColorWrapper color : new ColorWrapper[]{ColorsAS.CELESTIAL_STRIKE_LIGHT, ColorsAS.CELESTIAL_STRIKE_DARK}) {
             beamPos.add(rand.nextFloat() - rand.nextFloat(), 0, rand.nextFloat() - rand.nextFloat());
             spawnBeam(beamPos, 16 + rand.nextFloat() * 2F, FXColorFunction.constant(color), 24 + rand.nextInt(6));
         }
@@ -108,7 +107,7 @@ public class CelestialStrikeEffect extends VectorPosEffect {
         this.spawnRing(center, rand, 100 + rand.nextInt(40), 0.2F, 0.1F, 0.7F);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private static void spawnBeam(Vector3 at, double height, FXColorFunction<?> color, int maxAge) {
         EffectHelper.of(EffectTemplatesAS.LIGHT_BEAM)
                 .spawn(at.copy().addY(-4))
@@ -119,7 +118,7 @@ public class CelestialStrikeEffect extends VectorPosEffect {
                 .setMaxAge(maxAge);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void spawnRing(Vector3 center, RandomSource rand, int count, float baseSpeed, float randSpeed, float scale) {
         List<Vector3> circle = VectorUtil.getCircleOffsets(center, Vector3.RotAxis.Y_AXIS, 7.5F + rand.nextFloat(), count);
         for (Vector3 at : circle) {

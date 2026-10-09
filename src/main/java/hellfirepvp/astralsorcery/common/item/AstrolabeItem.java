@@ -13,11 +13,12 @@ import hellfirepvp.astralsorcery.common.component.AstrolabeAngleComponent;
 import hellfirepvp.astralsorcery.common.item.base.CreativeTabItem;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpyglassItem;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 
@@ -48,13 +49,13 @@ public class AstrolabeItem extends SpyglassItem implements CreativeTabItem {
         return player.isUsingItem() && player.getUseItem().is(ItemsAS.ASTROLABE);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private static boolean isClientDrawing() {
         return RenderAstrolabeOverlay.isDrawing();
     }
 
     @Override
-    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+    public boolean allowComponentsUpdateAnimation(Player player, InteractionHand hand, ItemStack oldStack, ItemStack newStack) {
         return !oldStack.is(newStack.getItem());
     }
 }

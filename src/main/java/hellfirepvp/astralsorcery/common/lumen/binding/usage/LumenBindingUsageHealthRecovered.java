@@ -8,14 +8,13 @@
 
 package hellfirepvp.astralsorcery.common.lumen.binding.usage;
 
+import cn.sh1rocu.astralsorcery.api.event.LivingHealEvent;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.lib.types.LumenBindingUsageTypesAS;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.event.entity.living.LivingHealEvent;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -43,8 +42,8 @@ public class LumenBindingUsageHealthRecovered extends LumenBindingUsage {
         return new LumenBindingUsageHealthRecovered(lumenCost, consumptionChance);
     }
 
-    public static void attachEventListeners(IEventBus bus) {
-        bus.addListener(LumenBindingUsageHealthRecovered::onHealthRecovered);
+    public static void attachEventListeners() {
+        LivingHealEvent.EVENT.register(LumenBindingUsageHealthRecovered::onHealthRecovered);
     }
 
     private static void onHealthRecovered(LivingHealEvent event) {

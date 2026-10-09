@@ -8,20 +8,22 @@
 
 package hellfirepvp.astralsorcery.common.util;
 
+import cn.sh1rocu.observerlib.ObserverLibFabric;
 import hellfirepvp.astralsorcery.common.lumen.Lumen;
-import hellfirepvp.astralsorcery.common.lumen.LumenStack;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.util.thread.EffectiveSide;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -34,14 +36,14 @@ public class RecipeUtil {
 
     @Nullable
     public static RecipeManager getRecipeManager() {
-        if (EffectiveSide.get().isClient()) {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             return getClientRecipeManager();
         }
-        MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
+        MinecraftServer srv = ObserverLibFabric.getServer();
         return srv == null ? null : srv.getRecipeManager();
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private static RecipeManager getClientRecipeManager() {
         ClientPacketListener connection = Minecraft.getInstance().getConnection();
         if (connection == null) return null;

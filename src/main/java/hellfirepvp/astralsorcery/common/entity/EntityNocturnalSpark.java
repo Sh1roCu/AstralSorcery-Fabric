@@ -18,6 +18,8 @@ import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
 import hellfirepvp.astralsorcery.common.util.*;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -34,9 +36,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AirBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.*;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Optional;
 
@@ -59,11 +62,11 @@ public class EntityNocturnalSpark extends ThrowableProjectile {
     }
 
     public EntityNocturnalSpark(LivingEntity shooter, Level level) {
-        this(EntitiesAS.NOCTURNAL_SPARK.get(), shooter, level);
+        this(EntitiesAS.NOCTURNAL_SPARK, shooter, level);
     }
 
     public EntityNocturnalSpark(double x, double y, double z, Level level) {
-        this(EntitiesAS.NOCTURNAL_SPARK.get(), x, y, z, level);
+        this(EntitiesAS.NOCTURNAL_SPARK, x, y, z, level);
     }
 
     protected EntityNocturnalSpark(EntityType<? extends ThrowableProjectile> entityType, LivingEntity shooter, Level level) {
@@ -122,7 +125,7 @@ public class EntityNocturnalSpark extends ThrowableProjectile {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void clientTick() {
         if (this.isSpawning()) {
             this.spawnSpawningParticles();
@@ -154,7 +157,7 @@ public class EntityNocturnalSpark extends ThrowableProjectile {
                 .color(FXColorFunction.constant(this.randomColor()));
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void spawnFlyingParticles() {
         for (int i = 0; i < 5; i++) {
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
@@ -196,7 +199,7 @@ public class EntityNocturnalSpark extends ThrowableProjectile {
             return !(state.getBlock() instanceof AirBlock) &&
                     !BlockUtil.isLiquidBlock(state) &&
                     state.getDestroySpeed(sLevel, pos) != -1F &&
-                    state.getLightEmission(sLevel, pos) > 2;
+                    state.getLightEmission(/*sLevel, pos*/) > 2;
         }).forEach(lightPos -> {
             BlockState state = sLevel.getBlockState(lightPos);
             BlockBreakUtil.Result result = BlockBreakUtil.breakBlockWithoutPlayer(sLevel, lightPos, ItemStack.EMPTY, true);

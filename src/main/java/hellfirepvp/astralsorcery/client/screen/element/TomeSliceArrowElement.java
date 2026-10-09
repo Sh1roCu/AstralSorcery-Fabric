@@ -23,7 +23,6 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.CommonInputs;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.sounds.SoundManager;
-import net.minecraft.network.chat.Component;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -69,10 +68,10 @@ public class TomeSliceArrowElement extends AbstractWidget {
         PoseStack.Pose pose = poseStack.last();
         this.texture.bindTexture();
         RenderUtil.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX, GameRenderer::getPositionTexShader, buf -> {
-            buf.addVertex(pose, 0,     0,      0).setUv(u,        v);
-            buf.addVertex(pose, 0,     height, 0).setUv(u,        v + 0.5F);
+            buf.addVertex(pose, 0, 0, 0).setUv(u, v);
+            buf.addVertex(pose, 0, height, 0).setUv(u, v + 0.5F);
             buf.addVertex(pose, width, height, 0).setUv(u + 0.5F, v + 0.5F);
-            buf.addVertex(pose, width, 0,      0).setUv(u + 0.5F, v);
+            buf.addVertex(pose, width, 0, 0).setUv(u + 0.5F, v);
         });
         poseStack.popPose();
     }
@@ -82,7 +81,7 @@ public class TomeSliceArrowElement extends AbstractWidget {
     }
 
     @Override
-    public void onClick(double mouseX, double mouseY, int button) {
+    public void onClick(double mouseX, double mouseY) {
         this.onClick.run();
     }
 

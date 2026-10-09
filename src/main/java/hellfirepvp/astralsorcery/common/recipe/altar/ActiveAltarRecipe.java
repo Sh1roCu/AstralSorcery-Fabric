@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.recipe.altar;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
+import cn.sh1rocu.astralsorcery.util.neoforge.common.crafting.SizedIngredient;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.constellation.BaseConstellation;
@@ -26,11 +28,16 @@ import hellfirepvp.astralsorcery.common.tile.TileAltar;
 import hellfirepvp.astralsorcery.common.tile.TileChalice;
 import hellfirepvp.astralsorcery.common.tile.TileFocusRelay;
 import hellfirepvp.astralsorcery.common.util.ItemUtil;
-import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
+import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
 import hellfirepvp.astralsorcery.common.util.data.LazyRecipeHolder;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.inventory.InventoryView;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.UUIDUtil;
@@ -50,10 +57,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.common.crafting.SizedIngredient;
-import net.neoforged.neoforge.fluids.FluidStack;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -241,7 +244,7 @@ public class ActiveAltarRecipe extends ActiveRecipe<AltarRecipe> {
                     int count = group.stream().mapToInt(itemEntity -> itemEntity.getItem().getCount()).sum();
                     if (count < ingredient.count()) continue;
 
-                    ItemEntityAltarInput inputEntity = ItemEntityReplacement.replace(EntitiesAS.ITEM_ALTAR_INPUT.get(), group.getFirst());
+                    ItemEntityAltarInput inputEntity = ItemEntityReplacement.replace(EntitiesAS.ITEM_ALTAR_INPUT, group.getFirst());
                     inputEntity.setUUID(UUID.randomUUID());
                     inputEntity.setDeltaMovement(Vec3.ZERO);
                     inputEntity.setUnlimitedLifetime();
@@ -295,7 +298,7 @@ public class ActiveAltarRecipe extends ActiveRecipe<AltarRecipe> {
             }
 
             if (input.capturedEntityUUID == null) {
-                EntityAltarFluidInput inputEntity = EntitiesAS.FLUID_ALTAR_INPUT.get().create(level);
+                EntityAltarFluidInput inputEntity = EntitiesAS.FLUID_ALTAR_INPUT.create(level);
                 if (inputEntity == null) throw new IllegalStateException("Cannot create fluid input tracking entity.");
                 inputEntity.setUUID(UUID.randomUUID());
                 inputEntity.setPos(altarPos.getCenter().add(0, 1, 0));
@@ -309,7 +312,7 @@ public class ActiveAltarRecipe extends ActiveRecipe<AltarRecipe> {
             if ((altar.getTileData().getTicksExisted() + 10) % 40 == 0) {
                 FluidStack drawn = this.drawnFluid.getOrDefault(fluidIndex, FluidStack.EMPTY);
 
-                int amtRequired = Math.min(250, fluid.getAmount() - drawn.getAmount());
+                long amtRequired = Math.min(250L, fluid.getAmount() - drawn.getAmount());
                 FluidStack requested = fluid.copyWithAmount(amtRequired);
                 input.fluidDrawInstance.update(level, altarPos, requested);
                 if (input.fluidDrawInstance.consumeLiquid(level, altarPos, requested, true)) {
@@ -345,7 +348,7 @@ public class ActiveAltarRecipe extends ActiveRecipe<AltarRecipe> {
                 if (neededAmt > 0) {
                     LumenStack draw = required.copyWithAmount(neededAmt);
                     boolean didTransfer = LumenRequestHelper.requestRelayed(level, altarPos, draw).map(chain -> {
-                        ILumenHandler handler = level.getCapability(ILumenHandler.BLOCK, chain.getEndNode().getPos(), null);
+                        ILumenHandler handler = ILumenHandler.BLOCK.find(level, chain.getEndNode().getPos(), null);
                         if (handler != null) {
                             LumenStack drained = handler.drain(draw, ILumenHandler.Action.EXECUTE);
                             if (!drained.isEmpty()) {
@@ -498,8 +501,27 @@ public class ActiveAltarRecipe extends ActiveRecipe<AltarRecipe> {
 
             int invSlot = slot;
             if (!ingredient.consume(
-                    () -> altarInv.extractItem(invSlot, 1, simulate),
-                    stack -> altarInv.insertItem(invSlot, stack, simulate),
+                    () -> {
+                        try (Transaction tx = Transaction.openOuter()) {
+                            var storage = altarInv.getSlot(invSlot);
+                            var extracted = StorageUtil.extractAny(storage, 1, tx);
+                            if (!simulate) {
+                                tx.commit();
+                            }
+                            return extracted == null ? ItemStack.EMPTY : extracted.resource().toStack((int) extracted.amount());
+                        }
+                    },
+                    stack -> {
+                        try (Transaction tx = Transaction.openOuter()) {
+                            var storage = altarInv.getSlot(invSlot);
+                            int inserted = (int) StorageUtil.tryInsertStacking(storage, ItemVariant.of(stack), stack.getCount(), tx);
+                            if (!simulate) {
+                                tx.commit();
+                            }
+                            int after = stack.getCount() - inserted;
+                            return inserted <= 0 ? stack : (after > 0 ? stack.copyWithCount(after) : ItemStack.EMPTY);
+                        }
+                    },
                     remainder -> ItemUtil.dropItemNaturally(level, altarPos.above(), remainder),
                     simulate)) {
                 validInputs = false;
@@ -528,8 +550,27 @@ public class ActiveAltarRecipe extends ActiveRecipe<AltarRecipe> {
             }
 
             if (!ingredient.consume(
-                    () -> relayInv.extractItem(0, 1, simulate),
-                    stack -> relayInv.insertItem(0, stack, simulate),
+                    () -> {
+                        try (Transaction tx = Transaction.openOuter()) {
+                            var storage = relayInv.getSlot(0);
+                            var extracted = StorageUtil.extractAny(storage, 1, tx);
+                            if (!simulate) {
+                                tx.commit();
+                            }
+                            return extracted == null ? ItemStack.EMPTY : extracted.resource().toStack((int) extracted.amount());
+                        }
+                    },
+                    stack -> {
+                        try (Transaction tx = Transaction.openOuter()) {
+                            var storage = relayInv.getSlot(0);
+                            int inserted = (int) StorageUtil.tryInsertStacking(storage, ItemVariant.of(stack), stack.getCount(), tx);
+                            if (!simulate) {
+                                tx.commit();
+                            }
+                            int after = stack.getCount() - inserted;
+                            return inserted <= 0 ? stack : (after > 0 ? stack.copyWithCount(after) : ItemStack.EMPTY);
+                        }
+                    },
                     remainder -> ItemUtil.dropItemNaturally(level, relay.getBlockPos().above(), remainder),
                     simulate)) {
                 validInputs = false;
@@ -619,7 +660,7 @@ public class ActiveAltarRecipe extends ActiveRecipe<AltarRecipe> {
         return validInputs;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void playLiquidDrawEffects(Level level, BlockPos centerPos) {
         this.getRecipe(level).ifPresent(recipe -> {
             AABB searchBox = new AABB(centerPos).inflate(10, 6, 10);
@@ -628,7 +669,7 @@ public class ActiveAltarRecipe extends ActiveRecipe<AltarRecipe> {
                 if (required.size() <= input.getInputIndex()) return;
                 if (input.capturedEntityUUID == null || input.isItem()) return;
                 Entity entity = level.getEntities(EntityTypeTest.forClass(EntityAltarFluidInput.class), searchBox,
-                        inputEntity -> inputEntity.isAlive() && inputEntity.getUUID().equals(input.capturedEntityUUID))
+                                inputEntity -> inputEntity.isAlive() && inputEntity.getUUID().equals(input.capturedEntityUUID))
                         .stream()
                         .findFirst()
                         .orElse(null);
@@ -649,7 +690,7 @@ public class ActiveAltarRecipe extends ActiveRecipe<AltarRecipe> {
                     return;
                 }
 
-                int amtSearch = Math.min(250, requiredFluid.getAmount() - drawnFluid.getAmount());
+                long amtSearch = Math.min(250, requiredFluid.getAmount() - drawnFluid.getAmount());
                 if (amtSearch <= 0) {
                     return;
                 }

@@ -8,19 +8,20 @@
 
 package hellfirepvp.astralsorcery.common.focal;
 
+import cn.sh1rocu.astralsorcery.api.event.PlayerTickEvent;
 import hellfirepvp.astralsorcery.common.component.AstrolabeAngleComponent;
 import hellfirepvp.astralsorcery.common.constellation.BaseConstellation;
 import hellfirepvp.astralsorcery.common.constellation.level.LevelSkyHandler;
 import hellfirepvp.astralsorcery.common.data.level.FocalPointData;
 import hellfirepvp.astralsorcery.common.data.sync.SyncDataManager;
 import hellfirepvp.astralsorcery.common.data.sync.server.FocalPointSyncData;
+import hellfirepvp.astralsorcery.common.focal.node.FocalPointNode;
 import hellfirepvp.astralsorcery.common.item.AstrolabeItem;
 import hellfirepvp.astralsorcery.common.lib.DataAS;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.lib.constants.TagsAS;
 import hellfirepvp.astralsorcery.common.lib.types.SyncDataTypesAS;
-import hellfirepvp.astralsorcery.common.focal.node.FocalPointNode;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
@@ -28,6 +29,9 @@ import hellfirepvp.astralsorcery.common.research.ResearchMessageHelper;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.RayTraceUtil;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -35,16 +39,11 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.bus.api.Event;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.level.ChunkEvent;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.List;
 
@@ -59,7 +58,8 @@ public class FocalPointManager {
 
     private static final FocalPointManager INSTANCE = new FocalPointManager();
 
-    private FocalPointManager() {}
+    private FocalPointManager() {
+    }
 
     public static FocalPointManager getInstance() {
         return INSTANCE;
@@ -76,18 +76,16 @@ public class FocalPointManager {
         }
     }
 
-    public void attachEventListeners(IEventBus bus) {
-        bus.addListener(this::onLevelTick);
-        bus.addListener(this::onPlayerTick);
-        bus.addListener(this::onChunkLoad);
-        bus.addListener(this::onChunkUnload);
+    public void attachEventListeners() {
+        ServerTickEvents.END_WORLD_TICK.register(this::onLevelTick);
+        PlayerTickEvent.POST.register(this::onPlayerTick);
+        ServerChunkEvents.CHUNK_LOAD.register(this::onChunkLoad);
+        ServerChunkEvents.CHUNK_UNLOAD.register(this::onChunkUnload);
     }
 
-    private void onLevelTick(LevelTickEvent.Post event) {
-        if (event.getLevel() instanceof ServerLevel sLevel) {
-            this.getData().getNodes(sLevel.dimension()).forEach(node -> {
-                node.tick(sLevel);
-            });
+    private void onLevelTick(Level level) {
+        if (level instanceof ServerLevel sLevel) {
+            List.copyOf(this.getData().getNodes(sLevel.dimension())).forEach(node -> node.tick(sLevel));
         }
     }
 
@@ -98,7 +96,7 @@ public class FocalPointManager {
                 if (held.isEmpty()) return;
                 LevelSkyHandler.getContext(sPlayer.serverLevel()).ifPresent(ctx -> {
                     FocalPointData focalPointData = DataAS.DOMAIN_AS.getData(sPlayer.serverLevel(), DataAS.KEY_FOCAL_POINT_DATA);
-                    PlayerProgress progress = ResearchManager.getProgress(sPlayer, LogicalSide.SERVER);
+                    PlayerProgress progress = ResearchManager.getProgress(sPlayer, EnvType.SERVER);
                     float angle = held.getOrDefault(DataComponentsAS.ASTROLABE_ANGLE, AstrolabeAngleComponent.DEFAULT).angle();
                     RegistriesAS.REGISTRY_CONSTELLATIONS.getTag(TagsAS.Constellations.MAY_BE_FOCAL_POINT).ifPresent(set -> {
                         set.forEach(cstHolder -> {
@@ -181,9 +179,9 @@ public class FocalPointManager {
         return new Vector3(centerX, targetY, centerZ);
     }
 
-    private void onChunkLoad(ChunkEvent.Load event) {
-        if (event.getChunk() instanceof LevelChunk && event.getLevel() instanceof ServerLevel sLevel) {
-            ChunkPos pos = event.getChunk().getPos();
+    private void onChunkLoad(Level world, LevelChunk chunk) {
+        if (chunk instanceof LevelChunk && world instanceof ServerLevel sLevel) {
+            ChunkPos pos = chunk.getPos();
             FocalPointData.Section sectionData = DataAS.DOMAIN_AS.getData(sLevel, DataAS.KEY_FOCAL_POINT_DATA).getSection(pos.getWorldPosition());
             if (sectionData != null) {
 
@@ -196,9 +194,9 @@ public class FocalPointManager {
         }
     }
 
-    private void onChunkUnload(ChunkEvent.Unload event) {
-        if (event.getChunk() instanceof LevelChunk && event.getLevel() instanceof ServerLevel sLevel) {
-            ChunkPos pos = event.getChunk().getPos();
+    private void onChunkUnload(Level world, LevelChunk chunk) {
+        if (chunk instanceof LevelChunk && world instanceof ServerLevel sLevel) {
+            ChunkPos pos = chunk.getPos();
 
             this.getData().unloadNodes(sLevel, pos);
         }

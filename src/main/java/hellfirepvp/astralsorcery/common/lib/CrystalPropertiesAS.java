@@ -11,8 +11,9 @@ package hellfirepvp.astralsorcery.common.lib;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.crystal.CrystalProperty;
 import net.minecraft.ChatFormatting;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.Registry;
+
+import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -23,18 +24,18 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  */
 public class CrystalPropertiesAS {
 
-    public static final DeferredRegister<CrystalProperty> CRYSTAL_PROPERTY_REGISTER =
-            DeferredRegister.create(RegistriesAS.KEY_CRYSTAL_PROPERTIES, AstralSorcery.MODID);
+    public static void init() {
 
-    public static final DeferredHolder<CrystalProperty, CrystalProperty> SIZE =
-            CRYSTAL_PROPERTY_REGISTER.register("size", () -> new CrystalProperty(ChatFormatting.GRAY, 8));
-    public static final DeferredHolder<CrystalProperty, CrystalProperty> PURITY =
-            CRYSTAL_PROPERTY_REGISTER.register("purity", () -> new CrystalProperty(ChatFormatting.GRAY, 4));
-    public static final DeferredHolder<CrystalProperty, CrystalProperty> CUT =
-            CRYSTAL_PROPERTY_REGISTER.register("cut", () -> new CrystalProperty(ChatFormatting.GRAY, 4));
+    }
 
-    public static final DeferredHolder<CrystalProperty, CrystalProperty> TOOL_EFFICIENCY =
-            CRYSTAL_PROPERTY_REGISTER.register("tool_efficiency", () -> new CrystalProperty(ChatFormatting.GRAY, 3));
-    public static final DeferredHolder<CrystalProperty, CrystalProperty> TOOL_DURABILITY =
-            CRYSTAL_PROPERTY_REGISTER.register("tool_durability", () -> new CrystalProperty(ChatFormatting.GRAY, 3));
+    public static final CrystalProperty SIZE = register("size", () -> new CrystalProperty(ChatFormatting.GRAY, 8));
+    public static final CrystalProperty PURITY = register("purity", () -> new CrystalProperty(ChatFormatting.GRAY, 4));
+    public static final CrystalProperty CUT = register("cut", () -> new CrystalProperty(ChatFormatting.GRAY, 4));
+
+    public static final CrystalProperty TOOL_EFFICIENCY = register("tool_efficiency", () -> new CrystalProperty(ChatFormatting.GRAY, 3));
+    public static final CrystalProperty TOOL_DURABILITY = register("tool_durability", () -> new CrystalProperty(ChatFormatting.GRAY, 3));
+
+    private static CrystalProperty register(String name, Supplier<CrystalProperty> supplier) {
+        return Registry.register(RegistriesAS.REGISTRY_CRYSTAL_PROPERTIES, AstralSorcery.key(name), supplier.get());
+    }
 }

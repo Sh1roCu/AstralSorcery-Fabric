@@ -57,6 +57,6 @@ public class CopyCrystalPropertiesFunction extends LootItemConditionalFunction {
 
     @Override
     public LootItemFunctionType<? extends LootItemConditionalFunction> getType() {
-        return LootAS.COPY_CRYSTAL_PROPERTIES_FUNCTION.get();
+        return LootAS.COPY_CRYSTAL_PROPERTIES_FUNCTION;
     }
 }

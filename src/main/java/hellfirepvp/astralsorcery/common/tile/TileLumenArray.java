@@ -8,19 +8,18 @@
 
 package hellfirepvp.astralsorcery.common.tile;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
 import com.mojang.datafixers.Products;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.client.effect.EffectHelper;
-import hellfirepvp.astralsorcery.client.effect.EntityVisualFX;
 import hellfirepvp.astralsorcery.client.effect.function.FXAlphaFunction;
 import hellfirepvp.astralsorcery.client.effect.function.FXColorFunction;
-import hellfirepvp.astralsorcery.client.effect.function.FXScaleFunction;
 import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
 import hellfirepvp.astralsorcery.common.block.tile.LumenArrayBlock;
-import hellfirepvp.astralsorcery.common.component.IdentifierComponent;
 import hellfirepvp.astralsorcery.common.component.StoredLumenComponent;
+import hellfirepvp.astralsorcery.common.event.RecipeEvent;
 import hellfirepvp.astralsorcery.common.lib.FluidsAS;
 import hellfirepvp.astralsorcery.common.lib.LumenAS;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
@@ -54,6 +53,9 @@ import hellfirepvp.astralsorcery.common.util.tank.FluidContainerList;
 import hellfirepvp.astralsorcery.common.util.tank.FluidTankView;
 import hellfirepvp.astralsorcery.common.util.tank.FluidTankViewFactory;
 import hellfirepvp.astralsorcery.common.util.tooltip.StoredLumenDisplayTooltip;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -64,9 +66,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.fluids.FluidStack;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -116,7 +115,7 @@ public class TileLumenArray extends TileEntityTick<TileLumenArray.Data> implemen
         if (this.getTileData().getTicksExisted() % 20 == 0) {
             FluidStack stack = this.getTileData().getContainedFluid();
             if (!stack.isEmpty()) {
-                this.setLight(level, stack.getFluidType().getLightLevel(stack));
+                this.setLight(level, FluidVariantAttributes.getLuminance(stack.getFluidVariant()));
             } else {
                 this.setLight(level, 0);
             }
@@ -147,7 +146,7 @@ public class TileLumenArray extends TileEntityTick<TileLumenArray.Data> implemen
                     } else {
                         LumenNode targetNode = requestChain.getEndNode();
                         LumenStack requiredPeek = LumenStack.of(requiredType, 100);
-                        ILumenHandler handler = level.getCapability(ILumenHandler.BLOCK, targetNode.getPos(), null);
+                        ILumenHandler handler = ILumenHandler.BLOCK.find(level, targetNode.getPos(), null);
                         if (handler == null || handler.drain(requiredPeek, ILumenHandler.Action.SIMULATE).isEmpty()) {
                             this.activeRequestChains.remove(requiredType);
                             requestChain = null;
@@ -188,7 +187,7 @@ public class TileLumenArray extends TileEntityTick<TileLumenArray.Data> implemen
                                 break;
                             }
                             LumenStack drainAttempt = LumenStack.of(additionalInput, fillableAttempts * additionalRequiredAmount);
-                            ILumenHandler handler = level.getCapability(ILumenHandler.BLOCK, requestChain.getEndNode().getPos(), null);
+                            ILumenHandler handler = ILumenHandler.BLOCK.find(level, requestChain.getEndNode().getPos(), null);
                             LumenStack drainable;
                             if (handler == null || (drainable = handler.drain(drainAttempt, ILumenHandler.Action.SIMULATE)).isEmpty()) {
                                 fillableAttempts = 0;
@@ -223,6 +222,8 @@ public class TileLumenArray extends TileEntityTick<TileLumenArray.Data> implemen
                             if (requiredInputs <= 0) {
                                 LumenStack produced = LumenStack.of(this.activeRecipe.getProducedLumen(), fillableAttempts * this.activeRecipe.getProducedLumenAmount());
                                 this.getTileData().getLumenHandler().fill(produced, ILumenHandler.Action.EXECUTE);
+
+                                RecipeEvent.LumenGeneration.EVENT.invoker().post(new RecipeEvent.LumenGeneration(this.activeRecipe, this, produced.copy()));
 
                                 this.getTileData().getOwner(level).ifPresent(sPlayer -> {
                                     List<Lumen> newlyDiscovered = ResearchHelper.discoverLumen(sPlayer, RecipeUtil.findAnyLumenMakingUp(level, produced.getLumen()));
@@ -298,7 +299,7 @@ public class TileLumenArray extends TileEntityTick<TileLumenArray.Data> implemen
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void clientTick(Level level) {
         super.clientTick(level);
 
@@ -389,7 +390,7 @@ public class TileLumenArray extends TileEntityTick<TileLumenArray.Data> implemen
     public static class Data extends TileEntityTick.Data implements TileDataOwned {
 
         public static final int LUMEN_TANK_CAPACITY = 4000;
-        public static final int TANK_CAPACITY = 2000;
+        public static final long TANK_CAPACITY = 2000 * 81;
 
         public static final Codec<Data> CODEC = RecordCodecBuilder.create(inst -> lumenArrayFields(inst).apply(inst, Data::new));
 
@@ -402,7 +403,7 @@ public class TileLumenArray extends TileEntityTick<TileLumenArray.Data> implemen
                             CodecUtil.defaulted(FluidContainerList.CODEC, "fluidContents", FluidContainerList::create, Data::getFluidContents),
                             CodecUtil.defaulted(InventoryStackList.CODEC, "inventoryContents", InventoryStackList::create, Data::getInventoryContents),
                             Codec.BOOL.optionalFieldOf("allowExtendedLumenTransfer", false).forGetter(Data::doesAllowExtendedLumenTransfer),
-                            CodecUtil.lenientDefaulted(RegistriesAS.REGISTRY_LUMEN.byNameCodec(), "assignedLumen", LumenAS.NONE, Data::getAssignedLumen)
+                            CodecUtil.lenientDefaulted(RegistriesAS.REGISTRY_LUMEN.byNameCodec(), "assignedLumen", LumenAS.NONE::get, Data::getAssignedLumen)
                     )
             );
         }
@@ -513,8 +514,8 @@ public class TileLumenArray extends TileEntityTick<TileLumenArray.Data> implemen
         protected FluidTankViewFactory newFluidTank() {
             return FluidTankViewFactory.builder(1)
                     .tankCapacity(tank -> TANK_CAPACITY)
-                    .inputFilter((tank, stack, existing) -> stack.getFluid().isSame(FluidsAS.LIQUID_STARLIGHT.getSource().get()))
-                    .extractFilter((tank, amount, existing) -> false)
+                    .inputFilter((tank, stack, existing) -> stack.getFluid().isSame(FluidsAS.LIQUID_STARLIGHT.getSource()))
+                    .extractFilter((tank, existing) -> false)
                     .accessibleSides(Direction.DOWN);
         }
 
@@ -525,12 +526,11 @@ public class TileLumenArray extends TileEntityTick<TileLumenArray.Data> implemen
         protected FilteredInventoryViewFactory newInventoryHandler() {
             return FilteredInventoryViewFactory.filteredBuilder(1)
                     .stackSizeLimiter((slot, stack) -> 1)
-                    .extractFilter((slot, amount, existing) -> false)
-                    .inputFilter((slot, toAdd, existing) -> {
-                        if (!existing.isEmpty()) return false;
+                    .extractFilter((amount, existing) -> false)
+                    .inputFilter((amount, toAdd) -> {
                         if (this.getFluidTank().getFluidInTank(0).isEmpty()) return false;
 
-                        return this.findMatchingRecipe(toAdd).isPresent();
+                        return this.findMatchingRecipe(toAdd.toStack((int) amount)).isPresent();
                     })
                     .accessibleSides(Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST);
         }

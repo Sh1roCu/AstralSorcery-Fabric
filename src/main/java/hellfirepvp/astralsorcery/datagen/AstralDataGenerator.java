@@ -9,35 +9,28 @@
 package hellfirepvp.astralsorcery.datagen;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
-import hellfirepvp.astralsorcery.datagen.assets.*;
-import hellfirepvp.astralsorcery.datagen.data.AstralCuriosProvider;
+import hellfirepvp.astralsorcery.datagen.assets.AstralConstellationPositionProvider;
+import hellfirepvp.astralsorcery.datagen.assets.AstralCustomSpriteProvider;
+import hellfirepvp.astralsorcery.datagen.assets.AstralLumenDisplayPositionProvider;
+import hellfirepvp.astralsorcery.datagen.assets.AstralSoundsProvider;
 import hellfirepvp.astralsorcery.datagen.data.AstralRegistriesDataProvider;
+import hellfirepvp.astralsorcery.datagen.data.advancement.AstralAdvancementProvider;
 import hellfirepvp.astralsorcery.datagen.data.artifact.AstralArtifactConditionProvider;
 import hellfirepvp.astralsorcery.datagen.data.artifact.AstralArtifactEffectProvider;
 import hellfirepvp.astralsorcery.datagen.data.artifact.AstralArtifactPenaltyProvider;
 import hellfirepvp.astralsorcery.datagen.data.damage.AstralDamageTypeTagProvider;
-import hellfirepvp.astralsorcery.datagen.data.datamap.AstralDataMapProvider;
-import hellfirepvp.astralsorcery.datagen.data.loot.AstralGlobalLootModifierProvider;
-import hellfirepvp.astralsorcery.datagen.data.loot.AstralLootTableProvider;
+import hellfirepvp.astralsorcery.datagen.data.loot.AstralBlockLootTableProvider;
+import hellfirepvp.astralsorcery.datagen.data.loot.AstralGameplayLootTableProvider;
 import hellfirepvp.astralsorcery.datagen.data.lumen.AstralLumenBindingDataProvider;
 import hellfirepvp.astralsorcery.datagen.data.perks.AstralPerkTreeProvider;
-import hellfirepvp.astralsorcery.datagen.data.perks.DebugPerkTreeProvider;
 import hellfirepvp.astralsorcery.datagen.data.recipes.AstralRecipeProvider;
 import hellfirepvp.astralsorcery.datagen.data.research.AstralResearchNodeProvider;
-import hellfirepvp.astralsorcery.datagen.data.tags.AstralBlockTagsProvider;
-import hellfirepvp.astralsorcery.datagen.data.tags.AstralConstellationTagsProvider;
-import hellfirepvp.astralsorcery.datagen.data.tags.AstralEntityTagsProvider;
-import hellfirepvp.astralsorcery.datagen.data.tags.AstralItemTagsProvider;
-import hellfirepvp.astralsorcery.datagen.data.world.AstralWorldGenProvider;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.data.DataGenerator;
-import net.minecraft.data.PackOutput;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import net.neoforged.neoforge.data.event.GatherDataEvent;
-
-import java.util.concurrent.CompletableFuture;
+import hellfirepvp.astralsorcery.datagen.data.tags.*;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
+import net.minecraft.data.models.BlockModelGenerators;
+import net.minecraft.data.models.ItemModelGenerators;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -46,49 +39,55 @@ import java.util.concurrent.CompletableFuture;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-@EventBusSubscriber(modid = AstralSorcery.MODID)
 public class AstralDataGenerator {
 
-    @SubscribeEvent
-    public static void gather(GatherDataEvent event) {
+    public static void gather(FabricDataGenerator.Pack pack) {
         if (!AstralSorcery.isDoingDataGeneration()) {
             return;
         }
-        event.createDatapackRegistryObjects(AstralRegistriesDataProvider.getRegistryBuilder());
+        pack.addProvider(AstralCustomSpriteProvider::new);
+        pack.addProvider(AstralModelProvider::new);
+        //pack.addProvider(AstralBlockStateProvider::new);
+        pack.addProvider(AstralConstellationPositionProvider::new);
+        pack.addProvider(AstralLumenDisplayPositionProvider::new);
+        pack.addProvider(AstralSoundsProvider::new);
 
-        DataGenerator gen = event.getGenerator();
-        PackOutput output = gen.getPackOutput();
-        ExistingFileHelper fileHelper = event.getExistingFileHelper();
-        CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
+        pack.addProvider(AstralRegistriesDataProvider::new);
 
-        if (event.includeClient()) {
-            gen.addProvider(true, new AstralCustomSpriteProvider(output, lookupProvider, fileHelper));
-            gen.addProvider(true, new AstralBlockModelProvider(output, fileHelper));
-            gen.addProvider(true, new AstralItemModelProvider(output, fileHelper));
-            gen.addProvider(true, new AstralBlockStateProvider(output, fileHelper));
-            gen.addProvider(true, new AstralConstellationPositionProvider(output));
-            gen.addProvider(true, new AstralLumenDisplayPositionProvider(output));
-            gen.addProvider(true, new AstralSoundsProvider(output, fileHelper));
+        pack.addProvider(AstralFluidTagsProvider::new);
+        pack.addProvider(AstralBlockTagsProvider::new);
+        pack.addProvider(AstralItemTagsProvider::new);
+        pack.addProvider(AstralBiomeTagsProvider::new);
+        pack.addProvider(AstralEntityTagsProvider::new);
+        pack.addProvider(AstralConstellationTagsProvider::new);
+        pack.addProvider(AstralRecipeProvider::new);
+        pack.addProvider(AstralResearchNodeProvider::new);
+        pack.addProvider(AstralBlockLootTableProvider::new);
+        pack.addProvider(AstralGameplayLootTableProvider::new);
+        pack.addProvider(AstralArtifactConditionProvider::new);
+        pack.addProvider(AstralArtifactEffectProvider::new);
+        pack.addProvider(AstralArtifactPenaltyProvider::new);
+        pack.addProvider(AstralDamageTypeTagProvider::new);
+        pack.addProvider(AstralLumenBindingDataProvider::new);
+        //pack.addProvider(DebugPerkTreeProvider::new);
+        pack.addProvider(AstralPerkTreeProvider::new);
+        pack.addProvider(AstralAdvancementProvider::new);
+    }
+
+    private static class AstralModelProvider extends FabricModelProvider {
+
+        public AstralModelProvider(FabricDataOutput output) {
+            super(output);
         }
-        if (event.includeServer()) {
-            AstralBlockTagsProvider blockTags = new AstralBlockTagsProvider(output, lookupProvider, fileHelper);
-            gen.addProvider(true, blockTags);
-            gen.addProvider(true, new AstralItemTagsProvider(output, lookupProvider, blockTags.contentsGetter(), fileHelper));
-            gen.addProvider(true, new AstralEntityTagsProvider(output, lookupProvider, fileHelper));
-            gen.addProvider(true, new AstralConstellationTagsProvider(output, lookupProvider, fileHelper));
-            gen.addProvider(true, new AstralRecipeProvider(output, lookupProvider));
-            gen.addProvider(true, new AstralResearchNodeProvider(output, lookupProvider));
-            gen.addProvider(true, new AstralDataMapProvider(output, lookupProvider));
-            gen.addProvider(true, new AstralLootTableProvider(output, lookupProvider));
-            gen.addProvider(true, new AstralGlobalLootModifierProvider(output, lookupProvider));
-            gen.addProvider(true, new AstralArtifactConditionProvider(output, lookupProvider));
-            gen.addProvider(true, new AstralArtifactEffectProvider(output, lookupProvider));
-            gen.addProvider(true, new AstralArtifactPenaltyProvider(output, lookupProvider));
-            gen.addProvider(true, new AstralDamageTypeTagProvider(output, lookupProvider, fileHelper));
-            gen.addProvider(true, new AstralCuriosProvider(output, fileHelper, lookupProvider));
-            gen.addProvider(true, new AstralLumenBindingDataProvider(output, lookupProvider));
-            //gen.addProvider(true, new DebugPerkTreeProvider(output, lookupProvider));
-            gen.addProvider(true, new AstralPerkTreeProvider(output, lookupProvider));
+
+        @Override
+        public void generateBlockStateModels(BlockModelGenerators generators) {
+            // AstralBlockModelProvider.registerModels(generators);
+        }
+
+        @Override
+        public void generateItemModels(ItemModelGenerators generators) {
+            // AstralItemModelProvider.registerModels(generators);
         }
     }
 }

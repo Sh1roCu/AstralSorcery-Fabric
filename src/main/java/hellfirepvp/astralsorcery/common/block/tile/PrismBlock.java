@@ -50,7 +50,7 @@ public class PrismBlock extends BaseTickTileBlock<TilePrism> {
     public static EnumProperty<Direction> PLACED_AGAINST = EnumProperty.create("against", Direction.class);
 
     public PrismBlock(Properties properties) {
-        super(properties, TileEntitiesAS.PRISM);
+        super(properties, () -> TileEntitiesAS.PRISM);
         this.registerDefaultState(this.defaultBlockState().setValue(PLACED_AGAINST, Direction.DOWN));
     }
 

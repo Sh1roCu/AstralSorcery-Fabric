@@ -15,16 +15,15 @@ import hellfirepvp.astralsorcery.common.perk.type.base.ModifierType;
 import hellfirepvp.astralsorcery.common.perk.type.base.PerkAttributeType;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
+import net.fabricmc.api.EnvType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nullable;
 import java.text.DecimalFormat;
-import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -37,15 +36,15 @@ public abstract class PerkAttributeTypeReader {
 
     private static final DecimalFormat percentageFormat = new DecimalFormat("0.00");
 
-    private final Supplier<? extends PerkAttributeType> type;
+    private final PerkAttributeType type;
     private boolean negate = false;
 
-    public PerkAttributeTypeReader(Supplier<? extends PerkAttributeType> type) {
+    public PerkAttributeTypeReader(PerkAttributeType type) {
         this.type = type;
     }
 
     public final PerkAttributeType getType() {
-        return this.type.get();
+        return this.type;
     }
 
     public <T extends PerkAttributeTypeReader> T negate() {
@@ -57,22 +56,22 @@ public abstract class PerkAttributeTypeReader {
      * Return the default value the perks or other things scale off of.
      *
      * @param statMap The player's current stat map
-     * @param player The player
-     * @param side The current side
+     * @param player  The player
+     * @param side    The current side
      * @return The default value as it would be without any modifiers.
      */
-    public abstract double getDefaultValue(PerkAttributeMap statMap, Player player, LogicalSide side);
+    public abstract double getDefaultValue(PerkAttributeMap statMap, Player player, EnvType side);
 
     /**
      * Return the modifier (multiplier or addition) for the given mode.
      *
      * @param statMap The player's current stat map
-     * @param player The player
-     * @param side The current side
-     * @param mode The mode to get the modifier for
+     * @param player  The player
+     * @param side    The current side
+     * @param mode    The mode to get the modifier for
      * @return The currently applying modifier value for the given mode.
      */
-    public abstract double getModifierValueForMode(PerkAttributeMap statMap, Player player, LogicalSide side, ModifierType mode);
+    public abstract double getModifierValueForMode(PerkAttributeMap statMap, Player player, EnvType side, ModifierType mode);
 
     public static String formatDecimal(double decimal) {
         return percentageFormat.format(decimal);
@@ -81,7 +80,7 @@ public abstract class PerkAttributeTypeReader {
     public String getDisplayFormat(PerkAttributeModifier modifier) {
         return Util.makeDescriptionId("perk.modifier", AstralSorcery.key("format"));
     }
-    
+
     public String getValueDisplayFormat(PerkAttributeModifier modifier, @Nullable Player player, @Nullable PlayerProgress progress) {
         return Util.makeDescriptionId("perk.modifier", AstralSorcery.key("value_format"));
     }
@@ -93,7 +92,7 @@ public abstract class PerkAttributeTypeReader {
     public String getDisplayModifierOperation(PerkAttributeModifier modifier, @Nullable Player player, @Nullable PlayerProgress progress) {
         return modifier.getMode().getModifierOperationNameId(this.getRawValue(modifier, player, progress));
     }
-    
+
     public Component formatDisplayValue(PerkAttributeModifier modifier, @Nullable Player player, @Nullable PlayerProgress progress, String valueStr) {
         return Component.translatable(this.getValueDisplayFormat(modifier, player, progress), valueStr);
     }
@@ -117,6 +116,6 @@ public abstract class PerkAttributeTypeReader {
         return this.negate ? -val : val;
     }
 
-    public static record Type(Supplier<? extends PerkAttributeType> perkAttributeType, PerkAttributeTypeReader reader) {
+    public static record Type(PerkAttributeType perkAttributeType, PerkAttributeTypeReader reader) {
     }
 }

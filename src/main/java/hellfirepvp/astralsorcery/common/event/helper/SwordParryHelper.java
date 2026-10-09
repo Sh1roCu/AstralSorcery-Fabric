@@ -8,15 +8,14 @@
 
 package hellfirepvp.astralsorcery.common.event.helper;
 
+import cn.sh1rocu.astralsorcery.api.event.ProjectileImpactEvent;
 import hellfirepvp.astralsorcery.common.item.tool.IridescentCrystalSwordItem;
 import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
-import hellfirepvp.astralsorcery.common.util.CelestialStrike;
 import hellfirepvp.astralsorcery.common.util.ServerSoundHelper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.tick.TimeoutList;
 import hellfirepvp.astralsorcery.common.visual.type.LightningEffect;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -26,8 +25,6 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
 
 import java.util.UUID;
 
@@ -44,11 +41,12 @@ public class SwordParryHelper {
 
     private static final TimeoutList<UUID> empoweredCharges = new TimeoutList<>();
 
-    private SwordParryHelper() {}
+    private SwordParryHelper() {
+    }
 
-    public static void attachListeners(IEventBus bus) {
-        bus.addListener(empoweredCharges::onServerTick);
-        bus.addListener(SwordParryHelper::onProjectileImpact);
+    public static void attachListeners() {
+        ServerTickEvents.END_SERVER_TICK.register(empoweredCharges::onServerTick);
+        ProjectileImpactEvent.EVENT.register(SwordParryHelper::onProjectileImpact);
     }
 
     public static void clearServer() {

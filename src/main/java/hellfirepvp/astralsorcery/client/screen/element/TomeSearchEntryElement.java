@@ -63,7 +63,7 @@ public class TomeSearchEntryElement extends AbstractWidget {
     }
 
     @Override
-    public void onClick(double mouseX, double mouseY, int button) {
+    public void onClick(double mouseX, double mouseY) {
         Minecraft.getInstance().setScreen(TomePagesScreen.fromProgressNode(this.screen, this.node));
     }
 

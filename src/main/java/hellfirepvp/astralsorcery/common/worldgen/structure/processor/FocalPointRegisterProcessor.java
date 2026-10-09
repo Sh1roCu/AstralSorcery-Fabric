@@ -76,6 +76,6 @@ public class FocalPointRegisterProcessor extends StructureProcessor {
 
     @Override
     protected StructureProcessorType<?> getType() {
-        return WorldGenAS.FOCAL_POINT_REGISTER_PROCESSOR.get();
+        return WorldGenAS.FOCAL_POINT_REGISTER_PROCESSOR;
     }
 }

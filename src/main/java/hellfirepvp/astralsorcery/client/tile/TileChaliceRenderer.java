@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.tile;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -16,17 +17,15 @@ import hellfirepvp.astralsorcery.client.resource.UVFrame;
 import hellfirepvp.astralsorcery.client.util.RenderCubeUtil;
 import hellfirepvp.astralsorcery.client.util.RenderSpriteUtil;
 import hellfirepvp.astralsorcery.client.util.RenderVectorUtil;
-import hellfirepvp.astralsorcery.client.util.RenderingDrawUtil;
 import hellfirepvp.astralsorcery.common.tile.TileChalice;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.observerlib.client.util.LightmapUtil;
+import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -41,12 +40,14 @@ public class TileChaliceRenderer implements BlockEntityRenderer<TileChalice> {
     private static final float SIZE_RANGE = 0.375F;
     private static final float CENTER_Y = 1.4F;
 
-    public TileChaliceRenderer() {}
-
-    @Override
-    public AABB getRenderBoundingBox(TileChalice blockEntity) {
-        return BlockEntityRenderer.super.getRenderBoundingBox(blockEntity).inflate(0, 1, 0);
+    public TileChaliceRenderer() {
     }
+
+    // TODO?
+//    @Override
+//    public AABB getRenderBoundingBox(TileChalice blockEntity) {
+//        return BlockEntityRenderer.super.getRenderBoundingBox(blockEntity).inflate(0, 1, 0);
+//    }
 
     @Override
     public void render(TileChalice tile, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
@@ -61,11 +62,11 @@ public class TileChaliceRenderer implements BlockEntityRenderer<TileChalice> {
 
         Vector3 rotation = RenderVectorUtil.interpolate(tile.getPrevRotation(), tile.getRotation(), partialTick);
 
-        int light = contained.getFluid().getFluidType().getLightLevel(contained);
+        int light = FluidVariantAttributes.getLuminance(contained.getFluidVariant());
         int blockLight = packedLight >> 4 & 0xF;
         packedLight = LightmapUtil.getPackedLightCoords(packedLight >> 20 & 0xF, Math.max(blockLight, light));
 
-        int tint = IClientFluidTypeExtensions.of(contained.getFluid()).getTintColor(contained);
+        int tint = FluidVariantRendering.getColor(contained.getFluidVariant());
         ColorWrapper color = ColorWrapper.opaque(tint);
         VertexConsumer vb = bufferSource.getBuffer(RenderTypesAS.TER_CHALICE_LIQUID);
 

@@ -8,8 +8,10 @@
 
 package hellfirepvp.astralsorcery.common.event;
 
+import cn.sh1rocu.astralsorcery.api.event.PlayerEvent;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -22,6 +24,12 @@ public class ItemCooldownEvent extends PlayerEvent {
 
     private final int originalCooldown;
     private int cooldown;
+
+    public static final Event<Callback> EVENT = EventFactory.createArrayBacked(Callback.class, callbacks -> event -> {
+        for (Callback callback : callbacks) {
+            callback.post(event);
+        }
+    });
 
     public ItemCooldownEvent(Player player, int cooldown) {
         super(player);
@@ -39,5 +47,9 @@ public class ItemCooldownEvent extends PlayerEvent {
 
     public int getCooldown() {
         return this.cooldown;
+    }
+
+    public interface Callback {
+        void post(ItemCooldownEvent event);
     }
 }

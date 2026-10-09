@@ -10,14 +10,14 @@ package hellfirepvp.astralsorcery.common.item.wand;
 
 import hellfirepvp.astralsorcery.common.component.BlockStateStorageComponent;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
+import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
 
 import java.util.*;
 
@@ -33,7 +33,8 @@ public class WandBlockStorageHelper {
     private static final long PREVIEW_SEED_BASE = 0x6834F10A91B03F15L;
     public static final int MAX_RAYTRACE_DISTANCE = 60;
 
-    private WandBlockStorageHelper() {}
+    private WandBlockStorageHelper() {
+    }
 
     public static BlockStateStorageComponent getStorage(ItemStack stack) {
         return stack.getOrDefault(DataComponentsAS.BLOCK_STATE_STORAGE, BlockStateStorageComponent.EMPTY);
@@ -61,14 +62,20 @@ public class WandBlockStorageHelper {
     }
 
     public static boolean consumeBlock(Player player, ItemStack match) {
-        IItemHandler inv = player.getCapability(Capabilities.ItemHandler.ENTITY);
+        var inv = PlayerInventoryStorage.of(player);
         if (inv == null) return false;
 
-        for (int i = 0; i < inv.getSlots(); i++) {
-            ItemStack inSlot = inv.getStackInSlot(i);
+        for (int i = 0; i < inv.getSlotCount(); i++) {
+            var storage = inv.getSlot(i);
+            ItemStack inSlot = storage.getResource().toStack((int) storage.getAmount());
             if (ItemStack.isSameItem(inSlot, match)) {
-                ItemStack extracted = inv.extractItem(i, 1, false);
-                if (!extracted.isEmpty()) return true;
+                try (Transaction tx = Transaction.openOuter()) {
+                    long extracted = storage.extract(storage.getResource(), 1, tx);
+                    if (extracted > 0) {
+                        tx.commit();
+                        return true;
+                    }
+                }
             }
         }
         return false;
@@ -112,7 +119,7 @@ public class WandBlockStorageHelper {
      * Uses a time-seeded random for consistent preview across frames.
      */
     public static Map<BlockPos, BlockState> buildPreviewMap(Player player, ItemStack wandStack,
-                                                             List<BlockPos> positions, Level level) {
+                                                            List<BlockPos> positions, Level level) {
         return buildPlaceableMap(player, wandStack, positions, getPreviewRandom(level));
     }
 
@@ -121,12 +128,12 @@ public class WandBlockStorageHelper {
      * Uses a fresh random so each placement produces a different shuffle.
      */
     public static Map<BlockPos, BlockState> buildPlaceableMap(Player player, ItemStack wandStack,
-                                                               List<BlockPos> positions) {
+                                                              List<BlockPos> positions) {
         return buildPlaceableMap(player, wandStack, positions, new Random());
     }
 
     private static Map<BlockPos, BlockState> buildPlaceableMap(Player player, ItemStack wandStack,
-                                                                List<BlockPos> positions, Random rand) {
+                                                               List<BlockPos> positions, Random rand) {
         Map<BlockState, InventoryEntry> inventoryMap = getInventoryMatching(player, wandStack);
         if (inventoryMap.isEmpty()) return Map.of();
 
@@ -168,12 +175,13 @@ public class WandBlockStorageHelper {
     }
 
     private static int countMatchingItems(Player player, ItemStack match) {
-        IItemHandler inv = player.getCapability(Capabilities.ItemHandler.ENTITY);
+        var inv = PlayerInventoryStorage.of(player);
         if (inv == null) return 0;
 
         int count = 0;
-        for (int i = 0; i < inv.getSlots(); i++) {
-            ItemStack inSlot = inv.getStackInSlot(i);
+        for (int i = 0; i < inv.getSlotCount(); i++) {
+            var storage = inv.getSlot(i);
+            ItemStack inSlot = storage.getResource().toStack((int) storage.getAmount());
             if (ItemStack.isSameItem(inSlot, match)) {
                 count += inSlot.getCount();
             }
@@ -181,5 +189,6 @@ public class WandBlockStorageHelper {
         return count;
     }
 
-    public record InventoryEntry(ItemStack itemStack, int count) {}
+    public record InventoryEntry(ItemStack itemStack, int count) {
+    }
 }

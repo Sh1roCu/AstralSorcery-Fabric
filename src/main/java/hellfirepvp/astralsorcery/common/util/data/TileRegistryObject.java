@@ -15,7 +15,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.registries.DeferredHolder;
 
 import javax.annotation.Nullable;
 
@@ -26,15 +25,16 @@ import javax.annotation.Nullable;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public record TileRegistryObject<T extends BlockEntity>(DeferredHolder<BlockEntityType<?>, BlockEntityType<T>> ref) {
+public record TileRegistryObject<T extends BlockEntity>(BlockEntityType<T> ref) {
 
     public BlockEntityType<T> type() {
-        return this.ref.get();
+        return this.ref;
     }
 
     public T newTile(BlockPos pos, BlockState state) {
         return this.type().create(pos, state);
     }
+
     @Nullable
     public <V extends TileEntityTick<?>> BlockEntityTicker<V> ticker(BlockEntityType<V> otherType, BlockEntityTicker<T> tick) {
         if (otherType != this.type()) {

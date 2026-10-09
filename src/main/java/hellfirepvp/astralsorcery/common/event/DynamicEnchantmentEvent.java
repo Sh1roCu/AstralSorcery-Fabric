@@ -8,9 +8,11 @@
 
 package hellfirepvp.astralsorcery.common.event;
 
+import cn.sh1rocu.astralsorcery.api.event.PlayerEvent;
 import hellfirepvp.astralsorcery.common.enchantment.CombinedEnchantmentModifiers;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -25,6 +27,12 @@ public class DynamicEnchantmentEvent {
 
         private final CombinedEnchantmentModifiers.Mutable newDynamicEnchantments;
 
+        public static final Event<Callback> EVENT = EventFactory.createArrayBacked(Callback.class, callbacks -> event -> {
+            for (Callback callback : callbacks) {
+                callback.post(event);
+            }
+        });
+
         public Add(Player player) {
             super(player);
             this.newDynamicEnchantments = CombinedEnchantmentModifiers.of().mutable();
@@ -33,11 +41,21 @@ public class DynamicEnchantmentEvent {
         public CombinedEnchantmentModifiers.Mutable getDynamicEnchantments() {
             return this.newDynamicEnchantments;
         }
+
+        public interface Callback {
+            void post(Add event);
+        }
     }
 
     public static class Modify extends PlayerEvent {
 
         private final CombinedEnchantmentModifiers.Mutable dynamicEnchantments;
+
+        public static final Event<Callback> EVENT = EventFactory.createArrayBacked(Callback.class, callbacks -> event -> {
+            for (Callback callback : callbacks) {
+                callback.post(event);
+            }
+        });
 
         public Modify(Player player, CombinedEnchantmentModifiers dynamicEnchantments) {
             super(player);
@@ -46,6 +64,10 @@ public class DynamicEnchantmentEvent {
 
         public CombinedEnchantmentModifiers.Mutable getDynamicEnchantments() {
             return this.dynamicEnchantments;
+        }
+
+        public interface Callback {
+            void post(Modify event);
         }
     }
 }

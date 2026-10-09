@@ -52,9 +52,10 @@ public class TileAltarRenderer implements BlockEntityRenderer<TileAltar> {
         });
     }
 
-    @Override
-    public AABB getRenderBoundingBox(TileAltar blockEntity) {
-        return BlockEntityRenderer.super.getRenderBoundingBox(blockEntity)
-                .inflate(4, 1, 4);
-    }
+    // TODO?
+//    @Override
+//    public AABB getRenderBoundingBox(TileAltar blockEntity) {
+//        return BlockEntityRenderer.super.getRenderBoundingBox(blockEntity)
+//                .inflate(4, 1, 4);
+//    }
 }

@@ -53,7 +53,7 @@ public record PlayerNearbyCondition(double distance, boolean failIfNoPlayer) imp
 
     @Override
     public LootItemConditionType getType() {
-        return LootAS.PLAYER_NEARBY_CONDITION.get();
+        return LootAS.PLAYER_NEARBY_CONDITION;
     }
 
     public static LootItemCondition.Builder nearby(double distance, boolean failIfNoPlayer) {

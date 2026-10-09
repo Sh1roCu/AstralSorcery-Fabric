@@ -20,7 +20,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.List;
 import java.util.function.Function;
@@ -52,7 +51,7 @@ public abstract class ArtifactCondition {
     public abstract DeferredType<?> getType();
 
     public Type<?> unwrapType() {
-        return this.getType().holder().get();
+        return this.getType().type();
     }
 
     public abstract List<Vector3> isFulfilled(RandomSource rand, ServerLevel sLevel, ItemEntityArtifact artifactEntity);
@@ -61,10 +60,14 @@ public abstract class ArtifactCondition {
 
     public abstract Component getDisplayHint(RandomSource rand, boolean wasSuccessful);
 
-    public record Type<T extends ArtifactCondition>(MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {}
+    public record Type<T extends ArtifactCondition>(MapCodec<T> codec,
+                                                    StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
+    }
 
-    public record DeferredType<T extends ArtifactCondition>(DeferredHolder<ArtifactCondition.Type<?>, ArtifactCondition.Type<T>> holder) {}
+    public record DeferredType<T extends ArtifactCondition>(ArtifactCondition.Type<T> type) {
+    }
 
     @FunctionalInterface
-    public interface Provider extends Function<ResourceLocation, ArtifactCondition> {}
+    public interface Provider extends Function<ResourceLocation, ArtifactCondition> {
+    }
 }

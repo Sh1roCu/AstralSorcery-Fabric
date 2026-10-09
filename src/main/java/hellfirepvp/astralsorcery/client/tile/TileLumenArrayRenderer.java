@@ -8,36 +8,24 @@
 
 package hellfirepvp.astralsorcery.client.tile;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
-import hellfirepvp.astralsorcery.client.ClientProxy;
 import hellfirepvp.astralsorcery.client.resource.UVFrame;
 import hellfirepvp.astralsorcery.client.util.RenderSpriteUtil;
-import hellfirepvp.astralsorcery.client.util.RenderUtil;
 import hellfirepvp.astralsorcery.client.util.RenderingDrawUtil;
 import hellfirepvp.astralsorcery.common.tile.TileLumenArray;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.tank.FluidTankView;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -50,14 +38,15 @@ public class TileLumenArrayRenderer implements BlockEntityRenderer<TileLumenArra
 
     private final ItemRenderer itemRenderer;
 
-    public TileLumenArrayRenderer(ItemRenderer itemRenderer)  {
+    public TileLumenArrayRenderer(ItemRenderer itemRenderer) {
         this.itemRenderer = itemRenderer;
     }
 
-    @Override
-    public AABB getRenderBoundingBox(TileLumenArray blockEntity) {
-        return BlockEntityRenderer.super.getRenderBoundingBox(blockEntity).inflate(1, 2, 1);
-    }
+    // TODO?
+//    @Override
+//    public AABB getRenderBoundingBox(TileLumenArray blockEntity) {
+//        return BlockEntityRenderer.super.getRenderBoundingBox(blockEntity).inflate(1, 2, 1);
+//    }
 
     @Override
     public void render(TileLumenArray lumenArray, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
@@ -81,8 +70,7 @@ public class TileLumenArrayRenderer implements BlockEntityRenderer<TileLumenArra
         FluidStack contained = tank.getFluidInTank(0);
         if (contained.isEmpty()) return;
 
-        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(contained.getFluidType());
-        ColorWrapper color = ColorWrapper.transparent(ext.getTintColor(contained));
+        ColorWrapper color = ColorWrapper.transparent(FluidVariantRendering.getColor(contained.getFluidVariant()));
         color = color.copyWithAlpha(204);
         RenderType rendertype = RenderType.entityTranslucent(InventoryMenu.BLOCK_ATLAS);
         TextureAtlasSprite tas = RenderSpriteUtil.getTexture(contained);

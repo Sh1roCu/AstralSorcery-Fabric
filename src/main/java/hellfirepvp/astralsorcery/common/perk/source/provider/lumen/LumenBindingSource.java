@@ -27,7 +27,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import java.util.*;
 
@@ -57,7 +57,7 @@ public class LumenBindingSource implements ModifierSource, AttributeModifierProv
         this.itemStack = itemStack;
     }
 
-    void snapshotModifiers(Player player, LogicalSide side, boolean ignoreRequirements) {
+    void snapshotModifiers(Player player, EnvType side, boolean ignoreRequirements) {
         this.modifierSnapshot.clear();
 
         if (this.itemStack.isEmpty()) return;
@@ -90,27 +90,27 @@ public class LumenBindingSource implements ModifierSource, AttributeModifierProv
     }
 
     @Override
-    public Collection<PerkAttributeModifier> getModifiers(Player player, LogicalSide side, boolean ignoreRequirements) {
+    public Collection<PerkAttributeModifier> getModifiers(Player player, EnvType side, boolean ignoreRequirements) {
         if (this.itemStack.isEmpty()) return Collections.emptyList();
         return Collections.unmodifiableList(this.modifierSnapshot);
     }
 
     @Override
-    public boolean canApplySource(Player player, LogicalSide dist) {
+    public boolean canApplySource(Player player, EnvType dist) {
         return true;
     }
 
     @Override
-    public void onRemove(Player player, LogicalSide dist) {
+    public void onRemove(Player player, EnvType dist) {
     }
 
     @Override
-    public void onApply(Player player, LogicalSide dist) {
+    public void onApply(Player player, EnvType dist) {
     }
 
     @Override
     public ModifierSourceProvider<?> getSourceProvider() {
-        return PerksAS.Sources.LUMEN_BINDING.get();
+        return PerksAS.Sources.LUMEN_BINDING;
     }
 
     @Override

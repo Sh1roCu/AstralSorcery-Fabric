@@ -8,10 +8,12 @@
 
 package hellfirepvp.astralsorcery.client.helper;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.client.ClientHooks;
 import com.mojang.datafixers.util.Either;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.tile.base.TileEntityLumenDisplay;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -23,9 +25,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.neoforged.neoforge.client.ClientHooks;
-import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
-import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 import java.util.List;
 
@@ -41,8 +40,8 @@ public class RenderLumenDisplayOverlay {
     public static final ResourceLocation LUMEN_LAYER_ID = AstralSorcery.key("lumen_display_overlay");
     public static final LayerRenderer RENDERER = new LayerRenderer();
 
-    public static void registerLayers(RegisterGuiLayersEvent event) {
-        event.registerBelow(VanillaGuiLayers.CROSSHAIR, LUMEN_LAYER_ID, RENDERER);
+    public static void registerLayers() {
+        HudRenderCallback.EVENT.register(/*VanillaGuiLayers.CROSSHAIR,*/ LUMEN_LAYER_ID, RENDERER::render);
     }
 
     public static class LayerRenderer implements LayeredDraw.Layer {

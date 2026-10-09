@@ -25,6 +25,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import java.util.function.Supplier;
+
 /**
  * This class is part of the Astral Sorcery Mod
  * The complete source code for this mod can be found on GitHub.
@@ -44,10 +46,10 @@ public class StarlightFocusCrystalBlock extends BaseTickTileBlock<TileStarlightF
     private final Type type;
 
     public StarlightFocusCrystalBlock(Properties properties, Type type) {
-        this(properties, type, TileEntitiesAS.STARLIGHT_FOCUS_CRYSTAL);
+        this(properties, type, () -> TileEntitiesAS.STARLIGHT_FOCUS_CRYSTAL);
     }
 
-    protected StarlightFocusCrystalBlock(Properties properties, Type type, TileRegistryObject<TileStarlightFocusCrystal> tileType) {
+    protected StarlightFocusCrystalBlock(Properties properties, Type type, Supplier<TileRegistryObject<TileStarlightFocusCrystal>> tileType) {
         super(properties, tileType);
         this.type = type;
     }

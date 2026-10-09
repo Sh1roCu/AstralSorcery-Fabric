@@ -23,8 +23,8 @@ import hellfirepvp.astralsorcery.common.research.tome.TomePageRecipe;
 import hellfirepvp.astralsorcery.common.research.tome.TomePageStructure;
 import hellfirepvp.astralsorcery.common.research.tome.TomePageText;
 import hellfirepvp.astralsorcery.datagen.data.GeneratedRecipeBuffer;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.data.PackOutput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -43,7 +43,7 @@ import java.util.function.Consumer;
  */
 public class AstralResearchNodeProvider extends ResearchNodeDataProvider {
 
-    public AstralResearchNodeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
+    public AstralResearchNodeProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registries) {
         super(output, registries);
     }
 
@@ -262,7 +262,7 @@ public class AstralResearchNodeProvider extends ResearchNodeDataProvider {
                 .addLookupIndexItem(ItemsAS.CELESTIAL_CRYSTAL, ItemsAS.BLOCK_CELESTIAL_CRYSTAL_CLUSTER)
                 .build(registrar);
 
-        ItemStack knowledgeShare = ItemsAS.KNOWLEDGE_SHARE.toStack();
+        ItemStack knowledgeShare = ItemsAS.KNOWLEDGE_SHARE.getDefaultInstance();
         knowledgeShare.set(DataComponentsAS.STORED_PLAYER_PROGRESS, StoredPlayerProgressComponent.CREATIVE);
         ResearchNode knowledgeSharingScroll = ResearchNodeBuilder.create(AstralSorcery.key("knowledge_sharing_scroll"), ResearchTier.ILLUMINATION, 0, -5)
                 .addDisplayItem(knowledgeShare)
@@ -307,7 +307,7 @@ public class AstralResearchNodeProvider extends ResearchNodeDataProvider {
                 .addPage(new TomePageText(text("artifacts", 1)))
                 .addPage(new TomePageText(text("artifacts", 2)))
                 .addCondition(new ConditionResearchFlag(ResearchFlag.HAS_OBTAINED_ARTIFACT))
-                .addPage(TomePageRecipe.of(RecipeTypesAS.ALTAR_CRAFTING_TYPE.holder(), AstralSorcery.key("altar/akashic_singularity_with_generated_artifact_loot")))
+                .addPage(TomePageRecipe.of(RecipeTypesAS.ALTAR_CRAFTING_TYPE.getKey(), AstralSorcery.key("altar/akashic_singularity_with_generated_artifact_loot")))
                 .addLookupIndexItem(ItemsAS.ARTIFACT, ItemsAS.ARTIFACT_SHARD)
                 .build(registrar);
 
@@ -607,7 +607,7 @@ public class AstralResearchNodeProvider extends ResearchNodeDataProvider {
                 .addPage(new TomePageText(text("resplendent_prism", 0)))
                 .addPage(GeneratedRecipeBuffer.findRecipe(RecipeTypesAS.ALTAR_CRAFTING_TYPE, ItemsAS.ENCHANTMENT_AMULET))
                 .addPage(new TomePageText(text("resplendent_prism", 1)))
-                .addPage(TomePageRecipe.of(RecipeTypesAS.ALTAR_CRAFTING_TYPE.holder(), AstralSorcery.key("altar/enchantment_amulet_reroll")))
+                .addPage(TomePageRecipe.of(RecipeTypesAS.ALTAR_CRAFTING_TYPE.getKey(), AstralSorcery.key("altar/enchantment_amulet_reroll")))
                 .addLookupIndexItem(ItemsAS.ENCHANTMENT_AMULET)
                 .build(registrar);
 
@@ -655,9 +655,9 @@ public class AstralResearchNodeProvider extends ResearchNodeDataProvider {
                 .addPage(new TomePageText(text("artifact_enhancements", 0)))
                 .addPage(new TomePageText(text("artifact_enhancements", 1)))
                 .addCondition(new ConditionResearchFlag(ResearchFlag.HAS_OBTAINED_ARTIFACT))
-                .addPage(TomePageRecipe.of(RecipeTypesAS.ALTAR_CRAFTING_TYPE.holder(), AstralSorcery.key("altar/enchantment_amulet_artifact_enhance")))
-                .addPage(TomePageRecipe.of(RecipeTypesAS.ALTAR_CRAFTING_TYPE.holder(), AstralSorcery.key("altar/enchanted_item_artifact_enhance")))
-                .addPage(TomePageRecipe.of(RecipeTypesAS.ALTAR_CRAFTING_TYPE.holder(), AstralSorcery.key("altar/dynamism_gem_artifact_enhance")))
+                .addPage(TomePageRecipe.of(RecipeTypesAS.ALTAR_CRAFTING_TYPE.getKey(), AstralSorcery.key("altar/enchantment_amulet_artifact_enhance")))
+                .addPage(TomePageRecipe.of(RecipeTypesAS.ALTAR_CRAFTING_TYPE.getKey(), AstralSorcery.key("altar/enchanted_item_artifact_enhance")))
+                .addPage(TomePageRecipe.of(RecipeTypesAS.ALTAR_CRAFTING_TYPE.getKey(), AstralSorcery.key("altar/dynamism_gem_artifact_enhance")))
                 .build(registrar);
     }
 

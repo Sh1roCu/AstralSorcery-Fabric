@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.tile;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.network.codec.NeoForgeStreamCodecs;
 import com.mojang.datafixers.Products;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -18,10 +19,10 @@ import hellfirepvp.astralsorcery.client.sound.PlayableSoundInstance;
 import hellfirepvp.astralsorcery.client.util.SoundUtil;
 import hellfirepvp.astralsorcery.common.block.tile.AltarBlock;
 import hellfirepvp.astralsorcery.common.component.AttunedConstellationComponent;
-import hellfirepvp.astralsorcery.common.component.ConstellationPaperComponent;
 import hellfirepvp.astralsorcery.common.component.StoredLumenComponent;
 import hellfirepvp.astralsorcery.common.constellation.BaseConstellation;
 import hellfirepvp.astralsorcery.common.container.*;
+import hellfirepvp.astralsorcery.common.event.RecipeEvent;
 import hellfirepvp.astralsorcery.common.lib.*;
 import hellfirepvp.astralsorcery.common.lib.constants.TagsAS;
 import hellfirepvp.astralsorcery.common.lumen.Lumen;
@@ -31,7 +32,6 @@ import hellfirepvp.astralsorcery.common.recipe.altar.AltarCraftingInput;
 import hellfirepvp.astralsorcery.common.recipe.altar.AltarRecipe;
 import hellfirepvp.astralsorcery.common.research.ResearchTier;
 import hellfirepvp.astralsorcery.common.sound.CategorizedSoundEvent;
-import hellfirepvp.astralsorcery.common.starlight.api.provider.TransmissionNodeProvider;
 import hellfirepvp.astralsorcery.common.starlight.transmission.StarlightTransmissionPacket;
 import hellfirepvp.astralsorcery.common.tile.base.TileEntityLumenDisplay;
 import hellfirepvp.astralsorcery.common.tile.base.TileEntityNetwork;
@@ -39,20 +39,24 @@ import hellfirepvp.astralsorcery.common.tile.network.ForwardingStarlightReceiver
 import hellfirepvp.astralsorcery.common.tile.network.provider.ForwardingStarlightReceiverNodeProvider;
 import hellfirepvp.astralsorcery.common.util.ClientObject;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
+import hellfirepvp.astralsorcery.common.util.RecipeFinder;
 import hellfirepvp.astralsorcery.common.util.ServerSoundHelper;
 import hellfirepvp.astralsorcery.common.util.codec.CodecProducts;
 import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
-import hellfirepvp.astralsorcery.common.util.RecipeFinder;
 import hellfirepvp.astralsorcery.common.util.codec.SetCodec;
 import hellfirepvp.astralsorcery.common.util.data.MenuTypeRegistryObject;
 import hellfirepvp.astralsorcery.common.util.data.ObserverRegistryObject;
 import hellfirepvp.astralsorcery.common.util.data.TileRegistryObject;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import hellfirepvp.astralsorcery.common.util.inventory.*;
+import hellfirepvp.astralsorcery.common.util.inventory.FilteredInventoryViewFactory;
+import hellfirepvp.astralsorcery.common.util.inventory.InventoryStackList;
+import hellfirepvp.astralsorcery.common.util.inventory.InventoryView;
 import hellfirepvp.astralsorcery.common.util.tooltip.StoredLumenDisplayTooltip;
 import hellfirepvp.observerlib.api.ObserverProvider;
 import hellfirepvp.observerlib.api.structure.MatchableStructure;
 import hellfirepvp.observerlib.common.change.ObserverProviderStructure;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
@@ -69,10 +73,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.codec.NeoForgeStreamCodecs;
-import net.neoforged.neoforge.registries.DeferredHolder;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -153,6 +153,7 @@ public class TileAltar extends TileEntityNetwork<ForwardingStarlightReceiverNode
             if (activeRecipe.isFinished(level) && activeRecipe.consumeItemInputs(this.getTileData(), level, this.getBlockPos(), true)) {
                 recipe.createOutput(this.createInput(level, activeRecipe.getPlayerUUID()), level.registryAccess());
                 activeRecipe.consumeItemInputs(this.getTileData(), level, this.getBlockPos(), false);
+                RecipeEvent.Altar.End.EVENT.invoker().post(new RecipeEvent.Altar.End(recipe, activeRecipe));
 
                 if (recipe.getBaseFocusShatterChance() > 0F &&
                         recipe.getFocusConstellation().isPresent() &&
@@ -180,14 +181,18 @@ public class TileAltar extends TileEntityNetwork<ForwardingStarlightReceiverNode
         }
 
         ActiveAltarRecipe activeRecipe = ActiveAltarRecipe.of(recipe, playerUUID, Direction.NORTH);
+        var start = new RecipeEvent.Altar.Start(recipe, activeRecipe);
+        RecipeEvent.Altar.Start.EVENT.invoker().post(start);
+        if (start.isCanceled()) return;
+
         this.getTileData().setActiveRecipe(activeRecipe);
         this.getTileData().markForUpdate();
 
         ServerSoundHelper.playSoundAround(SoundsAS.ALTAR_CRAFT_START, level, Vector3.atCenter(this), 0.6F, 1F);
     }
 
-    public Optional<RecipeHolder<AltarRecipe>> findMatchingRecipe(Level level) {
-        AltarCraftingInput input = this.createInput(level, null);
+    public Optional<RecipeHolder<AltarRecipe>> findMatchingRecipe(Level level, @Nullable UUID playerUUID) {
+        AltarCraftingInput input = this.createInput(level, playerUUID);
         return RecipeFinder.of(level).findAltarRecipe(this.getLevel(), input);
     }
 
@@ -211,7 +216,7 @@ public class TileAltar extends TileEntityNetwork<ForwardingStarlightReceiverNode
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void clientTick(Level level) {
         super.clientTick(level);
 
@@ -228,13 +233,13 @@ public class TileAltar extends TileEntityNetwork<ForwardingStarlightReceiverNode
         });
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void playActiveSparkle(Level level) {
         if (!this.hasStructure()) return;
         if (this.getRequiredObserver() == null || this.getRequiredObserver() == ObserversAS.STRUCTURE_EMPTY) return;
         if (this.getTileData().getActiveRecipe().isPresent()) return;
 
-        ObserverProvider<?> provider = ObserversAS.STRUCTURE_ALTAR_T4.observer().get();
+        ObserverProvider<?> provider = ObserversAS.STRUCTURE_ALTAR_T4.observer();
         if (!(provider instanceof ObserverProviderStructure providerStructure)) return;
         MatchableStructure structure = providerStructure.getStructure();
 
@@ -261,7 +266,7 @@ public class TileAltar extends TileEntityNetwork<ForwardingStarlightReceiverNode
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void playCraftingSound(ActiveAltarRecipe activeRecipe, Level level) {
         if (SoundUtil.getSoundVolume(SoundSource.BLOCKS) <= 0) return;
 
@@ -360,7 +365,7 @@ public class TileAltar extends TileEntityNetwork<ForwardingStarlightReceiverNode
     }
 
     @Override
-    public DeferredHolder<TransmissionNodeProvider<?>, ForwardingStarlightReceiverNodeProvider> getNodeProvider() {
+    public ForwardingStarlightReceiverNodeProvider getNodeProvider() {
         return StarlightNetworkNodesAS.FORWARDING_RECEIVER_NODE;
     }
 
@@ -502,30 +507,30 @@ public class TileAltar extends TileEntityNetwork<ForwardingStarlightReceiverNode
 
     public enum AltarType implements StringRepresentable {
 
-        ILLUMINATION(ResearchTier.ILLUMINATION, ObserversAS.STRUCTURE_EMPTY, BlocksAS.ALTAR_ILLUMINATION, Shapes.block(),
-                type(MenuTypesAS.ALTAR_ILLUMINATION, ContainerAltarIllumination::new, ContainerAltarIllumination::new)),
-        RESONANCE(ResearchTier.RESONANCE, ObserversAS.STRUCTURE_ALTAR_T2, BlocksAS.ALTAR_RESONANCE,
+        ILLUMINATION(ResearchTier.ILLUMINATION, ObserversAS.STRUCTURE_EMPTY, () -> BlocksAS.ALTAR_ILLUMINATION, Shapes.block(),
+                type(() -> MenuTypesAS.ALTAR_ILLUMINATION, ContainerAltarIllumination::new)),
+        RESONANCE(ResearchTier.RESONANCE, ObserversAS.STRUCTURE_ALTAR_T2, () -> BlocksAS.ALTAR_RESONANCE,
                 Shapes.box(-1F / 16F, 0F, -1F / 16F, 17F / 16F, 1F, 17F / 16F),
-                type(MenuTypesAS.ALTAR_RESONANCE, ContainerAltarResonance::new, ContainerAltarResonance::new)),
-        LUMINANCE(ResearchTier.LUMINANCE, ObserversAS.STRUCTURE_ALTAR_T3, BlocksAS.ALTAR_LUMINANCE,
+                type(() -> MenuTypesAS.ALTAR_RESONANCE, ContainerAltarResonance::new)),
+        LUMINANCE(ResearchTier.LUMINANCE, ObserversAS.STRUCTURE_ALTAR_T3, () -> BlocksAS.ALTAR_LUMINANCE,
                 Shapes.box(-2F / 16F, 0F, -2F / 16F, 18F / 16F, 17F / 16F, 18F / 16F),
-                type(MenuTypesAS.ALTAR_LUMINANCE, ContainerAltarLuminance::new, ContainerAltarLuminance::new)),
-        RADIANCE(ResearchTier.RADIANCE, ObserversAS.STRUCTURE_ALTAR_T4, BlocksAS.ALTAR_RADIANCE,
+                type(() -> MenuTypesAS.ALTAR_LUMINANCE, ContainerAltarLuminance::new)),
+        RADIANCE(ResearchTier.RADIANCE, ObserversAS.STRUCTURE_ALTAR_T4, () -> BlocksAS.ALTAR_RADIANCE,
                 Shapes.box(-2F / 16F, 0F, -2F / 16F, 18F / 16F, 20F / 16F, 18F / 16F),
-                type(MenuTypesAS.ALTAR_RADIANCE, ContainerAltarRadiance::new, ContainerAltarRadiance::new));
+                type(() -> MenuTypesAS.ALTAR_RADIANCE, ContainerAltarRadiance::new));
 
         public static final Codec<AltarType> CODEC = StringRepresentable.fromEnum(AltarType::values);
         public static final StreamCodec<FriendlyByteBuf, AltarType> STREAM_CODEC = NeoForgeStreamCodecs.enumCodec(AltarType.class);
 
         private final ResearchTier requiredTier;
         private final ObserverRegistryObject requiredStructure;
-        private final Supplier<? extends ItemLike> altarItemSupplier;
+        private final Supplier<ItemLike> altarItemSupplier;
         private final VoxelShape shape;
         private final ContainerAltar.Type containerType;
 
         AltarType(ResearchTier requiredTier,
                   ObserverRegistryObject requiredStructure,
-                  Supplier<? extends ItemLike> altarItemSupplier,
+                  Supplier<ItemLike> altarItemSupplier,
                   VoxelShape shape,
                   ContainerAltar.Type containerType) {
             this.requiredTier = requiredTier;
@@ -535,10 +540,9 @@ public class TileAltar extends TileEntityNetwork<ForwardingStarlightReceiverNode
             this.containerType = containerType;
         }
 
-        private static ContainerAltar.Type type(MenuTypeRegistryObject<? extends ContainerAltar> menuType,
-                                                ContainerAltar.Provider provider,
-                                                ContainerAltar.ClientProvider clientProvider) {
-            return new ContainerAltar.Type(menuType, provider, clientProvider);
+        private static ContainerAltar.Type type(Supplier<MenuTypeRegistryObject<? extends ContainerAltar>> menuType,
+                                                ContainerAltar.Provider provider) {
+            return new ContainerAltar.Type(menuType, provider);
         }
 
         @Override

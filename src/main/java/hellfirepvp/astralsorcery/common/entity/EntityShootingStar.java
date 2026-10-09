@@ -8,10 +8,11 @@
 
 package hellfirepvp.astralsorcery.common.entity;
 
+import cn.sh1rocu.astralsorcery.util.EntityUtil;
+import cn.sh1rocu.astralsorcery.util.EventHooks;
 import hellfirepvp.astralsorcery.client.effect.EffectHelper;
 import hellfirepvp.astralsorcery.client.effect.function.*;
 import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
-import hellfirepvp.astralsorcery.common.visual.type.ShootingStarExplosion;
 import hellfirepvp.astralsorcery.common.lib.EntitiesAS;
 import hellfirepvp.astralsorcery.common.lib.LootTablesAS;
 import hellfirepvp.astralsorcery.common.util.ChunkUtil;
@@ -20,6 +21,9 @@ import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.level.DayTimeHelper;
+import hellfirepvp.astralsorcery.common.visual.type.ShootingStarExplosion;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -44,9 +48,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.event.EventHooks;
 import org.joml.Vector3f;
 
 /**
@@ -82,7 +83,7 @@ public class EntityShootingStar extends ThrowableProjectile {
     }
 
     public static EntityShootingStar create(Level level, Vector3 pos, Vector3 shot) {
-        EntityShootingStar shootingStar = EntitiesAS.SHOOTING_STAR.get().create(level);
+        EntityShootingStar shootingStar = EntitiesAS.SHOOTING_STAR.create(level);
         shootingStar.setPos(pos.toVector3d());
         shootingStar.pendingRemoval = false;
         shootingStar.entityData.set(SHOOT_VEC, shot.toVector3d().toVector3f());
@@ -128,7 +129,7 @@ public class EntityShootingStar extends ThrowableProjectile {
 
             this.entityData.set(LAST_UPDATE, level.getGameTime());
 
-            if (this.isInFluidType()) {
+            if (EntityUtil.isInFluid(this)) {
                 BlockPos hit = this.blockPosition();
                 while (level.isInWorldBounds(hit) && !level.getFluidState(hit).isEmpty()) {
                     hit = hit.above();
@@ -152,7 +153,7 @@ public class EntityShootingStar extends ThrowableProjectile {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     protected void spawnEffects() {
         Vector3 dir = new Vector3(this.entityData.get(SHOOT_VEC));
         Vector3 adjustedDir = this.getAdjustedMovement();
@@ -214,7 +215,7 @@ public class EntityShootingStar extends ThrowableProjectile {
             Vector3 offset = adjustedDir.copy().perpendicular().normalize();
             for (int i = 0; i < 2; i++) {
                 Vector3 motion = offset.copy().rotate(random.nextFloat() * Mth.PI * 2, adjustedDir).normalize()
-                                .multiply(0.8F + random.nextFloat() * 0.4F);
+                        .multiply(0.8F + random.nextFloat() * 0.4F);
                 EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(new Vector3(this))
                         .color(colorFn)

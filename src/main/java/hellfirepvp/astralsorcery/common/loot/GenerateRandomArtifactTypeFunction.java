@@ -52,6 +52,6 @@ public class GenerateRandomArtifactTypeFunction extends LootItemConditionalFunct
 
     @Override
     public LootItemFunctionType<? extends LootItemConditionalFunction> getType() {
-        return LootAS.GENERATE_RANDOM_ARTIFACT_TYPE_FUNCTION.get();
+        return LootAS.GENERATE_RANDOM_ARTIFACT_TYPE_FUNCTION;
     }
 }

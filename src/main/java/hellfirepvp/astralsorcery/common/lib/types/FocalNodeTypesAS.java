@@ -9,11 +9,12 @@
 package hellfirepvp.astralsorcery.common.lib.types;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
-import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.focal.node.BasicFocalPointNode;
 import hellfirepvp.astralsorcery.common.focal.node.FocalPointNode;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
+import net.minecraft.core.Registry;
+
+import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -24,10 +25,14 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  */
 public class FocalNodeTypesAS {
 
-    public static final DeferredRegister<FocalPointNode.Type<?>> FOCAL_NODE_REGISTER =
-            DeferredRegister.create(RegistriesAS.KEY_FOCAL_NODE_TYPES, AstralSorcery.MODID);
+    public static void init() {
 
-    public static final DeferredHolder<FocalPointNode.Type<?>, FocalPointNode.Type<BasicFocalPointNode>> BASIC =
-            FOCAL_NODE_REGISTER.register("basic", () -> new FocalPointNode.Type<>(BasicFocalPointNode.CODEC, BasicFocalPointNode.STREAM_CODEC));
+    }
 
+    public static final FocalPointNode.Type<BasicFocalPointNode> BASIC =
+            register("basic", () -> new FocalPointNode.Type<>(BasicFocalPointNode.CODEC, BasicFocalPointNode.STREAM_CODEC));
+
+    private static <T extends FocalPointNode> FocalPointNode.Type<T> register(String name, Supplier<FocalPointNode.Type<T>> supplier) {
+        return Registry.register(RegistriesAS.REGISTRY_FOCAL_NODE_TYPES, AstralSorcery.key(name), supplier.get());
+    }
 }

@@ -12,21 +12,15 @@ import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.ConstellationsAS;
 import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
 import hellfirepvp.astralsorcery.common.recipe.builder.FocalTransmutationRecipeBuilder;
-import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 
-import java.util.concurrent.CompletableFuture;
-
-import static hellfirepvp.astralsorcery.common.util.TimeUtil.*;
+import static hellfirepvp.astralsorcery.common.util.TimeUtil.minutes;
+import static hellfirepvp.astralsorcery.common.util.TimeUtil.seconds;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -35,17 +29,13 @@ import static hellfirepvp.astralsorcery.common.util.TimeUtil.*;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class FocalTransmutationRecipeProvider extends RecipeProvider {
-
-    private FocalTransmutationRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-        super(output, registries);
-    }
+public class FocalTransmutationRecipeProvider {
 
     public static void registerRecipes(RecipeOutput recipeOutput) {
         FocalTransmutationRecipeBuilder.builder()
                 .duration(seconds(20))
                 .color(ColorsAS.STARMETAL)
-                .outputs(BlocksAS.STARMETAL_ORE.get(), 1)
+                .outputs(BlocksAS.STARMETAL_ORE, 1)
                 .input(BlockPredicate.matchesTag(BlockTags.IRON_ORES))
                 .inputDisplay(Blocks.IRON_ORE)
                 .save(recipeOutput);
@@ -53,51 +43,44 @@ public class FocalTransmutationRecipeProvider extends RecipeProvider {
         FocalTransmutationRecipeBuilder.builder()
                 .duration(seconds(30))
                 .color(ColorsAS.LUMEN_AEVITAS)
-                .outputs(BlocksAS.HYACINTH.get(), 1)
+                .outputs(BlocksAS.HYACINTH, 1)
                 .input(BlockPredicate.matchesTag(BlockTags.SMALL_FLOWERS))
                 .inputDisplay(ItemTags.SMALL_FLOWERS)
-                .requiresConstellation(ConstellationsAS.AEVITAS.get())
+                .requiresConstellation(ConstellationsAS.AEVITAS)
                 .save(recipeOutput);
         FocalTransmutationRecipeBuilder.builder()
                 .duration(seconds(30))
                 .color(ColorsAS.LUMEN_VICIO)
-                .outputs(BlocksAS.IRIS.get(), 1)
+                .outputs(BlocksAS.IRIS, 1)
                 .input(BlockPredicate.matchesTag(BlockTags.SMALL_FLOWERS))
                 .inputDisplay(ItemTags.SMALL_FLOWERS)
-                .requiresConstellation(ConstellationsAS.VICIO.get())
+                .requiresConstellation(ConstellationsAS.VICIO)
                 .save(recipeOutput);
         FocalTransmutationRecipeBuilder.builder()
                 .duration(seconds(30))
                 .color(ColorsAS.LUMEN_ARMARA)
-                .outputs(BlocksAS.ORCHID.get(), 1)
+                .outputs(BlocksAS.ORCHID, 1)
                 .input(BlockPredicate.matchesTag(BlockTags.SMALL_FLOWERS))
                 .inputDisplay(ItemTags.SMALL_FLOWERS)
-                .requiresConstellation(ConstellationsAS.ARMARA.get())
+                .requiresConstellation(ConstellationsAS.ARMARA)
                 .save(recipeOutput);
         FocalTransmutationRecipeBuilder.builder()
                 .duration(seconds(30))
                 .color(ColorsAS.LUMEN_EVORSIO)
-                .outputs(BlocksAS.PROTEA.get(), 1)
+                .outputs(BlocksAS.PROTEA, 1)
                 .input(BlockPredicate.matchesTag(BlockTags.SMALL_FLOWERS))
                 .inputDisplay(ItemTags.SMALL_FLOWERS)
-                .requiresConstellation(ConstellationsAS.EVORSIO.get())
+                .requiresConstellation(ConstellationsAS.EVORSIO)
                 .save(recipeOutput);
         FocalTransmutationRecipeBuilder.builder()
                 .duration(seconds(30))
                 .color(ColorsAS.LUMEN_DISCIDIA)
-                .outputs(BlocksAS.THISTLE.get(), 1)
+                .outputs(BlocksAS.THISTLE, 1)
                 .input(BlockPredicate.matchesTag(BlockTags.SMALL_FLOWERS))
                 .inputDisplay(ItemTags.SMALL_FLOWERS)
-                .requiresConstellation(ConstellationsAS.DISCIDIA.get())
+                .requiresConstellation(ConstellationsAS.DISCIDIA)
                 .save(recipeOutput);
 
-        FocalTransmutationRecipeBuilder.builder()
-                .duration(seconds(40))
-                .color(ColorsAS.DYE_LIGHT_GRAY)
-                .outputs(Blocks.CLAY, 1)
-                .inputDisplay(Items.SAND)
-                .input(BlockPredicate.matchesTag(BlockTags.SAND))
-                .save(recipeOutput);
         FocalTransmutationRecipeBuilder.builder()
                 .duration(seconds(40))
                 .color(ColorsAS.DYE_LIGHT_BLUE)
@@ -106,6 +89,14 @@ public class FocalTransmutationRecipeProvider extends RecipeProvider {
                 .input(BlockPredicate.matchesBlocks(Blocks.GLOWSTONE))
                 .save(recipeOutput);
 
+        FocalTransmutationRecipeBuilder.builder()
+                .duration(seconds(40))
+                .color(ColorsAS.DYE_LIGHT_GRAY)
+                .outputs(Blocks.CLAY, 1)
+                .inputDisplay(Items.SAND)
+                .input(BlockPredicate.matchesTag(BlockTags.SAND))
+                .requiresFocusedStarlight()
+                .save(recipeOutput);
         FocalTransmutationRecipeBuilder.builder()
                 .duration(seconds(20))
                 .color(ColorsAS.DYE_YELLOW)

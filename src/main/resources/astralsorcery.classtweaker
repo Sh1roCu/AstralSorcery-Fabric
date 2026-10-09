@@ -1,0 +1,44 @@
+classTweaker v2 named
+
+accessible field net/minecraft/client/renderer/texture/SpriteContents animatedTexture Lnet/minecraft/client/renderer/texture/SpriteContents$AnimatedTexture;
+accessible field net/minecraft/client/renderer/texture/SpriteContents originalImage Lcom/mojang/blaze3d/platform/NativeImage;
+
+accessible method net/minecraft/client/renderer/texture/SpriteContents$AnimatedTexture getFrameX (I)I
+accessible method net/minecraft/client/renderer/texture/SpriteContents$AnimatedTexture getFrameY (I)I
+
+accessible field net/minecraft/client/renderer/LevelRenderer destroyingBlocks Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;
+accessible field net/minecraft/client/renderer/LevelRenderer destructionProgress Lit/unimi/dsi/fastutil/longs/Long2ObjectMap;
+accessible field net/minecraft/client/renderer/LevelRenderer ticks I
+
+accessible field net/minecraft/client/renderer/RenderStateShard setupState Ljava/lang/Runnable;
+accessible field net/minecraft/client/renderer/RenderStateShard clearState Ljava/lang/Runnable;
+
+accessible field net/minecraft/world/item/ServerItemCooldowns player Lnet/minecraft/server/level/ServerPlayer;
+
+accessible method net/minecraft/world/inventory/AbstractContainerMenu addSlot (Lnet/minecraft/world/inventory/Slot;)Lnet/minecraft/world/inventory/Slot;
+
+mutable field net/minecraft/world/entity/item/ItemEntity bobOffs F
+accessible field net/minecraft/world/entity/item/ItemEntity age I
+accessible field net/minecraft/world/entity/item/ItemEntity pickupDelay I
+
+accessible field net/minecraft/world/entity/LivingEntity DATA_HEALTH_ID Lnet/minecraft/network/syncher/EntityDataAccessor;
+
+accessible field net/minecraft/world/damagesource/CombatTracker inCombat Z
+
+accessible field net/minecraft/world/effect/MobEffectInstance amplifier I
+accessible field net/minecraft/world/effect/MobEffectInstance duration I
+
+accessible field net/minecraft/world/level/block/SaplingBlock treeGrower Lnet/minecraft/world/level/block/grower/TreeGrower;
+
+accessible method net/minecraft/world/level/block/Block popExperience (Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;I)V
+
+accessible field net/minecraft/world/level/block/StemBlock fruit Lnet/minecraft/resources/ResourceKey;
+accessible field net/minecraft/world/level/block/AttachedStemBlock fruit Lnet/minecraft/resources/ResourceKey;
+
+accessible method net/minecraft/world/damagesource/DamageSource <init> (Lnet/minecraft/core/Holder;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;)V
+
+transitive-extend-enum net/minecraft/ChatFormatting ASTRALSORCERY_RELIC
+transitive-extend-enum net/minecraft/ChatFormatting ASTRALSORCERY_ARTIFACT
+
+transitive-extend-enum net/minecraft/world/item/Rarity ASTRALSORCERY_RELIC
+transitive-extend-enum net/minecraft/world/item/Rarity ASTRALSORCERY_ARTIFACT

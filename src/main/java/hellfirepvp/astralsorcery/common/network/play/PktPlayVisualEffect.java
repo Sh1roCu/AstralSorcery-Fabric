@@ -8,13 +8,15 @@
 
 package hellfirepvp.astralsorcery.common.network.play;
 
-import hellfirepvp.astralsorcery.common.visual.VisualEffectTypes;
 import hellfirepvp.astralsorcery.common.network.PlayPacketHandler;
+import hellfirepvp.astralsorcery.common.visual.VisualEffectTypes;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.util.RandomSource;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -44,9 +46,10 @@ public class PktPlayVisualEffect extends PlayPacketHandler.ToClient<PktPlayVisua
         return CODEC;
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
-    public void handle(Request payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
+    public void receive(Request payload, ClientPlayNetworking.Context context) {
+        context.client().execute(() -> {
             payload.effect().playEffect(RandomSource.create());
         });
     }

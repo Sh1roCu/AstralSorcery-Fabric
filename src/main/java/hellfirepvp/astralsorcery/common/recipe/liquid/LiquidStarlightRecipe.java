@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.recipe.liquid;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.common.crafting.SizedIngredient;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -26,14 +27,11 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.common.crafting.SizedIngredient;
 
 import java.util.*;
-import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -220,7 +218,7 @@ public class LiquidStarlightRecipe extends CustomRecipe<LiquidStarlightRecipe, L
     }
 
     @Override
-    public Supplier<? extends RecipeSerializer<LiquidStarlightRecipe>> getRecipeSerializer() {
+    public RecipeSerializer<LiquidStarlightRecipe> getRecipeSerializer() {
         return RecipeTypesAS.LIQUID_STARLIGHT_SERIALIZER;
     }
 

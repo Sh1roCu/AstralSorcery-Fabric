@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.datagen.data.recipes.liquid;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.fluids.crafing.SizedFluidIngredient;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.FluidsAS;
 import hellfirepvp.astralsorcery.common.recipe.builder.LiquidInteractionRecipeBuilder;
@@ -16,7 +17,6 @@ import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -27,17 +27,18 @@ import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
  */
 public class LiquidInteractionRecipeProvider {
 
-    private static final int DEFAULT_AMOUNT = 6;
-    private static final int OBSIDIAN_AMOUNT = 100;
+    private static final long DEFAULT_AMOUNT = 6 * 81;
+    private static final long OBSIDIAN_AMOUNT = 100 * 81;
 
-    private LiquidInteractionRecipeProvider() {}
+    private LiquidInteractionRecipeProvider() {
+    }
 
     public static void registerRecipes(RecipeOutput recipeOutput) {
         SizedFluidIngredient water = SizedFluidIngredient.of(Fluids.WATER, DEFAULT_AMOUNT);
         SizedFluidIngredient lava = SizedFluidIngredient.of(Fluids.LAVA, DEFAULT_AMOUNT);
         SizedFluidIngredient waterBucket = SizedFluidIngredient.of(Fluids.WATER, OBSIDIAN_AMOUNT);
         SizedFluidIngredient lavaBucket = SizedFluidIngredient.of(Fluids.LAVA, OBSIDIAN_AMOUNT);
-        SizedFluidIngredient liquidStarlight = SizedFluidIngredient.of(FluidsAS.LIQUID_STARLIGHT.getSource().get(), DEFAULT_AMOUNT);
+        SizedFluidIngredient liquidStarlight = SizedFluidIngredient.of(FluidsAS.LIQUID_STARLIGHT.getSource(), DEFAULT_AMOUNT);
 
         LiquidInteractionRecipeBuilder.builder("water_lava_cobblestone", water, lava,
                         new LiquidInteractionResultDropItem(new ItemStack(Items.COBBLESTONE)))
@@ -75,7 +76,7 @@ public class LiquidInteractionRecipeProvider {
                 .save(recipeOutput);
 
         LiquidInteractionRecipeBuilder.builder("liquidstarlight_lava_aquamarine", liquidStarlight, lava,
-                        new LiquidInteractionResultDropItem(new ItemStack(BlocksAS.AQUAMARINE_SHALE.get().asItem())))
+                        new LiquidInteractionResultDropItem(new ItemStack(BlocksAS.AQUAMARINE_SHALE.asItem())))
                 .chanceConsumeA(0.5F)
                 .chanceConsumeB(0.5F)
                 .weight(1)

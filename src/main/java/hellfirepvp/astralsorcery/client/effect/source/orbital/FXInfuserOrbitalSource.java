@@ -8,21 +8,15 @@
 
 package hellfirepvp.astralsorcery.client.effect.source.orbital;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
 import hellfirepvp.astralsorcery.client.effect.EffectHelper;
-import hellfirepvp.astralsorcery.client.effect.EffectTemplate;
 import hellfirepvp.astralsorcery.client.effect.function.FXAlphaFunction;
 import hellfirepvp.astralsorcery.client.effect.function.FXMotionFunction;
 import hellfirepvp.astralsorcery.client.effect.source.FXOrbitalSource;
-import hellfirepvp.astralsorcery.client.effect.vfx.VFXAtlasSpriteParticle;
 import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
 import hellfirepvp.astralsorcery.client.util.RenderSpriteUtil;
 import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.level.material.Fluid;
-import net.neoforged.neoforge.fluids.FluidStack;
-
-import java.util.function.BiConsumer;
 
 /**
  * This class is part of the Astral Sorcery Mod

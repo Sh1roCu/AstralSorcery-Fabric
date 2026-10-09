@@ -23,6 +23,8 @@ import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -33,10 +35,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
-import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -50,16 +48,16 @@ public class RenderPerkExperienceOverlay {
     public static final ResourceLocation PERK_EXPERIENCE_ID = AstralSorcery.key("perk_experience_overlay");
     public static final LayerRenderer RENDERER = new LayerRenderer();
 
-    public static void registerLayers(RegisterGuiLayersEvent event) {
-        event.registerBelow(VanillaGuiLayers.EXPERIENCE_BAR, PERK_EXPERIENCE_ID, RENDERER);
+    public static void registerLayers() {
+        HudRenderCallback.EVENT.register(/*VanillaGuiLayers.EXPERIENCE_BAR,*/ PERK_EXPERIENCE_ID, RENDERER::render);
     }
 
-    public static void onClientTick(ClientTickEvent.Pre event) {
-        Player player = Minecraft.getInstance().player;
+    public static void onClientTick(Minecraft client) {
+        Player player = client.player;
         if (player == null) return;
 
         if (MiscUtil.getMainOrOffHand(player,
-                stack -> stack.getItem() instanceof PerkExperienceRevealer revealer && revealer.shouldReveal(stack))
+                        stack -> stack.getItem() instanceof PerkExperienceRevealer revealer && revealer.shouldReveal(stack))
                 .isPresent()) {
             RENDERER.revealExperienceBar(20);
         }
@@ -103,10 +101,10 @@ public class RenderPerkExperienceOverlay {
             if (!progress.isAttuned()) return;
 
             PoseStack pose = guiGraphics.pose();
-            float frameHeight  = 128F;
-            float frameWidth   =  32F;
-            float frameOffsetX =   0F;
-            float frameOffsetY =   5F;
+            float frameHeight = 128F;
+            float frameWidth = 32F;
+            float frameOffsetX = 0F;
+            float frameOffsetY = 5F;
 
             RenderSystem.enableBlend();
             Blending.DEFAULT.apply();
@@ -118,11 +116,11 @@ public class RenderPerkExperienceOverlay {
                         .draw();
             });
 
-            float perc = progress.getPerkData().getPercentToNextLevel(player, LogicalSide.CLIENT);
-            float expHeight  =  78F * perc;
-            float expWidth   =  32F;
-            float expOffsetX =   0F;
-            float expOffsetY =  27.5F + (1F - perc) * 78F;
+            float perc = progress.getPerkData().getPercentToNextLevel(player, EnvType.CLIENT);
+            float expHeight = 78F * perc;
+            float expWidth = 32F;
+            float expOffsetX = 0F;
+            float expOffsetY = 27.5F + (1F - perc) * 78F;
             ColorWrapper barColor = ColorsAS.PERK_EXPERIENCE_BAR.copyWithAlpha((int) (this.visibilityAlpha * 255F));
 
             TexturesAS.SCREEN_PERK_EXPERIENCE_BAR.bindTexture();
@@ -134,7 +132,7 @@ public class RenderPerkExperienceOverlay {
             });
 
             Font font = Minecraft.getInstance().font;
-            String strLevel = String.valueOf(progress.getPerkData().getPerkLevel(player, LogicalSide.CLIENT));
+            String strLevel = String.valueOf(progress.getPerkData().getPerkLevel(player, EnvType.CLIENT));
             MutableComponent cmpLevel = Component.literal(strLevel);
             int width = font.width(cmpLevel);
             float size = 1.2F;

@@ -15,15 +15,13 @@ import hellfirepvp.astralsorcery.common.perk.modifier.PerkAttributeModifier;
 import hellfirepvp.astralsorcery.common.perk.reader.PerkAttributeTypeReader;
 import hellfirepvp.astralsorcery.common.perk.source.ModifierSource;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
+import net.fabricmc.api.EnvType;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.NeoForge;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -41,7 +39,7 @@ public class PerkAttributeType {
     public static final Codec<PerkAttributeType> CODEC = RegistriesAS.REGISTRY_PERK_ATTRIBUTE_TYPES.byNameCodec();
 
     //Used by subclasses to track application of this perkAttributeType on a player-uuid
-    private final Map<LogicalSide, Set<UUID>> applicationCache = Maps.newHashMap();
+    private final Map<EnvType, Set<UUID>> applicationCache = Maps.newHashMap();
 
     //Signify if this attribute perkAttributeType may only be used as multipliers
     private final boolean isOnlyMultiplicative;
@@ -51,7 +49,7 @@ public class PerkAttributeType {
         this.isOnlyMultiplicative = isOnlyMultiplicative;
 
         this.init();
-        this.attachListeners(NeoForge.EVENT_BUS);
+        this.attachListeners();
     }
 
     public boolean isMultiplicative() {
@@ -73,14 +71,16 @@ public class PerkAttributeType {
 
     public Optional<PerkAttributeTypeReader> getReader() {
         return RegistriesAS.REGISTRY_PERK_ATTRIBUTE_TYPE_READERS.stream()
-                .filter(type -> type.perkAttributeType().get().is(this))
+                .filter(type -> type.perkAttributeType().is(this))
                 .findFirst()
                 .map(PerkAttributeTypeReader.Type::reader);
     }
 
-    protected void init() {}
+    protected void init() {
+    }
 
-    protected void attachListeners(IEventBus eventBus) {}
+    protected void attachListeners() {
+    }
 
     public boolean is(PerkAttributeType other) {
         return this == other;
@@ -111,11 +111,11 @@ public class PerkAttributeType {
         return new PerkAttributeModifier(this, mode, modifier);
     }
 
-    public void onApply(Player player, LogicalSide side, ModifierSource source) {
+    public void onApply(Player player, EnvType side, ModifierSource source) {
         this.applicationCache.computeIfAbsent(side, s -> new HashSet<>()).add(player.getUUID());
     }
 
-    public void onRemove(Player player, LogicalSide side, boolean removedCompletely, ModifierSource source) {
+    public void onRemove(Player player, EnvType side, boolean removedCompletely, ModifierSource source) {
         if (removedCompletely) {
             this.applicationCache.getOrDefault(side, Collections.emptySet()).remove(player.getUUID());
         }
@@ -123,21 +123,23 @@ public class PerkAttributeType {
 
     //Called if no modifiers of this perkAttributeType were applied on the player, but now there is at least 1 added.
     //Called before any modifiers are actually applied!
-    public void onModeApply(Player player, ModifierType mode, LogicalSide side) {}
+    public void onModeApply(Player player, ModifierType mode, EnvType side) {
+    }
 
     //Called if no more modifiers of this perkAttributeType are applied on the player.
     //Called after that last modifier is removed!
-    public void onModeRemove(Player player, ModifierType mode, LogicalSide side, boolean removedCompletely) {}
+    public void onModeRemove(Player player, ModifierType mode, EnvType side, boolean removedCompletely) {
+    }
 
-    public boolean hasTypeApplied(Player player, LogicalSide side) {
+    public boolean hasTypeApplied(Player player, EnvType side) {
         return this.applicationCache.getOrDefault(side, Collections.emptySet()).contains(player.getUUID());
     }
 
-    private void clear(LogicalSide side) {
+    private void clear(EnvType side) {
         this.applicationCache.remove(side);
     }
 
-    public static void clearCache(LogicalSide side) {
+    public static void clearCache(EnvType side) {
         for (PerkAttributeType type : RegistriesAS.REGISTRY_PERK_ATTRIBUTE_TYPES) {
             type.clear(side);
         }

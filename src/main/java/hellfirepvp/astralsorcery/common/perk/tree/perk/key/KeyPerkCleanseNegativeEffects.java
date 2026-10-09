@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.perk.tree.perk.key;
 
+import cn.sh1rocu.astralsorcery.api.event.LivingHealEvent;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.lib.PerksAS;
@@ -22,15 +23,11 @@ import hellfirepvp.astralsorcery.common.perk.tree.requirement.PerkRequirement;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
-import hellfirepvp.astralsorcery.common.util.event.SidedEventBus;
+import net.fabricmc.api.EnvType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.entity.living.LivingHealEvent;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -58,14 +55,14 @@ public class KeyPerkCleanseNegativeEffects extends KeyPerk {
     }
 
     @Override
-    protected void attachEventListeners(SidedEventBus sidedEventBus) {
-        super.attachEventListeners(sidedEventBus);
-        sidedEventBus.addListener(LivingHealEvent.class, SidedEventBus.entityEvent(), this::onHeal);
+    protected void attachEventListeners() {
+        super.attachEventListeners();
+        LivingHealEvent.EVENT.register(this::onHeal);
     }
 
     private void onHeal(LivingHealEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer sPlayer)) return;
-        LogicalSide side = this.getSide(sPlayer);
+        EnvType side = this.getSide(sPlayer);
         PlayerProgress prog = ResearchManager.getProgress(sPlayer, side);
         if (!prog.getPerkData().hasPerkEffect(this)) return;
 

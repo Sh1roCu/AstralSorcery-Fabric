@@ -12,23 +12,19 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.lumen.Lumen;
-import hellfirepvp.astralsorcery.common.tile.base.TileEntityTick;
-import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.RayTraceUtil;
+import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
 import hellfirepvp.astralsorcery.common.util.codec.SetCodec;
 import hellfirepvp.astralsorcery.common.util.data.MapStream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.neoforged.neoforge.common.extensions.IBlockEntityExtension;
 
-import javax.annotation.Nullable;
 import java.util.*;
 
 /**
@@ -92,11 +88,11 @@ public class LumenNode {
         return RayTraceUtil.clip(level, ctx, Set.of(this.getPos(), other.getPos())).getType() == HitResult.Type.MISS;
     }
 
-    public <T extends IBlockEntityExtension> Optional<T> getTile(Level level, Class<T> clazz) {
+    public <T> Optional<T> getTile(Level level, Class<T> clazz) {
         return this.getTile(level, clazz, true);
     }
 
-    public <T extends IBlockEntityExtension> Optional<T> getTile(Level level, Class<T> clazz, boolean forceLoad) {
+    public <T> Optional<T> getTile(Level level, Class<T> clazz, boolean forceLoad) {
         return MiscUtil.getTileAt(level, this.getPos(), clazz, forceLoad);
     }
 

@@ -8,22 +8,19 @@
 
 package hellfirepvp.astralsorcery.common.config.json.data;
 
+import cn.sh1rocu.observerlib.ObserverLibFabric;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.config.json.JsonDataRegistry;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
-import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.util.List;
 import java.util.Objects;
@@ -40,7 +37,8 @@ public class AmuletEnchantmentDataRegistry extends JsonDataRegistry<AmuletEnchan
 
     private static final AmuletEnchantmentDataRegistry INSTANCE = new AmuletEnchantmentDataRegistry();
 
-    private AmuletEnchantmentDataRegistry() {}
+    private AmuletEnchantmentDataRegistry() {
+    }
 
     public static AmuletEnchantmentDataRegistry getInstance() {
         return INSTANCE;
@@ -63,7 +61,7 @@ public class AmuletEnchantmentDataRegistry extends JsonDataRegistry<AmuletEnchan
 
     @Override
     public List<Entry> getDefaultValues() {
-        MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
+        MinecraftServer srv = ObserverLibFabric.getServer();
         Registry<Enchantment> registry = srv.registryAccess().registryOrThrow(Registries.ENCHANTMENT);
         return registry.holders().map(holder -> {
             if (holder.is(EnchantmentTags.CURSE)) return null;
@@ -83,5 +81,6 @@ public class AmuletEnchantmentDataRegistry extends JsonDataRegistry<AmuletEnchan
         }
     }
 
-    private record ResolvedEntry(Holder<Enchantment> enchantment, int weight) {}
+    private record ResolvedEntry(Holder<Enchantment> enchantment, int weight) {
+    }
 }

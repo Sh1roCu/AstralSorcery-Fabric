@@ -12,10 +12,12 @@ import hellfirepvp.astralsorcery.common.network.PlayPacketHandler;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.research.SyncPlayerProgress;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -48,9 +50,10 @@ public class PktSyncPlayerProgress extends PlayPacketHandler.ToClient<PktSyncPla
         return CODEC;
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
-    public void handle(Request payload, IPayloadContext context) {
-        context.enqueueWork(() -> ResearchManager.setClientProgress(payload.progress.load()));
+    public void receive(Request payload, ClientPlayNetworking.Context context) {
+        context.client().execute(() -> ResearchManager.setClientProgress(payload.progress.load()));
     }
 
     public static record Request(SyncPlayerProgress progress) implements CustomPacketPayload {

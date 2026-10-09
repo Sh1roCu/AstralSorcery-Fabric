@@ -11,14 +11,10 @@ package hellfirepvp.astralsorcery.client.lib;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.model.builtin.ModelAttunementAltar;
 import hellfirepvp.astralsorcery.client.model.builtin.ModelLens;
-import net.minecraft.client.Minecraft;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.minecraft.client.model.geom.ModelLayerLocation;
-import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
 import java.util.function.BiConsumer;
-import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -30,22 +26,23 @@ import java.util.function.Supplier;
 public class ModelLayersAS {
 
     public static final PreparedModelLayer ATTUNEMENT_ALTAR = create("attunement_altar", ModelAttunementAltar::createLayer);
-    public static final PreparedModelLayer LENS             = create("lens", ModelLens::createLayer);
+    public static final PreparedModelLayer LENS = create("lens", ModelLens::createLayer);
 
-    public static void registerModelLayers(EntityRenderersEvent.RegisterLayerDefinitions event) {
-        BiConsumer<ModelLayerLocation, Supplier<LayerDefinition>> registrar = event::registerLayerDefinition;
+    public static void registerModelLayers() {
+        BiConsumer<ModelLayerLocation, EntityModelLayerRegistry.TexturedModelDataProvider> registrar = EntityModelLayerRegistry::registerModelLayer;
 
         ATTUNEMENT_ALTAR.register(registrar);
         LENS.register(registrar);
     }
 
-    private static PreparedModelLayer create(String name, Supplier<LayerDefinition> layerDefinition) {
+    private static PreparedModelLayer create(String name, EntityModelLayerRegistry.TexturedModelDataProvider layerDefinition) {
         return new PreparedModelLayer(new ModelLayerLocation(AstralSorcery.key(name), "main"), layerDefinition);
     }
 
-    public record PreparedModelLayer(ModelLayerLocation layerLocation, Supplier<LayerDefinition> layerDefinition) {
+    public record PreparedModelLayer(ModelLayerLocation layerLocation,
+                                     EntityModelLayerRegistry.TexturedModelDataProvider layerDefinition) {
 
-        private void register(BiConsumer<ModelLayerLocation, Supplier<LayerDefinition>> registrar) {
+        private void register(BiConsumer<ModelLayerLocation, EntityModelLayerRegistry.TexturedModelDataProvider> registrar) {
             registrar.accept(this.layerLocation(), this.layerDefinition());
         }
     }

@@ -8,9 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.util.structure;
 
-import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import hellfirepvp.astralsorcery.client.util.RenderUtil;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
@@ -32,10 +31,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.material.FluidState;
-import net.neoforged.neoforge.client.model.data.ModelData;
-
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL30;
 
 import java.util.Optional;
 
@@ -142,7 +137,7 @@ public class StructureRenderer {
             pose.translate(pos.getX(), pos.getY(), pos.getZ());
             this.level.getStorage().pushFilter(at -> at.equals(pos));
 
-            brd.renderSingleBlock(state, pose, buffers, LightmapUtil.getPackedFullbrightCoords(), OverlayTexture.NO_OVERLAY, ModelData.EMPTY, null);
+            brd.renderSingleBlock(state, pose, buffers, LightmapUtil.getPackedFullbrightCoords(), OverlayTexture.NO_OVERLAY/*, ModelData.EMPTY, null*/);
 
             FluidState fluidState = state.getFluidState();
             if (!fluidState.isEmpty()) {

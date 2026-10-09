@@ -21,46 +21,46 @@ import hellfirepvp.observerlib.api.util.StructureBlockArray;
 public class PatternAttunementAltar extends StructureBlockArray implements PillarStructure {
 
     public PatternAttunementAltar() {
-        this.addBlock(BlocksAS.ATTUNEMENT_ALTAR.get(), 0, 0, 0);
+        this.addBlock(BlocksAS.ATTUNEMENT_ALTAR, 0, 0, 0);
 
-        this.addBlockCube(BlocksAS.MARBLE_ARCH.get().defaultBlockState(), -7, -1, -8,  7, -1, -8);
-        this.addBlockCube(BlocksAS.MARBLE_ARCH.get().defaultBlockState(), -7, -1,  8,  7, -1,  8);
-        this.addBlockCube(BlocksAS.MARBLE_ARCH.get().defaultBlockState(), -8, -1, -7, -8, -1,  7);
-        this.addBlockCube(BlocksAS.MARBLE_ARCH.get().defaultBlockState(),  8, -1, -7,  8, -1,  7);
-        this.addBlockCube(BlocksAS.SOOTY_MARBLE_RAW.get().defaultBlockState(), -7, -1, -7, 7, -1, 7);
+        this.addBlockCube(BlocksAS.MARBLE_ARCH.defaultBlockState(), -7, -1, -8,  7, -1, -8);
+        this.addBlockCube(BlocksAS.MARBLE_ARCH.defaultBlockState(), -7, -1,  8,  7, -1,  8);
+        this.addBlockCube(BlocksAS.MARBLE_ARCH.defaultBlockState(), -8, -1, -7, -8, -1,  7);
+        this.addBlockCube(BlocksAS.MARBLE_ARCH.defaultBlockState(),  8, -1, -7,  8, -1,  7);
+        this.addBlockCube(BlocksAS.SOOTY_MARBLE_RAW.defaultBlockState(), -7, -1, -7, 7, -1, 7);
 
         this.addPillar(BlocksAS.MARBLE_PILLAR, -8, 0, -8, 3);
         this.addPillar(BlocksAS.MARBLE_PILLAR, -8, 0,  8, 3);
         this.addPillar(BlocksAS.MARBLE_PILLAR,  8, 0, -8, 3);
         this.addPillar(BlocksAS.MARBLE_PILLAR,  8, 0,  8, 3);
 
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get(), -8, 3, -8);
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get(), -8, 3,  8);
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get(),  8, 3, -8);
-        this.addBlock(BlocksAS.MARBLE_CHISELED.get(),  8, 3,  8);
+        this.addBlock(BlocksAS.MARBLE_CHISELED, -8, 3, -8);
+        this.addBlock(BlocksAS.MARBLE_CHISELED, -8, 3,  8);
+        this.addBlock(BlocksAS.MARBLE_CHISELED,  8, 3, -8);
+        this.addBlock(BlocksAS.MARBLE_CHISELED,  8, 3,  8);
 
-        this.addBlock(BlocksAS.MARBLE_ARCH.get(), -9, -1, -9);
-        this.addBlock(BlocksAS.MARBLE_ARCH.get(), -9, -1, -8);
-        this.addBlock(BlocksAS.MARBLE_ARCH.get(), -9, -1, -7);
-        this.addBlock(BlocksAS.MARBLE_ARCH.get(), -8, -1, -9);
-        this.addBlock(BlocksAS.MARBLE_ARCH.get(), -7, -1, -9);
+        this.addBlock(BlocksAS.MARBLE_ARCH, -9, -1, -9);
+        this.addBlock(BlocksAS.MARBLE_ARCH, -9, -1, -8);
+        this.addBlock(BlocksAS.MARBLE_ARCH, -9, -1, -7);
+        this.addBlock(BlocksAS.MARBLE_ARCH, -8, -1, -9);
+        this.addBlock(BlocksAS.MARBLE_ARCH, -7, -1, -9);
 
-        this.addBlock(BlocksAS.MARBLE_ARCH.get(), -9, -1,  9);
-        this.addBlock(BlocksAS.MARBLE_ARCH.get(), -9, -1,  8);
-        this.addBlock(BlocksAS.MARBLE_ARCH.get(), -9, -1,  7);
-        this.addBlock(BlocksAS.MARBLE_ARCH.get(), -8, -1,  9);
-        this.addBlock(BlocksAS.MARBLE_ARCH.get(), -7, -1,  9);
+        this.addBlock(BlocksAS.MARBLE_ARCH, -9, -1,  9);
+        this.addBlock(BlocksAS.MARBLE_ARCH, -9, -1,  8);
+        this.addBlock(BlocksAS.MARBLE_ARCH, -9, -1,  7);
+        this.addBlock(BlocksAS.MARBLE_ARCH, -8, -1,  9);
+        this.addBlock(BlocksAS.MARBLE_ARCH, -7, -1,  9);
 
-        this.addBlock(BlocksAS.MARBLE_ARCH.get(),  9, -1, -9);
-        this.addBlock(BlocksAS.MARBLE_ARCH.get(),  9, -1, -8);
-        this.addBlock(BlocksAS.MARBLE_ARCH.get(),  9, -1, -7);
-        this.addBlock(BlocksAS.MARBLE_ARCH.get(),  8, -1, -9);
-        this.addBlock(BlocksAS.MARBLE_ARCH.get(),  7, -1, -9);
+        this.addBlock(BlocksAS.MARBLE_ARCH,  9, -1, -9);
+        this.addBlock(BlocksAS.MARBLE_ARCH,  9, -1, -8);
+        this.addBlock(BlocksAS.MARBLE_ARCH,  9, -1, -7);
+        this.addBlock(BlocksAS.MARBLE_ARCH,  8, -1, -9);
+        this.addBlock(BlocksAS.MARBLE_ARCH,  7, -1, -9);
 
-        this.addBlock(BlocksAS.MARBLE_ARCH.get(),  9, -1,  9);
-        this.addBlock(BlocksAS.MARBLE_ARCH.get(),  9, -1,  8);
-        this.addBlock(BlocksAS.MARBLE_ARCH.get(),  9, -1,  7);
-        this.addBlock(BlocksAS.MARBLE_ARCH.get(),  8, -1,  9);
-        this.addBlock(BlocksAS.MARBLE_ARCH.get(),  7, -1,  9);
+        this.addBlock(BlocksAS.MARBLE_ARCH,  9, -1,  9);
+        this.addBlock(BlocksAS.MARBLE_ARCH,  9, -1,  8);
+        this.addBlock(BlocksAS.MARBLE_ARCH,  9, -1,  7);
+        this.addBlock(BlocksAS.MARBLE_ARCH,  8, -1,  9);
+        this.addBlock(BlocksAS.MARBLE_ARCH,  7, -1,  9);
     }
 }

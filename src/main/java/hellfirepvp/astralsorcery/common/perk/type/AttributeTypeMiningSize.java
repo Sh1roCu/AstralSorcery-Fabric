@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.perk.type;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.network.PacketDistributor;
 import hellfirepvp.astralsorcery.common.event.AttributeEvent;
 import hellfirepvp.astralsorcery.common.lib.PerksAS;
 import hellfirepvp.astralsorcery.common.network.play.PktSyncCustomDestroyProgress;
@@ -17,24 +18,24 @@ import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.BlockUtil;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.GameMasterBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.CommonHooks;
-import net.neoforged.neoforge.event.level.BlockEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,16 +56,16 @@ public class AttributeTypeMiningSize extends PerkAttributeType {
     }
 
     @Override
-    protected void attachListeners(IEventBus eventBus) {
-        super.attachListeners(eventBus);
-        eventBus.addListener(this::onBlockBreak);
+    protected void attachListeners() {
+        super.attachListeners();
+        PlayerBlockBreakEvents.AFTER.register(this::onBlockBreak);
     }
 
-    private void onBlockBreak(BlockEvent.BreakEvent event) {
-        if (!(event.getLevel() instanceof ServerLevel sLevel)) return;
-        if (!(event.getPlayer() instanceof ServerPlayer sPlayer)) return;
+    private void onBlockBreak(Level world, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity) {
+        if (!(world instanceof ServerLevel sLevel)) return;
+        if (!(player instanceof ServerPlayer sPlayer)) return;
 
-        forAllValidBreakablePositions(sLevel, sPlayer, event.getPos(), sPlayer.gameMode::destroyBlock);
+        forAllValidBreakablePositions(sLevel, sPlayer, pos, sPlayer.gameMode::destroyBlock);
     }
 
     public static void sendBlockBreakProgressSync(ServerLevel sLevel, ServerPlayer breaker, BlockPos pos, int progressStage) {
@@ -79,9 +80,9 @@ public class AttributeTypeMiningSize extends PerkAttributeType {
     }
 
     private static void forAllValidBreakablePositions(ServerLevel sLevel, ServerPlayer sPlayer, BlockPos center, Consumer<BlockPos> posFn) {
-        PlayerProgress progress = ResearchManager.getProgress(sPlayer, LogicalSide.SERVER);
+        PlayerProgress progress = ResearchManager.getProgress(sPlayer, EnvType.SERVER);
         if (!progress.isValid() || MiscUtil.isPlayerFake(sPlayer)) return;
-        if (!PerksAS.AttributeTypes.MINING_SIZE.get().hasTypeApplied(sPlayer, LogicalSide.SERVER)) return;
+        if (!PerksAS.AttributeTypes.MINING_SIZE.hasTypeApplied(sPlayer, EnvType.SERVER)) return;
 
         float size = PerkManager.getOrCreateAttributes(sPlayer)
                 .modifyValue(sPlayer, progress, PerksAS.AttributeTypes.MINING_SIZE, 0);
@@ -118,7 +119,8 @@ public class AttributeTypeMiningSize extends PerkAttributeType {
                 return; //If it takes significantly longer to break, it's probably harder. skip
             }
 
-            if (!heldItem.isEmpty() && !heldItem.getItem().canAttackBlock(offsetState, sLevel, offsetPos, sPlayer)) return;
+            if (!heldItem.isEmpty() && !heldItem.getItem().canAttackBlock(offsetState, sLevel, offsetPos, sPlayer))
+                return;
             if (sPlayer.blockActionRestricted(sLevel, offsetPos, gameMode)) return;
             if (offsetState.getBlock() instanceof GameMasterBlock && !sPlayer.canUseGameMasterBlocks()) return;
 

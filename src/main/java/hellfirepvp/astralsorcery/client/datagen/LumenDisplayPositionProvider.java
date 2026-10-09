@@ -12,6 +12,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.client.screen.tome.lumen.data.LumenDisplayPosition;
+import hellfirepvp.astralsorcery.common.lib.LumenAS;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.lumen.Lumen;
 import net.minecraft.data.CachedOutput;
@@ -46,7 +47,7 @@ public abstract class LumenDisplayPositionProvider implements DataProvider {
 
     public abstract void registerPositions();
 
-    public void put(Supplier<? extends Lumen> lumen, int x, int y) {
+    public void put(LumenAS.DeferredLumen lumen, int x, int y) {
         this.put(lumen.get(), new LumenDisplayPosition(x, y));
     }
 

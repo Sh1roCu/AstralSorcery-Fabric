@@ -11,13 +11,13 @@ package hellfirepvp.astralsorcery.common.network.play;
 import hellfirepvp.astralsorcery.client.helper.ClientLinkHelper;
 import hellfirepvp.astralsorcery.common.linking.session.ActiveLinkSession;
 import hellfirepvp.astralsorcery.common.network.PlayPacketHandler;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.Optional;
 
@@ -56,12 +56,13 @@ public class PktUpdateLinkSession extends PlayPacketHandler.ToClient<PktUpdateLi
         return CODEC;
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
-    public void handle(Request payload, IPayloadContext context) {
-        context.enqueueWork(() -> this.handleClient(payload));
+    public void receive(Request payload, ClientPlayNetworking.Context context) {
+        context.client().execute(() -> this.handleClient(payload));
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void handleClient(Request payload) {
         ClientLinkHelper.setActiveSession(payload.session().orElse(null));
     }

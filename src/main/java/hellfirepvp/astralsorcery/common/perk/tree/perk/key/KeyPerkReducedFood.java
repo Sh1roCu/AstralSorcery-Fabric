@@ -18,10 +18,10 @@ import hellfirepvp.astralsorcery.common.perk.tree.PerkCategory;
 import hellfirepvp.astralsorcery.common.perk.tree.PerkType;
 import hellfirepvp.astralsorcery.common.perk.tree.perk.KeyPerk;
 import hellfirepvp.astralsorcery.common.perk.tree.requirement.PerkRequirement;
+import net.fabricmc.api.EnvType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodData;
-import net.neoforged.fml.LogicalSide;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -48,8 +48,8 @@ public class KeyPerkReducedFood extends KeyPerk implements TickablePerk {
     }
 
     @Override
-    public void tick(Player player, LogicalSide side) {
-        if (side.isServer()) {
+    public void tick(Player player, EnvType side) {
+        if (side == EnvType.SERVER) {
             FoodData data = player.getFoodData();
 
             float exhaustion = data.getExhaustionLevel();

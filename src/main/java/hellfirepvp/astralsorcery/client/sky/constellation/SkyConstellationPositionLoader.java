@@ -14,6 +14,7 @@ import com.google.gson.JsonParseException;
 import com.mojang.serialization.JsonOps;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.datagen.ConstellationPositionProvider;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -35,18 +36,26 @@ import java.util.List;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class SkyConstellationPositionLoader implements ResourceManagerReloadListener {
+public class SkyConstellationPositionLoader implements ResourceManagerReloadListener, IdentifiableResourceReloadListener {
 
     private static final Gson GSON = new Gson();
     private static final SkyConstellationPositionLoader INSTANCE = new SkyConstellationPositionLoader();
 
+    public static final ResourceLocation ID = AstralSorcery.key("sky_constellation_position");
+
     private final List<SkyConstellationPosition> positions = new ArrayList<>();
     private boolean renderDebug = false;
 
-    private SkyConstellationPositionLoader() {}
+    private SkyConstellationPositionLoader() {
+    }
 
     public static SkyConstellationPositionLoader getInstance() {
         return INSTANCE;
+    }
+
+    @Override
+    public ResourceLocation getFabricId(){
+        return ID;
     }
 
     public List<SkyConstellationPosition> getPositions() {

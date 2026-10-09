@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.screen.tome.page;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
 import hellfirepvp.astralsorcery.client.effect.function.FXColorFunction;
 import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
@@ -19,12 +20,11 @@ import hellfirepvp.astralsorcery.common.research.ResearchNode;
 import hellfirepvp.astralsorcery.common.research.tome.TomePage;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
 
 import javax.annotation.Nullable;
 
@@ -53,10 +53,10 @@ public class RenderPageLightwell extends RenderPageRecipe<LightwellRecipe> {
             int resultY = y + 18 + 60 / 2;
             int yOffset = 113;
 
-            this.renderLiquidOutput(guiGraphics, midX - 8, resultY - 8, new FluidStack(recipe.getGeneratedFluid(), FluidType.BUCKET_VOLUME));
+            this.renderLiquidOutput(guiGraphics, midX - 8, resultY - 8, new FluidStack(recipe.getGeneratedFluid(), FluidConstants.BUCKET));
 
             this.renderInput(guiGraphics, midX - 8, y + yOffset, recipe.getInput());
-            this.renderScaledItem(guiGraphics, midX - 8, y + yOffset + 16, ItemsAS.BLOCK_LIGHTWELL.toStack(), 1.5F);
+            this.renderScaledItem(guiGraphics, midX - 8, y + yOffset + 16, ItemsAS.BLOCK_LIGHTWELL.getDefaultInstance(), 1.5F);
 
             StaticIdentifierTicket.Container container = this.getEffectContainer();
             if (container.canAddEffects()) {

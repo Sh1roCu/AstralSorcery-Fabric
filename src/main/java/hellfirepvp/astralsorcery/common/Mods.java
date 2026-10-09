@@ -9,16 +9,12 @@
 package hellfirepvp.astralsorcery.common;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.fml.InterModComms;
-import net.neoforged.fml.ModList;
-import net.neoforged.neoforge.internal.versions.neoforge.NeoForgeVersion;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -30,17 +26,17 @@ import java.util.function.Supplier;
 public enum Mods {
 
     MINECRAFT("minecraft", true),
-    NEOFORGE(NeoForgeVersion.MOD_ID, true),
+    FABRIC("fabric-api", true),
     ASTRAL_SORCERY(AstralSorcery.MODID, true),
     DRACONIC_EVOLUTION("draconicevolution"),
-    CURIOS("curios"),
+    TRINKETS("trinkets"),
     SIMULATED("simulated");
 
     private final String modid;
     private final boolean loaded;
 
     Mods(String modid) {
-        this(modid, ModList.get().isLoaded(modid));
+        this(modid, FabricLoader.getInstance().isModLoaded(modid));
     }
 
     Mods(String modid, boolean loaded) {

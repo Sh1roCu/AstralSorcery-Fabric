@@ -12,14 +12,14 @@ import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.perk.tree.AbstractPerk;
 import hellfirepvp.astralsorcery.common.perk.tree.AttributeModifierPerk;
+import hellfirepvp.astralsorcery.common.perk.tree.PerkType;
 import hellfirepvp.astralsorcery.common.perk.tree.perk.KeyPerk;
 import hellfirepvp.astralsorcery.common.perk.tree.perk.MajorPerk;
-import hellfirepvp.astralsorcery.common.perk.tree.PerkType;
 import hellfirepvp.astralsorcery.common.perk.tree.perk.key.*;
 import hellfirepvp.astralsorcery.common.perk.tree.perk.root.*;
 import hellfirepvp.astralsorcery.common.perk.tree.perk.socket.GemSocketPerk;
 import hellfirepvp.astralsorcery.common.util.data.PerkTypeRegistryObject;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.Registry;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -30,8 +30,9 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  */
 public class PerkTypesAS {
 
-    public static final DeferredRegister<PerkType<?>> PERK_TYPE_REGISTER =
-            DeferredRegister.create(RegistriesAS.KEY_PERK_TYPES, AstralSorcery.MODID);
+    public static void init() {
+
+    }
 
     public static final PerkTypeRegistryObject<AttributeModifierPerk<?>> MODIFIER_PERK =
             register("modifier_perk", AttributeModifierPerk.TYPE);
@@ -95,8 +96,8 @@ public class PerkTypesAS {
             register("key_grow_plants", KeyPerkGrowPlants.TYPE);
     public static final PerkTypeRegistryObject<KeyPerkRangeAreaOfEffect> KEY_RANGE_AREA_OF_EFFECT =
             register("key_range_area_of_effect", KeyPerkRangeAreaOfEffect.TYPE);
-    
+
     private static <T extends AbstractPerk<?>> PerkTypeRegistryObject<T> register(String name, PerkType<T> type) {
-        return new PerkTypeRegistryObject<>(PERK_TYPE_REGISTER.register(name, () -> type));
+        return new PerkTypeRegistryObject<>(Registry.register(RegistriesAS.REGISTRY_PERK_TYPES, AstralSorcery.key(name), type));
     }
 }

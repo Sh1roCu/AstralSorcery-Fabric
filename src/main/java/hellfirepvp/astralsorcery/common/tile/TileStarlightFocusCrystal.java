@@ -27,7 +27,6 @@ import hellfirepvp.astralsorcery.common.event.helper.TemporaryFlightHelper;
 import hellfirepvp.astralsorcery.common.focal.FocusCrystalPlacementHelper;
 import hellfirepvp.astralsorcery.common.focal.observer.FocusCrystalFilamentObserver;
 import hellfirepvp.astralsorcery.common.lib.*;
-import hellfirepvp.astralsorcery.common.starlight.api.provider.TransmissionNodeProvider;
 import hellfirepvp.astralsorcery.common.tile.base.TileDataConstellationContainer;
 import hellfirepvp.astralsorcery.common.tile.base.TileDataCrystalAttributeContainer;
 import hellfirepvp.astralsorcery.common.tile.base.TileEntityNetwork;
@@ -43,9 +42,10 @@ import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.ObserverRegistryObject;
 import hellfirepvp.astralsorcery.common.util.data.TileRegistryObject;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
@@ -54,9 +54,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.registries.DeferredHolder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -174,7 +171,7 @@ public class TileStarlightFocusCrystal extends TileEntityNetwork<FocusCrystalSou
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void clientTick(Level level) {
         super.clientTick(level);
 
@@ -182,7 +179,7 @@ public class TileStarlightFocusCrystal extends TileEntityNetwork<FocusCrystalSou
         this.playFocalNodeEffects();
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void playStellarFilamentEffects() {
         Data data = this.getTileData();
         data.getConstellation().ifPresent(cst -> {
@@ -217,7 +214,7 @@ public class TileStarlightFocusCrystal extends TileEntityNetwork<FocusCrystalSou
                         if (ClientProxy.getClientTick() % 40 == 0) {
                             for (int i = 0; i < display.size() - 1; i++) {
                                 Vector3 from = Vector3.atCenter(display.get(i));
-                                Vector3 to   = Vector3.atCenter(display.get(i + 1));
+                                Vector3 to = Vector3.atCenter(display.get(i + 1));
 
                                 EffectHelper.of(EffectTemplatesAS.LIGHT_BEAM)
                                         .spawn(from)
@@ -258,7 +255,7 @@ public class TileStarlightFocusCrystal extends TileEntityNetwork<FocusCrystalSou
         });
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void playFocalNodeEffects() {
         if (!this.getTileData().isOnFocalNode() ||
                 !this.getTileData().hasSky() ||
@@ -294,7 +291,7 @@ public class TileStarlightFocusCrystal extends TileEntityNetwork<FocusCrystalSou
     }
 
     @Override
-    public DeferredHolder<TransmissionNodeProvider<?>, FocusCrystalSourceNodeProvider> getNodeProvider() {
+    public FocusCrystalSourceNodeProvider getNodeProvider() {
         return StarlightNetworkNodesAS.FOCUS_CRYSTAL_SOURCE_NODE;
     }
 

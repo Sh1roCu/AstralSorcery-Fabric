@@ -13,18 +13,15 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.ClientProxy;
 import hellfirepvp.astralsorcery.client.helper.ClientLinkHelper;
 import hellfirepvp.astralsorcery.client.helper.FocalPointEffectHelper;
-import hellfirepvp.astralsorcery.client.helper.GatewayInterfaceRenderHelper;
 import hellfirepvp.astralsorcery.client.sky.AstralSkyRenderer;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
-import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.*;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
@@ -34,7 +31,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.client.ClientHooks;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -55,9 +51,16 @@ import javax.annotation.Nullable;
 @Mixin(LevelRenderer.class)
 public abstract class MixinLevelRenderer {
 
-    @Shadow @Nullable private ClientLevel level;
-    @Shadow @Final private RenderBuffers renderBuffers;
-    @Shadow private static void renderShape(PoseStack poseStack, VertexConsumer consumer, VoxelShape shape, double x, double y, double z, float red, float green, float blue, float alpha) {}
+    @Shadow
+    @Nullable
+    private ClientLevel level;
+    @Shadow
+    @Final
+    private RenderBuffers renderBuffers;
+
+    @Shadow
+    private static void renderShape(PoseStack poseStack, VertexConsumer consumer, VoxelShape shape, double x, double y, double z, float red, float green, float blue, float alpha) {
+    }
 
     @Inject(method = "renderSky", at = @At("HEAD"), cancellable = true)
     public void specialSkyRenderer(Matrix4f frustumMatrix, Matrix4f projectionMatrix, float partialTick, Camera camera, boolean isFoggy, Runnable skyFogSetup, CallbackInfo ci) {
@@ -80,24 +83,24 @@ public abstract class MixinLevelRenderer {
                     BlockHitResult blockHit = new BlockHitResult(bhr.getLocation(), bhr.getDirection(), bhr.getBlockPos(), bhr.isInside());
                     MultiBufferSource.BufferSource buffers = this.renderBuffers.bufferSource();
                     PoseStack pose = new PoseStack(); //During actual rendering, this is also just identity.
-                    if (!ClientHooks.onDrawHighlight(MiscUtil.cast(this), camera, blockHit, deltaTracker, pose, buffers)) {
-                        if (this.level.getWorldBorder().isWithinBounds(bhr.getBlockPos())) {
-                            BlockState placeable = BlocksAS.STELLAR_FILAMENT.get().defaultBlockState();
-                            VertexConsumer buf = buffers.getBuffer(RenderType.lines());
-                            Vec3 cameraPos = camera.getPosition();
-                            ColorWrapper color = ColorWrapper.ofHSB((ClientProxy.getClientTick() % 100) / 100F, 1F, 1F).copyWithAlpha(0x66);
-                            renderShape(pose,
-                                    buf,
-                                    placeable.getShape(this.level, bhr.getBlockPos(), CollisionContext.of(camera.getEntity())),
-                                    (double) bhr.getBlockPos().getX() - cameraPos.x(),
-                                    (double) bhr.getBlockPos().getY() - cameraPos.y(),
-                                    (double) bhr.getBlockPos().getZ() - cameraPos.z(),
-                                    color.getRed() / 255F,
-                                    color.getGreen() / 255F,
-                                    color.getBlue() / 255F,
-                                    color.getAlpha() / 255F);
-                        }
+                    // if (!ClientHooks.onDrawHighlight(MiscUtil.cast(this), camera, blockHit, deltaTracker, pose, buffers)) {
+                    if (this.level.getWorldBorder().isWithinBounds(bhr.getBlockPos())) {
+                        BlockState placeable = BlocksAS.STELLAR_FILAMENT.defaultBlockState();
+                        VertexConsumer buf = buffers.getBuffer(RenderType.lines());
+                        Vec3 cameraPos = camera.getPosition();
+                        ColorWrapper color = ColorWrapper.ofHSB((ClientProxy.getClientTick() % 100) / 100F, 1F, 1F).copyWithAlpha(0x66);
+                        renderShape(pose,
+                                buf,
+                                placeable.getShape(this.level, bhr.getBlockPos(), CollisionContext.of(camera.getEntity())),
+                                (double) bhr.getBlockPos().getX() - cameraPos.x(),
+                                (double) bhr.getBlockPos().getY() - cameraPos.y(),
+                                (double) bhr.getBlockPos().getZ() - cameraPos.z(),
+                                color.getRed() / 255F,
+                                color.getGreen() / 255F,
+                                color.getBlue() / 255F,
+                                color.getAlpha() / 255F);
                     }
+                    // }
                 }
             }
         }

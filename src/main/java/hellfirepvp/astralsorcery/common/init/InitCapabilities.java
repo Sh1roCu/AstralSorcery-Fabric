@@ -8,11 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.init;
 
-import hellfirepvp.astralsorcery.common.item.wand.ArchitectWandItem;
-import hellfirepvp.astralsorcery.common.item.wand.BlinkWandItem;
-import hellfirepvp.astralsorcery.common.item.wand.ExchangeWandItem;
 import hellfirepvp.astralsorcery.common.lib.FluidsAS;
-import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.TileEntitiesAS;
 import hellfirepvp.astralsorcery.common.lumen.ILumenHandler;
 import hellfirepvp.astralsorcery.common.lumen.capability.LumenHandlerView;
@@ -21,13 +17,15 @@ import hellfirepvp.astralsorcery.common.tile.base.TileEntitySynchronized;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.inventory.InventoryView;
 import hellfirepvp.astralsorcery.common.util.tank.FluidTankView;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.fluid.base.EmptyItemFluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.Direction;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.ICapabilityProvider;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.wrappers.FluidBucketWrapper;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.minecraft.world.item.Items;
 
 import java.util.function.Function;
 
@@ -40,58 +38,57 @@ import java.util.function.Function;
  */
 public class InitCapabilities {
 
-    public static void init(RegisterCapabilitiesEvent event) {
+    public static void init() {
         // -------------------- BLOCKS/TILES --------------------
-        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, TileEntitiesAS.FOCUS_RELAY.type(),
-                tileInventory(TileFocusRelay.Data::getInventory));
-        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, TileEntitiesAS.ALTAR.type(),
-                tileInventory(TileAltar.Data::getAltarInventory));
-        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, TileEntitiesAS.LUMEN_ARRAY.type(),
-                tileInventory(TileLumenArray.Data::getInventory));
-        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, TileEntitiesAS.LUMEN_ALCHEMY_ARRAY.type(),
-                tileInventory(TileLumenArray.Data::getInventory));
-        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, TileEntitiesAS.LUMEN_CRYSTALLIZER.type(),
-                tileInventory(TileLumenCrystallizer.Data::getInventory));
-        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, TileEntitiesAS.LIGHTWELL.type(),
-                tileInventory(TileLightwell.Data::getInventory));
-        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, TileEntitiesAS.INFUSER.type(),
-                tileInventory(TileInfuser.Data::getInventory));
+        ItemStorage.SIDED.registerForBlockEntity((be, direction) -> tileInventory(be, direction, TileFocusRelay.Data::getInventory),
+                TileEntitiesAS.FOCUS_RELAY.type());
+        ItemStorage.SIDED.registerForBlockEntity((be, direction) -> tileInventory(be, direction, TileAltar.Data::getAltarInventory),
+                TileEntitiesAS.ALTAR.type());
+        ItemStorage.SIDED.registerForBlockEntity((be, direction) -> tileInventory(be, direction, TileLumenArray.Data::getInventory),
+                TileEntitiesAS.LUMEN_ARRAY.type());
+        ItemStorage.SIDED.registerForBlockEntity((be, direction) -> tileInventory(be, direction, TileLumenArray.Data::getInventory),
+                TileEntitiesAS.LUMEN_ALCHEMY_ARRAY.type());
+        ItemStorage.SIDED.registerForBlockEntity((be, direction) -> tileInventory(be, direction, TileLumenCrystallizer.Data::getInventory),
+                TileEntitiesAS.LUMEN_CRYSTALLIZER.type());
+        ItemStorage.SIDED.registerForBlockEntity((be, direction) -> tileInventory(be, direction, TileLightwell.Data::getInventory),
+                TileEntitiesAS.LIGHTWELL.type());
+        ItemStorage.SIDED.registerForBlockEntity((be, direction) -> tileInventory(be, direction, TileInfuser.Data::getInventory),
+                TileEntitiesAS.INFUSER.type());
 
-        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, TileEntitiesAS.LUMEN_ARRAY.type(),
-                fluidHandler(TileLumenArray.Data::getFluidTank));
-        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, TileEntitiesAS.LUMEN_ALCHEMY_ARRAY.type(),
-                fluidHandler(TileLumenArray.Data::getFluidTank));
-        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, TileEntitiesAS.LUMEN_CRYSTALLIZER.type(),
-                fluidHandler(TileLumenCrystallizer.Data::getFluidTank));
-        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, TileEntitiesAS.LIGHTWELL.type(),
-                fluidHandler(TileLightwell.Data::getFluidTank));
-        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, TileEntitiesAS.CHALICE.type(),
-                fluidHandler(TileChalice.Data::getFluidTank));
+        FluidStorage.SIDED.registerForBlockEntity((be, direction) -> fluidHandler(be, direction, TileLumenArray.Data::getFluidTank),
+                TileEntitiesAS.LUMEN_ARRAY.type());
+        FluidStorage.SIDED.registerForBlockEntity((be, direction) -> fluidHandler(be, direction, TileLumenArray.Data::getFluidTank),
+                TileEntitiesAS.LUMEN_ALCHEMY_ARRAY.type());
+        FluidStorage.SIDED.registerForBlockEntity((be, direction) -> fluidHandler(be, direction, TileLumenCrystallizer.Data::getFluidTank),
+                TileEntitiesAS.LUMEN_CRYSTALLIZER.type());
+        FluidStorage.SIDED.registerForBlockEntity((be, direction) -> fluidHandler(be, direction, TileLightwell.Data::getFluidTank),
+                TileEntitiesAS.LIGHTWELL.type());
+        FluidStorage.SIDED.registerForBlockEntity((be, direction) -> fluidHandler(be, direction, TileChalice.Data::getFluidTank),
+                TileEntitiesAS.CHALICE.type());
 
-        event.registerBlockEntity(ILumenHandler.BLOCK, TileEntitiesAS.LUMEN_ARRAY.type(),
-                lumenHandler(TileLumenArray.Data::getLumenHandler));
-        event.registerBlockEntity(ILumenHandler.BLOCK, TileEntitiesAS.LUMEN_ALCHEMY_ARRAY.type(),
-                lumenHandler(TileLumenArray.Data::getLumenHandler));
-        event.registerBlockEntity(ILumenHandler.BLOCK, TileEntitiesAS.LUMEN_CRYSTALLIZER.type(),
-                lumenHandler(TileLumenCrystallizer.Data::getLumenHandler));
-        event.registerBlockEntity(ILumenHandler.BLOCK, TileEntitiesAS.TREE_BEACON.type(),
-                lumenHandler(TileTreeBeacon.Data::getLumenHandler));
+        ILumenHandler.BLOCK.registerForBlockEntity((be, direction) -> lumenHandler(be, direction, TileLumenArray.Data::getLumenHandler),
+                TileEntitiesAS.LUMEN_ARRAY.type());
+        ILumenHandler.BLOCK.registerForBlockEntity((be, direction) -> lumenHandler(be, direction, TileLumenArray.Data::getLumenHandler),
+                TileEntitiesAS.LUMEN_ALCHEMY_ARRAY.type());
+        ILumenHandler.BLOCK.registerForBlockEntity((be, direction) -> lumenHandler(be, direction, TileLumenCrystallizer.Data::getLumenHandler),
+                TileEntitiesAS.LUMEN_CRYSTALLIZER.type());
+        ILumenHandler.BLOCK.registerForBlockEntity((be, direction) -> lumenHandler(be, direction, TileTreeBeacon.Data::getLumenHandler),
+                TileEntitiesAS.TREE_BEACON.type());
 
         // -------------------- ITEMS --------------------
-        event.registerItem(Capabilities.FluidHandler.ITEM,
-                (stack, ctx) -> new FluidBucketWrapper(stack),
-                FluidsAS.LIQUID_STARLIGHT.getBucket());
+        FluidStorage.combinedItemApiProvider(Items.BUCKET).register(ctx ->
+                new EmptyItemFluidStorage(ctx, bucket -> ItemVariant.of(FluidsAS.LIQUID_STARLIGHT.getBucket()), FluidsAS.LIQUID_STARLIGHT.getSource(), FluidConstants.BUCKET));
     }
 
-    private static <O extends TileEntitySynchronized.Data> ICapabilityProvider<TileEntitySynchronized<?>, Direction, IItemHandler> tileInventory(Function<O, InventoryView> invFn) {
-        return (tile, dir) -> invFn.apply(MiscUtil.cast(tile.getTileData())).getInventoryAccess(dir);
+    private static <O extends TileEntitySynchronized.Data> Storage<ItemVariant> tileInventory(TileEntitySynchronized<?> tile, Direction dir, Function<O, InventoryView> invFn) {
+        return invFn.apply(MiscUtil.cast(tile.getTileData())).getInventoryAccess(dir);
     }
 
-    private static <O extends TileEntitySynchronized.Data> ICapabilityProvider<TileEntitySynchronized<?>, Direction, IFluidHandler> fluidHandler(Function<O, FluidTankView> handlerFn) {
-        return (tile, dir) -> handlerFn.apply(MiscUtil.cast(tile.getTileData())).getFluidAccess(dir);
+    private static <O extends TileEntitySynchronized.Data> Storage<FluidVariant> fluidHandler(TileEntitySynchronized<?> tile, Direction dir, Function<O, FluidTankView> handlerFn) {
+        return handlerFn.apply(MiscUtil.cast(tile.getTileData())).getFluidAccess(dir);
     }
 
-    private static <O extends TileEntitySynchronized.Data> ICapabilityProvider<TileEntitySynchronized<?>, Direction, ILumenHandler> lumenHandler(Function<O, LumenHandlerView> handlerFn) {
-        return (tile, dir) -> handlerFn.apply(MiscUtil.cast(tile.getTileData())).getLumenAccess(dir);
+    private static <O extends TileEntitySynchronized.Data> ILumenHandler lumenHandler(TileEntitySynchronized<?> tile, Direction dir, Function<O, LumenHandlerView> handlerFn) {
+        return handlerFn.apply(MiscUtil.cast(tile.getTileData())).getLumenAccess(dir);
     }
 }

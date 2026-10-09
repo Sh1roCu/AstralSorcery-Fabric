@@ -203,21 +203,21 @@ public class StructureDisplayLevel extends Level implements WorldGenLevel {
         return PotionBrewing.EMPTY;
     }
 
-    @Override
-    public void setDayTimeFraction(float dayTimeFraction) {}
-
-    @Override
-    public float getDayTimeFraction() {
-        return 0;
-    }
-
-    @Override
-    public float getDayTimePerTick() {
-        return 0;
-    }
-
-    @Override
-    public void setDayTimePerTick(float dayTimePerTick) {}
+//    @Override
+//    public void setDayTimeFraction(float dayTimeFraction) {}
+//
+//    @Override
+//    public float getDayTimeFraction() {
+//        return 0;
+//    }
+//
+//    @Override
+//    public float getDayTimePerTick() {
+//        return 0;
+//    }
+//
+//    @Override
+//    public void setDayTimePerTick(float dayTimePerTick) {}
 
     @Override
     public long getSeed() {

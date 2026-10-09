@@ -8,10 +8,10 @@
 
 package hellfirepvp.astralsorcery.client.util;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.sounds.SoundSource;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -20,7 +20,7 @@ import net.neoforged.api.distmarker.OnlyIn;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class SoundUtil {
 
     public static float getSoundVolume(SoundSource cat) {

@@ -14,7 +14,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.component.CrystalAttributesComponent;
 import hellfirepvp.astralsorcery.common.lib.StarlightNetworkNodesAS;
 import hellfirepvp.astralsorcery.common.lib.TileEntitiesAS;
-import hellfirepvp.astralsorcery.common.starlight.api.provider.TransmissionNodeProvider;
 import hellfirepvp.astralsorcery.common.tile.base.TileDataCrystalAttributeContainer;
 import hellfirepvp.astralsorcery.common.tile.base.TileEntityNetwork;
 import hellfirepvp.astralsorcery.common.tile.network.SimpleTransmissionNode;
@@ -23,7 +22,6 @@ import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
 import hellfirepvp.astralsorcery.common.util.data.TileRegistryObject;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.registries.DeferredHolder;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
@@ -46,7 +44,7 @@ public class TilePrism extends TileEntityNetwork<SimpleTransmissionNode, TilePri
     }
 
     @Override
-    public DeferredHolder<TransmissionNodeProvider<?>, SimpleTransmissionNodeProvider> getNodeProvider() {
+    public SimpleTransmissionNodeProvider getNodeProvider() {
         return StarlightNetworkNodesAS.SIMPLE_NODE;
     }
 

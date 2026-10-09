@@ -8,8 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.recipe;
 
+import cn.sh1rocu.astralsorcery.api.mixin.IDyeColor;
 import hellfirepvp.astralsorcery.common.component.ColorComponent;
-import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
@@ -17,14 +17,13 @@ import hellfirepvp.astralsorcery.common.util.ColorReference;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredItem;
 
 import java.util.Optional;
 
@@ -37,12 +36,12 @@ import java.util.Optional;
  */
 public class RecipeChangeColor extends CustomRecipe {
 
-    private final DeferredHolder<RecipeSerializer<?>, ? extends RecipeSerializer<?>> serializer;
-    private final DeferredItem<?> targetItem;
+    private final RecipeSerializer<?> serializer;
+    private final Item targetItem;
 
     public RecipeChangeColor(CraftingBookCategory category,
-                             DeferredHolder<RecipeSerializer<?>, ? extends RecipeSerializer<?>> serializer,
-                             DeferredItem<?> targetItem) {
+                             RecipeSerializer<?> serializer,
+                             Item targetItem) {
         super(category);
         this.serializer = serializer;
         this.targetItem = targetItem;
@@ -75,7 +74,7 @@ public class RecipeChangeColor extends CustomRecipe {
             if (stack.is(this.targetItem)) {
                 foundItem = stack;
             } else {
-                DyeColor color = DyeColor.getColor(stack);
+                DyeColor color = IDyeColor.getColor(stack);
                 if (color != null) {
                     foundColor = color;
                 }
@@ -96,7 +95,7 @@ public class RecipeChangeColor extends CustomRecipe {
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return this.serializer.get();
+        return this.serializer;
     }
 
     public static class IlluminationWandChangeColor extends RecipeChangeColor {

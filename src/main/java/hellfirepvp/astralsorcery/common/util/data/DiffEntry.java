@@ -8,9 +8,9 @@
 
 package hellfirepvp.astralsorcery.common.util.data;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.network.codec.NeoForgeStreamCodecs;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.neoforged.neoforge.network.codec.NeoForgeStreamCodecs;
 
 /**
  * This class is part of the Astral Sorcery Mod

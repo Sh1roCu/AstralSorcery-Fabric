@@ -33,10 +33,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.data.ModelData;
 
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -49,7 +47,7 @@ import java.util.function.Function;
 public class VFXCube extends EntityVisualFX {
 
     private BlockState renderState = Blocks.AIR.defaultBlockState();
-    private ModelData modelData = ModelData.EMPTY;
+    // private ModelData modelData = ModelData.EMPTY;
     private RenderType stateRenderType = null;
 
     private Vector3 rotationDegreeAxis = new Vector3();
@@ -70,10 +68,10 @@ public class VFXCube extends EntityVisualFX {
         return this;
     }
 
-    public VFXCube setModelData(ModelData modelData) {
-        this.modelData = modelData;
-        return this;
-    }
+//    public VFXCube setModelData(ModelData modelData) {
+//        this.modelData = modelData;
+//        return this;
+//    }
 
     public VFXCube setStateRenderType(RenderType stateRenderType) {
         this.stateRenderType = stateRenderType;
@@ -140,7 +138,8 @@ public class VFXCube extends EntityVisualFX {
         pose.mulPose(Axis.ZP.rotationDegrees((float) rotation.getZ()));
         pose.scale(fScale, fScale, fScale);
 
-        brd.renderSingleBlock(this.renderState, pose, bufferSource, packedLight, OverlayTexture.NO_OVERLAY, this.modelData, this.stateRenderType);
+        // TODO?
+        brd.renderSingleBlock(this.renderState, pose, bufferSource, packedLight, OverlayTexture.NO_OVERLAY/*, this.modelData, this.stateRenderType*/);
     }
 
     public static class IndividualTemplate<T extends VFXCube> extends EffectTemplate<T> {

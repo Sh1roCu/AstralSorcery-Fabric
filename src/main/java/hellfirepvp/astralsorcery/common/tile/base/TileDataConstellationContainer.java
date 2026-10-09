@@ -18,7 +18,6 @@ import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -33,7 +32,7 @@ public interface TileDataConstellationContainer {
         return MiscUtil.cast(this);
     }
 
-    default Supplier<? extends DataComponentType<? extends ConstellationPaperComponent>> getComponent() {
+    default DataComponentType<? extends ConstellationPaperComponent> getComponent() {
         return DataComponentsAS.ATTUNED_CONSTELLATION;
     }
 

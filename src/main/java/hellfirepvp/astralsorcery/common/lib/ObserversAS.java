@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.lib;
 
+import com.google.common.collect.Sets;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.focal.observer.FocusCrystalFilamentProvider;
 import hellfirepvp.astralsorcery.common.structure.*;
@@ -18,14 +19,10 @@ import hellfirepvp.observerlib.api.structure.MatchableStructure;
 import hellfirepvp.observerlib.api.util.StructureBlockArray;
 import hellfirepvp.observerlib.common.change.ObserverProviderStructure;
 import hellfirepvp.observerlib.common.registry.RegistryProviders;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -38,8 +35,11 @@ import java.util.stream.Collectors;
  */
 public class ObserversAS {
 
-    public static final DeferredRegister<ObserverProvider<?>> OBSERVER_REGISTER =
-            DeferredRegister.create(RegistryProviders.REGISTRY_KEY, AstralSorcery.MODID);
+    public static void init() {
+
+    }
+
+    public static final Set<ObserverProvider<?>> REGISTERED_OBSERVERS = Sets.newHashSet();
 
     public static final ObserverRegistryObject STRUCTURE_EMPTY = registerStructure("empty", StructureBlockArray::new);
     public static final ObserverRegistryObject STRUCTURE_ALTAR_T2 =
@@ -58,30 +58,28 @@ public class ObserversAS {
     public static final ObserverRegistryObject FOCUS_CRYSTAL_FILAMENTS =
             register("focus_crystal_filaments", FocusCrystalFilamentProvider::new);
 
+    @SafeVarargs
     private static ObserverRegistryObject registerCompoundStructure(String name, Supplier<StructureBlockArray>... structuresSupplier) {
-        DeferredHolder<ObserverProvider<?>, ObserverProvider<?>> providerObj =
-                OBSERVER_REGISTER.register(name, () -> {
-                    List<MatchableStructure> structures = Arrays.stream(structuresSupplier)
-                            .map(Supplier::get)
-                            .filter(Objects::nonNull)
-                            .collect(Collectors.toList());
-                    return new CompoundObserverProviderStructure(structures);
-                });
-        return new ObserverRegistryObject(providerObj);
+        List<MatchableStructure> structures = Arrays.stream(structuresSupplier)
+                .map(Supplier::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        return register(name, () -> new CompoundObserverProviderStructure(structures));
     }
 
     private static ObserverRegistryObject registerStructure(String name, Supplier<StructureBlockArray> structureSupplier) {
         return register(name, () -> new ObserverProviderStructure(structureSupplier.get()));
     }
 
-    private static <T extends ObserverProvider<?>> ObserverRegistryObject register(String name, Supplier<T> provider) {
-        DeferredHolder<ObserverProvider<?>, ObserverProvider<?>> providerObj = OBSERVER_REGISTER.register(name, provider);
+    private static <T extends ObserverProvider<?>> ObserverRegistryObject register(String name, Supplier<T> supplier) {
+        var providerObj = Registry.register(RegistryProviders.getRegistry(), AstralSorcery.key(name), supplier.get());
+        REGISTERED_OBSERVERS.add(providerObj);
         return new ObserverRegistryObject(providerObj);
     }
 
     public static Optional<ObserverRegistryObject> getByName(ResourceKey<ObserverProvider<?>> key) {
-        return OBSERVER_REGISTER.getEntries().stream()
-                .filter(entry -> entry.getKey().equals(key))
+        return REGISTERED_OBSERVERS.stream()
+                .filter(entry -> Objects.equals(RegistryProviders.getRegistry().getResourceKey(entry).orElse(null), key))
                 .findFirst()
                 .map(ObserverRegistryObject::new);
     }

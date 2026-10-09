@@ -61,7 +61,7 @@ public class GemCrystalClusterBlock extends BaseTickTileBlock<TileGemCrystalClus
     private static final VoxelShape STAGE_2_NIGHT = Block.box(5, 0, 5, 11,  8, 11);
 
     public GemCrystalClusterBlock(Properties properties) {
-        super(properties, TileEntitiesAS.GEM_CRYSTAL_CLUSTER);
+        super(properties, () -> TileEntitiesAS.GEM_CRYSTAL_CLUSTER);
     }
 
     @Override
@@ -99,8 +99,8 @@ public class GemCrystalClusterBlock extends BaseTickTileBlock<TileGemCrystalClus
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
-        ItemStack stack = super.getCloneItemStack(state, target, level, pos, player);
+    public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+        ItemStack stack = super.getCloneItemStack(level, pos, state);
         GemCrystalClusterBlockItem.setStage(stack, state.getValue(STAGE));
         return stack;
     }

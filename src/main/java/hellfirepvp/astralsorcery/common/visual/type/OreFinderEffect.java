@@ -10,16 +10,16 @@ package hellfirepvp.astralsorcery.common.visual.type;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.effect.EffectHelper;
-import hellfirepvp.astralsorcery.client.effect.function.FXAlphaFunction;
 import hellfirepvp.astralsorcery.client.effect.function.FXColorFunction;
-import hellfirepvp.astralsorcery.client.effect.function.FXScaleFunction;
 import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
-import hellfirepvp.astralsorcery.common.lib.constants.TagsAS;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.visual.VisualEffectTypes;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -27,9 +27,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.common.Tags;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,7 +64,7 @@ public class OreFinderEffect implements VisualEffectTypes.Effect {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void playEffect(RandomSource rand) {
         this.effectStates.forEach((state, positions) -> {
             ColorWrapper color = this.lookupColorPotential(state);
@@ -100,16 +97,16 @@ public class OreFinderEffect implements VisualEffectTypes.Effect {
 
     private ColorWrapper lookupColorPotential(BlockState state) {
         if (state.is(BlocksAS.AQUAMARINE_SHALE)) return ColorsAS.DYE_LIGHT_BLUE;
-        if (state.is(Tags.Blocks.ORES_IRON)) return ColorsAS.DYE_BROWN;
-        if (state.is(Tags.Blocks.ORES_GOLD)) return ColorsAS.DYE_YELLOW;
-        if (state.is(Tags.Blocks.ORES_COPPER)) return ColorsAS.DYE_ORANGE;
-        if (state.is(Tags.Blocks.ORES_COAL)) return ColorsAS.DYE_BLACK;
-        if (state.is(Tags.Blocks.ORES_DIAMOND)) return ColorsAS.DYE_LIGHT_BLUE;
-        if (state.is(Tags.Blocks.ORES_EMERALD)) return ColorsAS.DYE_GREEN;
-        if (state.is(Tags.Blocks.ORES_LAPIS)) return ColorsAS.DYE_BLUE;
-        if (state.is(Tags.Blocks.ORES_REDSTONE)) return ColorsAS.DYE_RED;
-        if (state.is(Tags.Blocks.ORES_QUARTZ)) return ColorsAS.DYE_WHITE;
-        if (state.is(Tags.Blocks.ORES_NETHERITE_SCRAP)) return ColorsAS.DYE_BROWN;
+        if (state.is(ConventionalBlockTags.IRON_ORES)) return ColorsAS.DYE_BROWN;
+        if (state.is(ConventionalBlockTags.GOLD_ORES)) return ColorsAS.DYE_YELLOW;
+        if (state.is(ConventionalBlockTags.COPPER_ORES)) return ColorsAS.DYE_ORANGE;
+        if (state.is(ConventionalBlockTags.COAL_ORES)) return ColorsAS.DYE_BLACK;
+        if (state.is(ConventionalBlockTags.DIAMOND_ORES)) return ColorsAS.DYE_LIGHT_BLUE;
+        if (state.is(ConventionalBlockTags.EMERALD_ORES)) return ColorsAS.DYE_GREEN;
+        if (state.is(ConventionalBlockTags.LAPIS_ORES)) return ColorsAS.DYE_BLUE;
+        if (state.is(ConventionalBlockTags.REDSTONE_ORES)) return ColorsAS.DYE_RED;
+        if (state.is(ConventionalBlockTags.QUARTZ_ORES)) return ColorsAS.DYE_WHITE;
+        if (state.is(ConventionalBlockTags.NETHERITE_SCRAP_ORES)) return ColorsAS.DYE_BROWN;
         return ColorWrapper.WHITE;
     }
 

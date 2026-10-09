@@ -11,6 +11,7 @@ package hellfirepvp.astralsorcery.common.component;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
+import hellfirepvp.astralsorcery.common.lib.LumenAS;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.lumen.ILumenHandler;
 import hellfirepvp.astralsorcery.common.lumen.Lumen;
@@ -19,6 +20,7 @@ import hellfirepvp.astralsorcery.common.lumen.LumenStack;
 import hellfirepvp.astralsorcery.common.lumen.binding.LumenBindingType;
 import hellfirepvp.astralsorcery.common.lumen.binding.data.LumenBindingTypeLoader;
 import hellfirepvp.astralsorcery.common.lumen.capability.LumenHandlerItemFactory;
+import net.fabricmc.api.EnvType;
 import net.minecraft.Util;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -28,8 +30,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.registries.DeferredHolder;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -42,7 +42,8 @@ import java.util.function.UnaryOperator;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public record StoredLumenComponent(List<StoredLumen> storedLumen, List<StoredLumenDisplay> lumenDisplay, Properties properties, Map<Lumen, ResourceLocation> boundLumen) {
+public record StoredLumenComponent(List<StoredLumen> storedLumen, List<StoredLumenDisplay> lumenDisplay,
+                                   Properties properties, Map<Lumen, ResourceLocation> boundLumen) {
 
     public static final int DEFAULT_CAPACITY = 2000;
     public static final StoredLumenComponent EMPTY = new StoredLumenComponent(List.of(), List.of(), Properties.DEFAULT, Map.of());
@@ -174,7 +175,7 @@ public record StoredLumenComponent(List<StoredLumen> storedLumen, List<StoredLum
         return true;
     }
 
-    public Optional<LumenBindingType> getBinding(LogicalSide side, LumenLike lumen) {
+    public Optional<LumenBindingType> getBinding(EnvType side, LumenLike lumen) {
         return Optional.ofNullable(this.boundLumen.get(lumen.asLumen()))
                 .flatMap(bindingTypeId -> LumenBindingTypeLoader.getInstance().getBindingType(side, bindingTypeId));
     }
@@ -207,7 +208,7 @@ public record StoredLumenComponent(List<StoredLumen> storedLumen, List<StoredLum
         return displayed;
     }
 
-    public List<Component> getLumenDisplayTexts(LogicalSide side, ItemStack stack, Lumen lumen) {
+    public List<Component> getLumenDisplayTexts(EnvType side, ItemStack stack, Lumen lumen) {
         List<Component> display = new ArrayList<>();
         this.getBinding(side, lumen)
                 .map(bindingType -> bindingType.getBinding(stack))
@@ -352,7 +353,7 @@ public record StoredLumenComponent(List<StoredLumen> storedLumen, List<StoredLum
             return new Properties(this.capacity, this.canDrain, false, this.accepted);
         }
 
-        public Properties allowAccept(DeferredHolder<Lumen, ? extends Lumen> lumenHolder) {
+        public Properties allowAccept(LumenAS.DeferredLumen lumenHolder) {
             return this.allowAccept(lumenHolder.getKey());
         }
 

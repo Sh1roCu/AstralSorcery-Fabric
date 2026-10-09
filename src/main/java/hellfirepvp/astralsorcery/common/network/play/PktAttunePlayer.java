@@ -12,13 +12,12 @@ import hellfirepvp.astralsorcery.common.network.PlayPacketHandler;
 import hellfirepvp.astralsorcery.common.recipe.attunement.PlayerAttunementRecipe;
 import hellfirepvp.astralsorcery.common.tile.TileAttunementAltar;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -45,8 +44,8 @@ public class PktAttunePlayer extends PlayPacketHandler.ToServer<PktAttunePlayer.
     }
 
     @Override
-    public void handle(Request payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
+    public void receive(Request payload, ServerPlayNetworking.Context context) {
+        context.server().execute(() -> {
             if (context.player() instanceof ServerPlayer sPlayer) {
                 MiscUtil.getTileAt(sPlayer.serverLevel(), payload.altarPos(), TileAttunementAltar.class, false).ifPresent(altar -> {
                     altar.getTileData().getActiveRecipe().ifPresent(activeRecipe -> {

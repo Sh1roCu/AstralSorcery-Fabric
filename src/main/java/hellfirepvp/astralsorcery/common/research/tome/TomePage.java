@@ -13,11 +13,11 @@ import com.mojang.serialization.MapCodec;
 import hellfirepvp.astralsorcery.client.screen.tome.page.RenderPage;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.research.ResearchNode;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 
@@ -30,9 +30,9 @@ import javax.annotation.Nullable;
  */
 public interface TomePage {
 
-    public static final Codec<TomePage> CODEC = RegistriesAS.REGISTRY_TOME_PAGE_TYPES.byNameCodec()
+    Codec<TomePage> CODEC = RegistriesAS.REGISTRY_TOME_PAGE_TYPES.byNameCodec()
             .dispatch(TomePage::getType, TomePage.TomePageType::codec);
-    public static final StreamCodec<RegistryFriendlyByteBuf, TomePage> STREAM_CODEC = ByteBufCodecs.registry(RegistriesAS.KEY_TOME_PAGE_TYPES)
+    StreamCodec<RegistryFriendlyByteBuf, TomePage> STREAM_CODEC = ByteBufCodecs.registry(RegistriesAS.KEY_TOME_PAGE_TYPES)
             .dispatch(TomePage::getType, TomePage.TomePageType::streamCodec);
 
     int DEFAULT_WIDTH = 174;
@@ -40,8 +40,9 @@ public interface TomePage {
 
     TomePageType<?> getType();
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     RenderPage createPage(@Nullable ResearchNode node, int page);
 
-    record TomePageType<T extends TomePage>(MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {}
+    record TomePageType<T extends TomePage>(MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
+    }
 }

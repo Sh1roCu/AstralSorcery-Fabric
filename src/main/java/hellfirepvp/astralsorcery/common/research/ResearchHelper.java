@@ -8,8 +8,11 @@
 
 package hellfirepvp.astralsorcery.common.research;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.network.PacketDistributor;
 import hellfirepvp.astralsorcery.common.constellation.BaseConstellation;
 import hellfirepvp.astralsorcery.common.constellation.property.AttunePlayerProperty;
+import hellfirepvp.astralsorcery.common.event.ResearchEvent;
+import hellfirepvp.astralsorcery.common.lib.AdvancementsAS;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.lib.constants.TagsAS;
 import hellfirepvp.astralsorcery.common.lumen.Lumen;
@@ -24,10 +27,9 @@ import hellfirepvp.astralsorcery.common.research.perk.PerkAllocation;
 import hellfirepvp.astralsorcery.common.research.perk.PerkAllocationType;
 import hellfirepvp.astralsorcery.common.research.perk.PerkRemovalResult;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
+import net.fabricmc.api.EnvType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,33 +47,68 @@ import java.util.function.Predicate;
 public class ResearchHelper {
 
     public static boolean memorizeConstellation(ServerPlayer player, BaseConstellation constellation) {
-        return withProgress(player, progress -> progress.memorizeConstellation(constellation));
+        return withProgress(player, progress -> {
+            if (progress.memorizeConstellation(constellation)) {
+                ResearchEvent.MemorizeConstellation.EVENT.invoker().post(new ResearchEvent.MemorizeConstellation(player, progress, constellation));
+                return true;
+            }
+            return false;
+        });
     }
 
     public static boolean discoverConstellation(ServerPlayer player, BaseConstellation constellation) {
-        return withProgress(player, progress -> progress.discoverConstellation(constellation));
+        return withProgress(player, progress -> {
+            boolean memorized = progress.hasSeenConstellation(constellation);
+            if (progress.discoverConstellation(constellation)) {
+                if (!memorized) {
+                    ResearchEvent.MemorizeConstellation.EVENT.invoker().post(new ResearchEvent.MemorizeConstellation(player, progress, constellation));
+                }
+                ResearchEvent.DiscoverConstellation.EVENT.invoker().post(new ResearchEvent.DiscoverConstellation(player, progress, constellation));
+                AdvancementsAS.CONSTELLATION_DISCOVERY.trigger(player, constellation);
+                return true;
+            }
+            return false;
+        });
     }
 
     public static boolean discoverConstellations(ServerPlayer player, Collection<BaseConstellation> constellations) {
         return withProgress(player, progress -> {
             boolean discoveredAny = false;
             for (BaseConstellation c : constellations) {
-                if (progress.discoverConstellation(c)) discoveredAny = true;
+                boolean memorized = progress.hasSeenConstellation(c);
+                if (progress.discoverConstellation(c)) {
+                    if (!memorized) {
+                        ResearchEvent.MemorizeConstellation.EVENT.invoker().post(new ResearchEvent.MemorizeConstellation(player, progress, c));
+                    }
+                    ResearchEvent.DiscoverConstellation.EVENT.invoker().post(new ResearchEvent.DiscoverConstellation(player, progress, c));
+                    AdvancementsAS.CONSTELLATION_DISCOVERY.trigger(player, c);
+                    discoveredAny = true;
+                }
             }
             return discoveredAny;
         });
     }
 
     public static boolean memorizeFocalPoint(ServerPlayer player, BaseConstellation constellation) {
-        return withProgress(player, progress ->
-                constellation.is(TagsAS.Constellations.MAY_BE_FOCAL_POINT) && progress.memorizeFocalPoint(constellation));
+        return withProgress(player, progress -> {
+            if (constellation.is(TagsAS.Constellations.MAY_BE_FOCAL_POINT) && progress.memorizeFocalPoint(constellation)) {
+                ResearchEvent.MemorizedFocalPoint.EVENT.invoker().post(new ResearchEvent.MemorizedFocalPoint(player, progress, constellation));
+                AdvancementsAS.FOCAL_POINT_DISCOVERY.trigger(player, constellation);
+                return true;
+            }
+            return false;
+        });
     }
 
     public static boolean memorizeFocalPoints(ServerPlayer player, Collection<BaseConstellation> constellations) {
         return withProgress(player, progress -> {
             boolean memorizedAny = false;
             for (BaseConstellation c : constellations) {
-                if (c.is(TagsAS.Constellations.MAY_BE_FOCAL_POINT) && progress.memorizeFocalPoint(c)) memorizedAny = true;
+                if (c.is(TagsAS.Constellations.MAY_BE_FOCAL_POINT) && progress.memorizeFocalPoint(c)) {
+                    ResearchEvent.MemorizedFocalPoint.EVENT.invoker().post(new ResearchEvent.MemorizedFocalPoint(player, progress, c));
+                    AdvancementsAS.FOCAL_POINT_DISCOVERY.trigger(player, c);
+                    memorizedAny = true;
+                }
             }
             return memorizedAny;
         });
@@ -82,6 +119,8 @@ public class ResearchHelper {
         withProgress(player, progress -> {
             if (progress.discoverLumen(lumen)) {
                 discovered.add(lumen);
+                ResearchEvent.DiscoveredLumen.EVENT.invoker().post(new ResearchEvent.DiscoveredLumen(player, progress, lumen));
+                AdvancementsAS.LUMEN_DISCOVERY.trigger(player, lumen);
                 return true;
             }
             return false;
@@ -94,6 +133,8 @@ public class ResearchHelper {
         withProgress(player, progress -> {
             for (Lumen l : lumen) {
                 if (progress.discoverLumen(l)) {
+                    ResearchEvent.DiscoveredLumen.EVENT.invoker().post(new ResearchEvent.DiscoveredLumen(player, progress, l));
+                    AdvancementsAS.LUMEN_DISCOVERY.trigger(player, l);
                     discovered.add(l);
                 }
             }
@@ -104,7 +145,9 @@ public class ResearchHelper {
 
     public static boolean setResearchProgress(ServerPlayer player, ResearchTier progression) {
         return withProgress(player, progress -> {
+            ResearchTier previous = progress.getTierReached();
             progress.setProgression(progression);
+            ResearchEvent.ResearchTierSet.EVENT.invoker().post(new ResearchEvent.ResearchTierSet(player, progress, previous, progression));
             return true;
         });
     }
@@ -136,11 +179,14 @@ public class ResearchHelper {
 
             removeAllAllocatedPerks(progress, player);
 
+            BaseConstellation prev = progress.getAttunedConstellation().orElse(null);
             PlayerPerkData perkData = progress.getPerkData();
             perkData.setExp(0);
             progress.setAttunedConstellation(constellation);
+            ResearchEvent.AttunedConstellationSet.EVENT.invoker().post(new ResearchEvent.AttunedConstellationSet(player, progress, prev));
+            AdvancementsAS.PLAYER_ATTUNEMENT.trigger(player, constellation);
 
-            AttunePlayerProperty.getRootPerk(constellation, LogicalSide.SERVER).ifPresent(root -> {
+            AttunePlayerProperty.getRootPerk(constellation, EnvType.SERVER).ifPresent(root -> {
                 doApplyPerk(progress, perkData, player, root, PerkAllocation.unlock());
             });
             return true;
@@ -150,8 +196,11 @@ public class ResearchHelper {
     public static boolean removeAttunedConstellation(ServerPlayer player) {
         return withProgress(player, progress -> {
             removeAllAllocatedPerks(progress, player);
+
+            BaseConstellation prev = progress.getAttunedConstellation().orElse(null);
             progress.getPerkData().setExp(0);
             progress.setAttunedConstellation(null);
+            ResearchEvent.AttunedConstellationSet.EVENT.invoker().post(new ResearchEvent.AttunedConstellationSet(player, progress, prev));
             return true;
         });
     }
@@ -165,7 +214,11 @@ public class ResearchHelper {
 
     public static boolean setKnowledgeFlag(ServerPlayer player, ResearchFlag flag) {
         return withProgress(player, progress -> {
-            return progress.setKnownFlag(flag);
+            if (progress.setKnownFlag(flag)) {
+                ResearchEvent.ResearchFlagSet.EVENT.invoker().post(new ResearchEvent.ResearchFlagSet(player, progress, flag));
+                return true;
+            }
+            return false;
         });
     }
 
@@ -180,14 +233,14 @@ public class ResearchHelper {
     }
 
     public static boolean wipeProgress(ServerPlayer player) {
-        PlayerProgress progress = ResearchManager.getProgress(player, LogicalSide.SERVER);
+        PlayerProgress progress = ResearchManager.getProgress(player, EnvType.SERVER);
         if (!progress.isValid()) return false;
 
         resetPerks(player);
         ResearchManager.removeProgress(player.getUUID());
         ResearchWriter.wipeFiles(player.getUUID());
 
-        PlayerProgress newProgress = ResearchManager.getProgress(player, LogicalSide.SERVER);
+        PlayerProgress newProgress = ResearchManager.getProgress(player, EnvType.SERVER);
 
         PacketDistributor.sendToPlayer(player, PktSyncPlayerProgress.newRequest(newProgress));
         ResearchManager.scheduleSave(player, true);
@@ -195,7 +248,7 @@ public class ResearchHelper {
     }
 
     private static boolean withProgress(ServerPlayer player, Predicate<PlayerProgress> fn) {
-        PlayerProgress progress = ResearchManager.getProgress(player, LogicalSide.SERVER);
+        PlayerProgress progress = ResearchManager.getProgress(player, EnvType.SERVER);
         if (!progress.isValid()) return false;
 
         if (!fn.test(progress)) return false;
@@ -210,6 +263,7 @@ public class ResearchHelper {
     public static boolean setPerkExp(ServerPlayer player, double exp) {
         return withProgress(player, progress -> {
             progress.getPerkData().setExp(exp);
+            AdvancementsAS.PERK_LEVEL.trigger(player, progress.getPerkData().getPerkLevel(player, EnvType.SERVER));
             return true;
         });
     }
@@ -217,6 +271,7 @@ public class ResearchHelper {
     public static boolean addPerkExp(ServerPlayer player, double exp) {
         return withProgress(player, progress -> {
             progress.getPerkData().modifyExp(player, exp);
+            AdvancementsAS.PERK_LEVEL.trigger(player, progress.getPerkData().getPerkLevel(player, EnvType.SERVER));
             return true;
         });
     }
@@ -239,7 +294,7 @@ public class ResearchHelper {
 
             // only check unlocked, granted comes with a token
             if (alloc.getType().isUnlock()) {
-                if (!perkData.hasFreeAllocationPoint(player, LogicalSide.SERVER)) return false;
+                if (!perkData.hasFreeAllocationPoint(player, EnvType.SERVER)) return false;
             }
 
             return doApplyPerk(progress, perkData, player, perk, alloc);
@@ -259,7 +314,7 @@ public class ResearchHelper {
             if (perkData.isPerkSealed(perk)) return false;
             if (!perkData.canSealPerk(perk)) return false;
 
-            PerkApplicationManager.modifySource(player, LogicalSide.SERVER, perk, PerkManager.Action.REMOVE);
+            PerkApplicationManager.modifySource(player, EnvType.SERVER, perk, PerkManager.Action.REMOVE);
             PacketDistributor.sendToPlayer(player, PktSyncModifierSource.remove(perk));
 
             if (!perkData.sealPerk(perk)) {
@@ -277,7 +332,7 @@ public class ResearchHelper {
             if (!perkData.isPerkSealed(perk)) return false;
             if (!perkData.breakSeal(perk)) return false;
 
-            PerkApplicationManager.modifySource(player, LogicalSide.SERVER, perk, PerkManager.Action.ADD);
+            PerkApplicationManager.modifySource(player, EnvType.SERVER, perk, PerkManager.Action.ADD);
             return true;
         });
 
@@ -295,9 +350,9 @@ public class ResearchHelper {
             PlayerPerkData perkData = progress.getPerkData();
             if (!perkData.hasPerkAllocation(perk)) return false;
 
-            PerkApplicationManager.modifySource(player, LogicalSide.SERVER, perk, PerkManager.Action.REMOVE);
+            PerkApplicationManager.modifySource(player, EnvType.SERVER, perk, PerkManager.Action.REMOVE);
             perkData.updateAllocatedPerkData(perk, newData);
-            PerkApplicationManager.modifySource(player, LogicalSide.SERVER, perk, PerkManager.Action.ADD);
+            PerkApplicationManager.modifySource(player, EnvType.SERVER, perk, PerkManager.Action.ADD);
 
             PacketDistributor.sendToPlayer(player, PktSyncPerkActivity.changeData(perk, oldData, newData));
             return true;
@@ -334,7 +389,7 @@ public class ResearchHelper {
                     return false;
                 }
                 if (removeResult.removesPerk()) {
-                    PerkApplicationManager.modifySource(player, LogicalSide.SERVER, perk, PerkManager.Action.REMOVE);
+                    PerkApplicationManager.modifySource(player, EnvType.SERVER, perk, PerkManager.Action.REMOVE);
                 }
                 if (removeResult.removesAllocationType()) {
                     perk.onRemovePerkServer(player, allocation.getType(), progress, MiscUtil.cast(data));
@@ -367,7 +422,7 @@ public class ResearchHelper {
             perkData.applyPerkAllocation(perk, allocation, false);
             perkData.updateAllocatedPerkData(perk, MiscUtil.cast(newData));
 
-            PerkApplicationManager.modifySource(player, LogicalSide.SERVER, perk, PerkManager.Action.ADD);
+            PerkApplicationManager.modifySource(player, EnvType.SERVER, perk, PerkManager.Action.ADD);
             PacketDistributor.sendToPlayer(player, PktSyncModifierSource.add(perk));
             return true;
         }

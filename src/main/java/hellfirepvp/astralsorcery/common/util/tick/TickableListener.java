@@ -8,11 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.util.tick;
 
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
+
+import net.minecraft.server.MinecraftServer;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -23,19 +20,19 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
  */
 public interface TickableListener extends Tickable {
 
-    default void onPlayerTick(PlayerTickEvent.Post event) {
+    default void onPlayerTick(/*PlayerTickEvent.Post event*/) {
         this.tick();
     }
 
-    default void onLevelTick(LevelTickEvent.Post event) {
+    default void onLevelTick(/*LevelTickEvent.Post event*/) {
         this.tick();
     }
 
-    default void onClientTick(ClientTickEvent.Post event) {
+    default void onClientTick() {
         this.tick();
     }
 
-    default void onServerTick(ServerTickEvent.Post event) {
+    default void onServerTick(MinecraftServer server) {
         this.tick();
     }
 }

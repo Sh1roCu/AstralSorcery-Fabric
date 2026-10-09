@@ -13,24 +13,22 @@ import hellfirepvp.astralsorcery.common.block.tile.base.BaseTickTileBlock;
 import hellfirepvp.astralsorcery.common.item.block.CelestialCrystalClusterBlockItem;
 import hellfirepvp.astralsorcery.common.lib.TileEntitiesAS;
 import hellfirepvp.astralsorcery.common.tile.TileCelestialCrystalCluster;
-import hellfirepvp.astralsorcery.common.util.data.TileRegistryObject;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.pathfinder.PathComputationType;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -56,7 +54,7 @@ public class CelestialCrystalClusterBlock extends BaseTickTileBlock<TileCelestia
     public static IntegerProperty STAGE = IntegerProperty.create("stage", 0, 4);
 
     public CelestialCrystalClusterBlock(Properties properties) {
-        super(properties, TileEntitiesAS.CELESTIAL_CRYSTAL_CLUSTER);
+        super(properties, () -> TileEntitiesAS.CELESTIAL_CRYSTAL_CLUSTER);
     }
 
     @Override
@@ -94,8 +92,8 @@ public class CelestialCrystalClusterBlock extends BaseTickTileBlock<TileCelestia
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
-        ItemStack stack = super.getCloneItemStack(state, target, level, pos, player);
+    public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+        ItemStack stack = super.getCloneItemStack(level, pos, state);
         CelestialCrystalClusterBlockItem.setStage(stack, state.getValue(STAGE));
         return stack;
     }
@@ -106,11 +104,6 @@ public class CelestialCrystalClusterBlock extends BaseTickTileBlock<TileCelestia
             return Blocks.AIR.defaultBlockState();
         }
         return state;
-    }
-
-    @Override
-    public SoundType getSoundType(BlockState state, LevelReader level, BlockPos pos, @org.jetbrains.annotations.Nullable Entity entity) {
-        return super.getSoundType(state, level, pos, entity);
     }
 
     @Override

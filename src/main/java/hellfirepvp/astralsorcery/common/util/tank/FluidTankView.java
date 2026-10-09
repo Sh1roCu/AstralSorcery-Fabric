@@ -8,12 +8,17 @@
 
 package hellfirepvp.astralsorcery.common.util.tank;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.core.Direction;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -27,13 +32,13 @@ import java.util.stream.IntStream;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class FluidTankView implements IFluidHandler {
+public class FluidTankView extends CombinedStorage<FluidVariant, Storage<FluidVariant>> {
 
     private final int tanks;
     private final FluidContainerList contents;
     private final Set<Direction> applicableSides;
     private final Consumer<Integer> changeListener;
-    private final Function<Integer, Integer> tankCapacityGetter;
+    private final Function<Integer, Long> tankCapacityGetter;
     private InputFilter inputFilter;
     private ExtractFilter extractFilter;
 
@@ -41,9 +46,10 @@ public class FluidTankView implements IFluidHandler {
                          FluidContainerList contents,
                          Set<Direction> applicableSides,
                          Consumer<Integer> changeListener,
-                         Function<Integer, Integer> tankCapacityGetter,
+                         Function<Integer, Long> tankCapacityGetter,
                          InputFilter inputFilter,
                          ExtractFilter extractFilter) {
+        super(List.of());
         this.tanks = tanks;
         this.contents = contents;
         this.applicableSides = applicableSides;
@@ -51,9 +57,85 @@ public class FluidTankView implements IFluidHandler {
         this.tankCapacityGetter = tankCapacityGetter;
         this.inputFilter = inputFilter;
         this.extractFilter = extractFilter;
+        this.parts = storages();
+    }
+
+    protected List<Storage<FluidVariant>> storages() {
+        List<Storage<FluidVariant>> storages = new ArrayList<>();
+        for (int i = 0; i < this.tanks; i++) {
+            final int slot = i;
+            storages.add(new SingleFluidStorage() {
+                private FluidStack outerContent() {
+                    return FluidTankView.this.contents.getTank(slot).getModifiableContent();
+                }
+
+                private void sync() {
+                    FluidStack stack = outerContent();
+                    this.variant = stack.getFluidVariant();
+                    this.amount = stack.getAmount();
+                }
+
+                @Override
+                public long insert(FluidVariant resource, long maxAmount, TransactionContext tx) {
+                    sync();
+                    return super.insert(resource, maxAmount, tx);
+                }
+
+                @Override
+                public long extract(FluidVariant resource, long maxAmount, TransactionContext tx) {
+                    sync();
+                    return super.extract(resource, maxAmount, tx);
+                }
+
+                @Override
+                protected long getCapacity(FluidVariant variant) {
+                    return FluidTankView.this.getTankCapacity(slot);
+                }
+
+                @Override
+                public FluidVariant getResource() {
+                    sync();
+                    return this.variant;
+                }
+
+                @Override
+                public long getAmount() {
+                    sync();
+                    return this.amount;
+                }
+
+                @Override
+                public boolean isResourceBlank() {
+                    return getResource().isBlank();
+                }
+
+                @Override
+                protected boolean canInsert(FluidVariant variant) {
+                    return super.canInsert(variant) && FluidTankView.this.inputFilter.canInsert(slot, variant, getResource());
+                }
+
+                @Override
+                protected boolean canExtract(FluidVariant variant) {
+                    return super.canExtract(variant) && FluidTankView.this.extractFilter.canExtract(slot, variant);
+                }
+
+                @Override
+                protected void onFinalCommit() {
+                    FluidContainer container = FluidTankView.this.contents.getTank(slot);
+                    if (this.variant.isBlank() || this.amount <= 0) {
+                        container.clear();
+                    } else {
+                        container.setContent(new FluidStack(this.variant, this.amount));
+                    }
+                    FluidTankView.this.onContentChanged(slot);
+                }
+            });
+        }
+        return storages;
     }
 
     private FluidContainer getTank(int tank) {
+
         this.validateTankAccess(tank);
         return this.contents.getTank(tank);
     }
@@ -84,144 +166,23 @@ public class FluidTankView implements IFluidHandler {
         }
     }
 
-    @Override
     public int getTanks() {
         return this.tanks;
     }
 
-    @Override
     public FluidStack getFluidInTank(int tank) {
         this.validateTankAccess(tank);
         return this.getTank(tank).getContent();
     }
 
-    @Override
-    public int getTankCapacity(int tank) {
+    public long getTankCapacity(int tank) {
         this.validateTankAccess(tank);
         return this.tankCapacityGetter.apply(tank);
     }
 
-    @Override
-    public boolean isFluidValid(int tank, FluidStack stack) {
+    public boolean isFluidValid(int tank, FluidVariant fluidVariant) {
         this.validateTankAccess(tank);
-        return this.inputFilter.canInsert(tank, stack, this.getFluidInTank(tank));
-    }
-
-    @Override
-    public int fill(FluidStack resource, FluidAction action) {
-        if (resource.isEmpty()) {
-            return 0;
-        }
-
-        FluidStack fillStack = resource.copy();
-        int filled = 0;
-        for (int tank = 0; tank < this.getTanks(); tank++) {
-            if (!fillStack.isEmpty() && this.isFluidValid(tank, fillStack)) {
-                int tankFilled = this.fillTank(tank, fillStack, action);
-                fillStack.shrink(tankFilled);
-                filled += tankFilled;
-            }
-        }
-        return filled;
-    }
-
-    private int fillTank(int tankIndex, FluidStack fillStack, FluidAction action) {
-        FluidContainer tank = this.getTank(tankIndex);
-        FluidStack tankContent = tank.getContent();
-        int capacity = this.getTankCapacity(tankIndex);
-
-        if (action.simulate()) {
-            if (tankContent.isEmpty()) {
-                return Math.min(capacity, fillStack.getAmount());
-            }
-            if (!FluidStack.isSameFluidSameComponents(tankContent, fillStack)) {
-                return 0;
-            }
-            return Math.min(capacity - tankContent.getAmount(), fillStack.getAmount());
-        }
-
-        if (tankContent.isEmpty()) {
-            FluidStack newContent = fillStack.copyWithAmount(Math.min(capacity, fillStack.getAmount()));
-            tank.setContent(newContent);
-            this.onContentChanged(tankIndex);
-            return newContent.getAmount();
-        }
-        if (!FluidStack.isSameFluidSameComponents(tankContent, fillStack)) {
-            return 0;
-        }
-
-        int maxFillable = capacity - tankContent.getAmount();
-        if (maxFillable <= 0) {
-            return 0;
-        }
-
-        if (fillStack.getAmount() < maxFillable) {
-            tank.getModifiableContent().grow(fillStack.getAmount());
-            maxFillable = fillStack.getAmount();
-        } else {
-            tank.getModifiableContent().setAmount(capacity);
-        }
-        this.onContentChanged(tankIndex);
-        return maxFillable;
-    }
-
-    @Override
-    public FluidStack drain(FluidStack resource, FluidAction action) {
-        if (resource.isEmpty()) {
-            return FluidStack.EMPTY;
-        }
-        return this.drainInternal(resource.getAmount(), this.getDrainableTanks(resource), action);
-    }
-
-    private List<Integer> getDrainableTanks(FluidStack resource) {
-        return IntStream.range(0, this.getTanks())
-                .filter(tank -> !this.getTank(tank).getContent().isEmpty())
-                .filter(tank -> FluidStack.isSameFluidSameComponents(this.getTank(tank).getContent(), resource))
-                .boxed()
-                .toList();
-    }
-
-    @Override
-    public FluidStack drain(int maxDrain, FluidAction action) {
-        List<Integer> allTanks = IntStream.range(0, this.getTanks()).boxed().toList();
-        return this.drainInternal(maxDrain, allTanks, action);
-    }
-
-    private FluidStack drainInternal(int maxDrain, List<Integer> eligibleTanks, FluidAction action) {
-        FluidStack drained = FluidStack.EMPTY;
-        int toDrain = maxDrain;
-        for (int tankId : eligibleTanks) {
-            if (toDrain > 0) {
-                FluidStack tankDrain = this.drainTank(tankId, drained, toDrain, action);
-                toDrain -= tankDrain.getAmount();
-                if (drained.isEmpty()) {
-                    drained = tankDrain;
-                } else {
-                    drained.grow(tankDrain.getAmount());
-                }
-            }
-        }
-        return drained;
-    }
-
-    //fluidstack that Was drained
-    private FluidStack drainTank(int tankIndex, FluidStack drainedType, int maxDrain, FluidAction action) {
-        FluidContainer tank = this.getTank(tankIndex);
-        FluidStack tankContent = tank.getContent();
-
-        if (tankContent.isEmpty() || !this.extractFilter.canExtract(tankIndex, maxDrain, tankContent)) {
-            return FluidStack.EMPTY;
-        }
-        if (!drainedType.isEmpty() && !FluidStack.isSameFluidSameComponents(tankContent, drainedType)) {
-            return FluidStack.EMPTY;
-        }
-
-        int canDrain = Math.min(maxDrain, tankContent.getAmount());
-        if (action.execute()) {
-            tank.getModifiableContent().shrink(canDrain);
-            this.onContentChanged(tankIndex);
-        }
-        return tankContent.copyWithAmount(canDrain);
+        return this.inputFilter.canInsert(tank, fluidVariant, this.getFluidInTank(tank).getFluidVariant());
     }
 
     public void clearTanks() {
@@ -254,7 +215,7 @@ public class FluidTankView implements IFluidHandler {
 
         InputFilter NO_FILTER = (tank, toAdd, existing) -> true;
 
-        boolean canInsert(int tank, FluidStack toAdd, @Nonnull FluidStack existing);
+        boolean canInsert(int tank, FluidVariant toAdd, @Nonnull FluidVariant existing);
 
         default InputFilter and(InputFilter other) {
             return (tank, toAdd, existing) ->
@@ -265,13 +226,13 @@ public class FluidTankView implements IFluidHandler {
     @FunctionalInterface
     public interface ExtractFilter {
 
-        ExtractFilter NO_FILTER = (tank, amount, existing) -> true;
+        ExtractFilter NO_FILTER = (tank, existing) -> true;
 
-        boolean canExtract(int tank, int amount, @Nonnull FluidStack existing);
+        boolean canExtract(int tank, @Nonnull FluidVariant existing);
 
         default ExtractFilter and(ExtractFilter other) {
-            return (tank, amount, existing) ->
-                    other.canExtract(tank, amount, existing) && this.canExtract(tank, amount, existing);
+            return (tank, existing) ->
+                    other.canExtract(tank, existing) && this.canExtract(tank, existing);
         }
     }
 }

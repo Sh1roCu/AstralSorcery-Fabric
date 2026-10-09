@@ -12,8 +12,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.patreon.type.TypeFlare;
-import net.neoforged.fml.loading.FMLLoader;
-import net.neoforged.neoforge.common.NeoForge;
+import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,7 +20,6 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -79,7 +77,7 @@ public class PatreonDataManager {
                 PatreonEffect pe = effectType.getProvider().buildEffect(playerUUID, effect.getParameters());
 
                 pe.initialize();
-                pe.attachEventListeners(NeoForge.EVENT_BUS);
+                pe.attachEventListeners();
                 PatreonEffectHelper.playerEffectMap.computeIfAbsent(playerUUID, uuid -> new ArrayList<>()).add(pe);
                 PatreonEffectHelper.effectMap.put(pe.getEffectUUID(), pe);
             } catch (Exception exc) {
@@ -87,12 +85,12 @@ public class PatreonDataManager {
             }
         }
 
-        if (!FMLLoader.isProduction()) {
+        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
             //UUID hellfire = UUID.fromString("7f6971c5-fb58-4519-a975-b1b5766e92d1");
             UUID dev = UUID.fromString("380df991-f603-344c-a090-369bad2a924a");
             PatreonEffect effect = new TypeFlare(UUID.fromString("17f84a37-6d9d-4ad2-8b85-ac333390f6f2"), FlareColor.STANDARD);
 
-            effect.attachEventListeners(NeoForge.EVENT_BUS);
+            effect.attachEventListeners();
             PatreonEffectHelper.playerEffectMap.computeIfAbsent(dev, uuid -> new ArrayList<>()).add(effect);
             PatreonEffectHelper.effectMap.put(effect.getEffectUUID(), effect);
         }

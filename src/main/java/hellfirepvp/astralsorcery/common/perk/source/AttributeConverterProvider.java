@@ -10,7 +10,7 @@ package hellfirepvp.astralsorcery.common.perk.source;
 
 import hellfirepvp.astralsorcery.common.perk.convert.PerkAttributeConverter;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import java.util.Collection;
 
@@ -23,6 +23,6 @@ import java.util.Collection;
  */
 public interface AttributeConverterProvider {
 
-    Collection<PerkAttributeConverter> getConverters(Player player, LogicalSide side, boolean ignoreRequirements);
+    Collection<PerkAttributeConverter> getConverters(Player player, EnvType side, boolean ignoreRequirements);
 
 }

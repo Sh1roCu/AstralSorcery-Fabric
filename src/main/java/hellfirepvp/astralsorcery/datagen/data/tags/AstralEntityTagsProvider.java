@@ -8,14 +8,11 @@
 
 package hellfirepvp.astralsorcery.datagen.data.tags;
 
-import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.lib.EntitiesAS;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalEntityTypeTags;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.data.PackOutput;
-import net.minecraft.data.tags.EntityTypeTagsProvider;
-import net.neoforged.neoforge.common.Tags;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -26,24 +23,24 @@ import java.util.concurrent.CompletableFuture;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class AstralEntityTagsProvider extends EntityTypeTagsProvider {
+public class AstralEntityTagsProvider extends FabricTagProvider.EntityTypeTagProvider {
 
-    public AstralEntityTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> provider, @Nullable ExistingFileHelper existingFileHelper) {
-        super(output, provider, AstralSorcery.MODID, existingFileHelper);
+    public AstralEntityTagsProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> completableFuture) {
+        super(output, completableFuture);
     }
 
     @Override
     protected void addTags(HolderLookup.Provider provider) {
-        tag(Tags.EntityTypes.CAPTURING_NOT_SUPPORTED)
-                .add(EntitiesAS.FLARE.get())
-                .add(EntitiesAS.ILLUMINATION_SPARK.get())
-                .add(EntitiesAS.NOCTURNAL_SPARK.get())
-                .add(EntitiesAS.VIVID_SPARK.get());
+        getOrCreateTagBuilder(ConventionalEntityTypeTags.CAPTURING_NOT_SUPPORTED)
+                .add(EntitiesAS.FLARE)
+                .add(EntitiesAS.ILLUMINATION_SPARK)
+                .add(EntitiesAS.NOCTURNAL_SPARK)
+                .add(EntitiesAS.VIVID_SPARK);
 
-        tag(Tags.EntityTypes.TELEPORTING_NOT_SUPPORTED)
-                .add(EntitiesAS.FLARE.get())
-                .add(EntitiesAS.ILLUMINATION_SPARK.get())
-                .add(EntitiesAS.NOCTURNAL_SPARK.get())
-                .add(EntitiesAS.VIVID_SPARK.get());
+        getOrCreateTagBuilder(ConventionalEntityTypeTags.TELEPORTING_NOT_SUPPORTED)
+                .add(EntitiesAS.FLARE)
+                .add(EntitiesAS.ILLUMINATION_SPARK)
+                .add(EntitiesAS.NOCTURNAL_SPARK)
+                .add(EntitiesAS.VIVID_SPARK);
     }
 }

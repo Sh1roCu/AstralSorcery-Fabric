@@ -26,7 +26,7 @@ import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -53,7 +53,7 @@ public class CommandAttune {
             ctx.getSource().sendFailure(Component.literal("Unknown constellation" + cstKey.location()).withStyle(ChatFormatting.RED));
             return 0;
         }
-        PlayerProgress progress = ResearchManager.getProgress(player, LogicalSide.SERVER);
+        PlayerProgress progress = ResearchManager.getProgress(player, EnvType.SERVER);
         if (!progress.hasDiscoveredConstellation(cst)) {
             ResearchHelper.discoverConstellation(player, cst);
         }

@@ -11,6 +11,7 @@ package hellfirepvp.astralsorcery.datagen.assets;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.datagen.ConstellationPositionProvider;
 import hellfirepvp.astralsorcery.client.sky.constellation.SkyConstellationPosition;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
@@ -28,7 +29,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public class AstralConstellationPositionProvider extends ConstellationPositionProvider {
 
-    public AstralConstellationPositionProvider(PackOutput output) {
+    public AstralConstellationPositionProvider(FabricDataOutput output) {
         super(output, AstralSorcery.MODID);
     }
 

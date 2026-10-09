@@ -11,13 +11,13 @@ package hellfirepvp.astralsorcery.common.recipe.altar.effect;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.recipe.altar.ActiveAltarRecipe;
 import hellfirepvp.astralsorcery.common.tile.TileAltar;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
 
@@ -30,10 +30,11 @@ import javax.annotation.Nonnull;
  */
 public abstract class AltarEffect implements Comparable<AltarEffect> {
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public abstract void tick(Level level, TileAltar altar, RandomSource rand, ActiveAltarRecipe recipe, int progressTick, int tick, ActiveAltarRecipe.State state, CompoundTag effectData);
 
-    public void copyEffectData(CompoundTag from, CompoundTag to) {}
+    public void copyEffectData(CompoundTag from, CompoundTag to) {
+    }
 
     public final ResourceLocation getKey() {
         return RegistriesAS.REGISTRY_ALTAR_EFFECTS.getResourceKey(this)

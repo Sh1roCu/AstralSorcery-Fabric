@@ -17,7 +17,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import java.util.List;
 
@@ -53,7 +53,7 @@ public class LumenBindingEffectEffectiveness extends LumenBindingEffect {
     }
 
     @Override
-    public List<Component> getDisplayText(LogicalSide side, ItemStack stack) {
+    public List<Component> getDisplayText(EnvType side, ItemStack stack) {
         int flatRoundedChance = Math.round(this.getEffectMultiplier() * 100F);
         return List.of(Component.translatable("lumen.binding.astralsorcery.increased_effect", flatRoundedChance));
     }

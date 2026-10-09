@@ -14,12 +14,10 @@ import hellfirepvp.astralsorcery.common.constellation.BaseConstellation;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 
 /**
@@ -31,7 +29,8 @@ import net.minecraft.world.level.block.Block;
  */
 public class TagsAS {
 
-    private TagsAS() {}
+    private TagsAS() {
+    }
 
     public static class Blocks {
 
@@ -41,7 +40,7 @@ public class TagsAS {
 
         public static final TagKey<Block> VALID_TREE_BEACON_BLOCK = blockTag("valid_tree_beacon_block");
 
-        public static final TagKey<Block> SIMULATED_NON_MOVEABLE = BlockTags.create(Mods.SIMULATED.key("non_movable"));
+        public static final TagKey<Block> SIMULATED_NON_MOVEABLE = TagKey.create(Registries.BLOCK, Mods.SIMULATED.key("non_movable"));
 
     }
 
@@ -62,7 +61,18 @@ public class TagsAS {
         public static final TagKey<Item> FUNCTIONAL_ATTUNEABLE_ITEM = itemTag("functional_attuneable_item");
         public static final TagKey<Item> FUNCTIONAL_PERKTREE_SOCKETABLE_ITEM = itemTag("functional_perktree_socketable_item");
 
-        public static final TagKey<Item> CURIOS_NECKLACE = ItemTags.create(Mods.CURIOS.key("necklace"));
+        public static final TagKey<Item> CURIOS_NECKLACE = TagKey.create(Registries.ITEM, Mods.TRINKETS.key("necklace"));
+
+    }
+
+    public static class Biomes {
+
+        public static final TagKey<Biome> FOCAL_POINT_BIOMES = TagKey.create(Registries.BIOME, AstralSorcery.key("focal_point_biomes"));
+        public static final TagKey<Biome> OBLITERATION_BIOMES = TagKey.create(Registries.BIOME, AstralSorcery.key("obliteration_biomes"));
+        public static final TagKey<Biome> DIG_SITE_BIOMES = TagKey.create(Registries.BIOME, AstralSorcery.key("dig_site_biomes"));
+        public static final TagKey<Biome> MOON_DIAL_BIOMES = TagKey.create(Registries.BIOME, AstralSorcery.key("moon_dial_biomes"));
+        public static final TagKey<Biome> COLUMN_BIOMES = TagKey.create(Registries.BIOME, AstralSorcery.key("column_biomes"));
+        public static final TagKey<Biome> ROTUNDA_BIOMES = TagKey.create(Registries.BIOME, AstralSorcery.key("rotunda_biomes"));
 
     }
 
@@ -80,19 +90,19 @@ public class TagsAS {
     }
 
     private static TagKey<Block> blockTagCommon(String name) {
-        return BlockTags.create(ResourceLocation.fromNamespaceAndPath("c", name));
+        return TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath("c", name));
     }
 
     private static TagKey<Block> blockTag(String name) {
-        return BlockTags.create(AstralSorcery.key(name));
+        return TagKey.create(Registries.BLOCK, AstralSorcery.key(name));
     }
 
     private static TagKey<Item> itemTagCommon(String name) {
-        return ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", name));
+        return TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", name));
     }
 
     private static TagKey<Item> itemTag(String name) {
-        return ItemTags.create(AstralSorcery.key(name));
+        return TagKey.create(Registries.ITEM, AstralSorcery.key(name));
     }
 
     private static TagKey<DamageType> damageTypeTag(String name) {

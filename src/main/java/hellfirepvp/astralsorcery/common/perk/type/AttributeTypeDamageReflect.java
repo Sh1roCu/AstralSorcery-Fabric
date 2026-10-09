@@ -15,12 +15,11 @@ import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.DamageUtil;
 import hellfirepvp.astralsorcery.common.util.SidedHelper;
-import net.minecraft.world.damagesource.DamageSources;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -36,15 +35,15 @@ public class AttributeTypeDamageReflect extends PerkAttributeType {
     }
 
     @Override
-    protected void attachListeners(IEventBus eventBus) {
-        super.attachListeners(eventBus);
-        eventBus.addListener(this::onDamageTaken);
+    protected void attachListeners() {
+        super.attachListeners();
+        ServerLivingEntityEvents.AFTER_DAMAGE.register(this::onDamageTaken);
     }
 
-    private void onDamageTaken(LivingDamageEvent.Post event) {
-        if (!(event.getSource().getEntity() instanceof LivingEntity attacker)) return;
-        if (!(event.getEntity() instanceof Player player)) return;
-        LogicalSide side = SidedHelper.getSide(player);
+    private void onDamageTaken(LivingEntity entity, DamageSource source, float baseDamageTaken, float damageTaken, boolean blocked) {
+        if (!(source.getEntity() instanceof LivingEntity attacker)) return;
+        if (!(entity instanceof Player player)) return;
+        EnvType side = SidedHelper.getSide(player);
         if (!this.hasTypeApplied(player, side)) return;
 
         PlayerProgress progress = ResearchManager.getProgress(player, side);
@@ -54,7 +53,7 @@ public class AttributeTypeDamageReflect extends PerkAttributeType {
                 .modifyValue(player, progress, this, 0F);
         reflectPercent = AttributeEvent.postProcessModded(player, this, reflectPercent);
 
-        float damageToReflect = event.getNewDamage() * reflectPercent;
+        float damageToReflect = damageTaken * reflectPercent;
         if (damageToReflect <= 0) return;
 
         DamageUtil.shotgunAttack(attacker, e -> {

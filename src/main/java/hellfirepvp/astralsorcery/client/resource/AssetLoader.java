@@ -9,9 +9,9 @@
 package hellfirepvp.astralsorcery.client.resource;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -20,17 +20,18 @@ import net.neoforged.api.distmarker.OnlyIn;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class AssetLoader {
 
-    private AssetLoader() {}
+    private AssetLoader() {
+    }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     protected static RenderTexture load(AssetLocation location, String name, String suffix) {
         return new RenderTexture(buildResourceKey(location, name, suffix));
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private static ResourceLocation buildResourceKey(AssetLocation location, String name, String suffix) {
         if (name.endsWith(suffix)) { //In case of derp.
             name = name.substring(0, name.length() - suffix.length());
@@ -45,7 +46,7 @@ public class AssetLoader {
         return AstralSorcery.key(path.toString());
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     protected static RenderTexture loadTexture(AssetLocation location, String name) {
         return load(location, name, ".png");
     }

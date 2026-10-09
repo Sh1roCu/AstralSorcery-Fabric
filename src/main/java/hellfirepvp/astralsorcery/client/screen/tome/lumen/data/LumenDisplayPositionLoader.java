@@ -15,6 +15,7 @@ import com.mojang.serialization.JsonOps;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.datagen.LumenDisplayPositionProvider;
 import hellfirepvp.astralsorcery.common.lumen.Lumen;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -25,7 +26,6 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,17 +37,25 @@ import java.util.Map;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class LumenDisplayPositionLoader implements ResourceManagerReloadListener {
+public class LumenDisplayPositionLoader implements ResourceManagerReloadListener, IdentifiableResourceReloadListener {
 
     private static final Gson GSON = new Gson();
     private static final LumenDisplayPositionLoader INSTANCE = new LumenDisplayPositionLoader();
 
+    public static final ResourceLocation ID = AstralSorcery.key("lumen_display_position");
+
     private final Map<Lumen, LumenDisplayPosition> positions = new HashMap<>();
 
-    private LumenDisplayPositionLoader() {}
+    private LumenDisplayPositionLoader() {
+    }
 
     public static LumenDisplayPositionLoader getInstance() {
         return INSTANCE;
+    }
+
+    @Override
+    public ResourceLocation getFabricId() {
+        return ID;
     }
 
     public Map<Lumen, LumenDisplayPosition> getPositions() {

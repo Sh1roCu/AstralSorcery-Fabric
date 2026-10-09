@@ -16,14 +16,12 @@ import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
 import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.visual.VisualEffectTypes;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-
-import java.util.List;
 
 public class CelestialStrikeBeamEffect implements VisualEffectTypes.Effect {
 
@@ -57,7 +55,7 @@ public class CelestialStrikeBeamEffect implements VisualEffectTypes.Effect {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void playEffect(RandomSource rand) {
         VectorUtil.iteratePoints(this.from, this.to, 0.35F).forEach(pos -> {
             Vector3 effectPos = VectorUtil.withRandomOffset(pos, rand, 0.15F);

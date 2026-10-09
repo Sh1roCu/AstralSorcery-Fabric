@@ -9,13 +9,11 @@
 package hellfirepvp.astralsorcery.client.util.structure;
 
 import hellfirepvp.observerlib.api.structure.MatchableStructure;
-import hellfirepvp.observerlib.api.util.StructureBlockArray;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -39,18 +37,18 @@ public class StructurePreviewHelper {
         return new StructurePreview.Builder(level, center, structure);
     }
 
-    public static void renderPreview(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL) return;
+    public static void renderPreview(WorldRenderContext context) {
+        // if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL) return;
         if (currentPreview == null) return;
         Player player = Minecraft.getInstance().player;
         if (player != null && currentPreview.canRender(player.level(), player.blockPosition())) {
-            currentPreview.render(event.getCamera(), event.getPartialTick().getGameTimeDeltaPartialTick(false));
+            currentPreview.render(context.camera(), context.tickCounter().getGameTimeDeltaPartialTick(false));
         }
     }
 
-    public static void tickPreview(ClientTickEvent.Post event) {
+    public static void tickPreview(Minecraft client) {
         if (currentPreview == null) return;
-        Player player = Minecraft.getInstance().player;
+        Player player = client.player;
         if (player == null) {
             currentPreview.removed();
             currentPreview = null;

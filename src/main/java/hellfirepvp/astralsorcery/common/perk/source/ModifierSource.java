@@ -9,11 +9,11 @@
 package hellfirepvp.astralsorcery.common.perk.source;
 
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
+import net.fabricmc.api.EnvType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -26,13 +26,13 @@ import net.neoforged.fml.LogicalSide;
 public interface ModifierSource {
 
     StreamCodec<RegistryFriendlyByteBuf, ModifierSource> STREAM_CODEC = ByteBufCodecs.registry(RegistriesAS.KEY_PERK_MODIFIER_SOURCES)
-                    .dispatch(ModifierSource::getSourceProvider, ModifierSourceProvider::getModifierSourceSyncCodec);
+            .dispatch(ModifierSource::getSourceProvider, ModifierSourceProvider::getModifierSourceSyncCodec);
 
-    boolean canApplySource(Player player, LogicalSide dist);
+    boolean canApplySource(Player player, EnvType dist);
 
-    void onRemove(Player player, LogicalSide dist);
+    void onRemove(Player player, EnvType dist);
 
-    void onApply(Player player, LogicalSide dist);
+    void onApply(Player player, EnvType dist);
 
     default boolean isEqual(ModifierSource other) {
         return this.equals(other);

@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.util.inventory;
 
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 
@@ -54,60 +56,52 @@ public class FilteredInventoryView extends InventoryView {
     }
 
     @Override
-    public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-        if (!this.canInsertItem(slot, stack, this.getStackInSlot(slot))) {
-            return stack;
+    public long insert(ItemVariant resource, long maxAmount, TransactionContext transaction) {
+        if (!this.canInsertItem(maxAmount, resource)) {
+            return 0;
         }
-        return super.insertItem(slot, stack, simulate);
+        return super.insert(resource, maxAmount, transaction);
     }
 
     @Override
-    public ItemStack extractItem(int slot, int amount, boolean simulate) {
-        if (!this.canExtractItem(slot, amount, this.getStackInSlot(slot))) {
-            return ItemStack.EMPTY;
+    public long extract(ItemVariant resource, long maxAmount, TransactionContext transaction) {
+        if (!this.canExtractItem(maxAmount, resource)) {
+            return 0;
         }
-        return super.extractItem(slot, amount, simulate);
+        return super.extract(resource, maxAmount, transaction);
     }
 
-    public boolean canInsertItem(int slot, ItemStack toAdd) {
-        return this.canInsertItem(slot, toAdd, this.getStackInSlot(slot));
+    private boolean canInsertItem(long amount, @Nonnull ItemVariant toAdd) {
+        return this.inputFilter == null || this.inputFilter.canInsert(amount, toAdd);
     }
 
-    private boolean canInsertItem(int slot, ItemStack toAdd, @Nonnull ItemStack existing) {
-        return this.inputFilter == null || this.inputFilter.canInsert(slot, toAdd, existing);
-    }
-
-    public boolean canExtractItem(int slot, int amount) {
-        return this.canExtractItem(slot, amount, this.getStackInSlot(slot));
-    }
-
-    private boolean canExtractItem(int slot, int amount, @Nonnull ItemStack existing) {
-        return this.extractFilter == null || this.extractFilter.canExtract(slot, amount, existing);
+    private boolean canExtractItem(long amount, @Nonnull ItemVariant existing) {
+        return this.extractFilter == null || this.extractFilter.canExtract(amount, existing);
     }
 
     @FunctionalInterface
     public interface InputFilter {
 
-        InputFilter NO_FILTER = (slot, toAdd, existing) -> true;
+        InputFilter NO_FILTER = (amount, toAdd) -> true;
 
-        boolean canInsert(int slot, ItemStack toAdd, @Nonnull ItemStack existing);
+        boolean canInsert(long amount, @Nonnull ItemVariant toAdd);
 
         default InputFilter and(InputFilter other) {
-            return (slot, toAdd, existing) ->
-                    other.canInsert(slot, toAdd, existing) && this.canInsert(slot, toAdd, existing);
+            return (amount, toAdd) ->
+                    other.canInsert(amount, toAdd) && this.canInsert(amount, toAdd);
         }
     }
 
     @FunctionalInterface
     public interface ExtractFilter {
 
-        ExtractFilter NO_FILTER = (slot, amount, existing) -> true;
+        ExtractFilter NO_FILTER = (amount, existing) -> true;
 
-        boolean canExtract(int slot, int amount, @Nonnull ItemStack existing);
+        boolean canExtract(long amount, @Nonnull ItemVariant existing);
 
         default ExtractFilter and(ExtractFilter other) {
-            return (slot, amount, existing) ->
-                    other.canExtract(slot, amount, existing) && this.canExtract(slot, amount, existing);
+            return (amount, existing) ->
+                    other.canExtract(amount, existing) && this.canExtract(amount, existing);
         }
     }
 }

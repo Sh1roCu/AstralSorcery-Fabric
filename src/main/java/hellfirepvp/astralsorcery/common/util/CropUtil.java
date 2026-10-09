@@ -15,13 +15,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.event.EventHooks;
-import net.neoforged.neoforge.event.entity.player.BonemealEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,9 +33,9 @@ import java.util.Optional;
  * Date: 07.09.2026 / 10:00
  */
 public class CropUtil {
-    
+
     private static final int PERFORMED_TICKS = 10;
-    
+
     public static Optional<Plant> wrapPlant(Level level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
         if (state.getBlock() instanceof CropBlock) {
@@ -91,7 +88,7 @@ public class CropUtil {
         boolean replant(Level level);
 
     }
-    
+
     public static abstract class BasicPlant implements Plant {
 
         private final BlockPos pos;
@@ -107,11 +104,11 @@ public class CropUtil {
     }
 
     public static class CropPlant extends BasicPlant {
-        
+
         public CropPlant(BlockPos pos) {
             super(pos);
         }
-        
+
         private Optional<CropBlock> getCrop(Level sLevel) {
             return Optional.of(sLevel.getBlockState(this.getPos()))
                     .map(BlockBehaviour.BlockStateBase::getBlock)
@@ -281,9 +278,10 @@ public class CropUtil {
             if (!(level instanceof ServerLevel sLevel)) return false;
             return this.getBonemealable(sLevel).map(bonemealableBlock -> {
                 BlockState state = level.getBlockState(this.getPos());
-                BonemealEvent event = EventHooks.fireBonemealEvent(null, sLevel, this.getPos(), state, new ItemStack(Items.BONE_MEAL));
-                if (event.isCanceled()) return event.isSuccessful();
-                if (!event.isValidBonemealTarget() || !bonemealableBlock.isBonemealSuccess(sLevel, rand, this.getPos(), state)) return false;
+//                BonemealEvent event = EventHooks.fireBonemealEvent(null, sLevel, this.getPos(), state, new ItemStack(Items.BONE_MEAL));
+//                if (event.isCanceled()) return event.isSuccessful();
+                if (/*!event.isValidBonemealTarget() ||*/ !bonemealableBlock.isBonemealSuccess(sLevel, rand, this.getPos(), state))
+                    return false;
                 bonemealableBlock.performBonemeal(sLevel, rand, this.getPos(), state);
                 return true;
             }).orElse(false);
@@ -400,6 +398,7 @@ public class CropUtil {
         public SweetBerryBushPlant(BlockPos pos) {
             super(pos);
         }
+
         private Optional<SweetBerryBushBlock> getBush(Level level) {
             return Optional.of(level.getBlockState(this.getPos()))
                     .map(BlockBehaviour.BlockStateBase::getBlock)

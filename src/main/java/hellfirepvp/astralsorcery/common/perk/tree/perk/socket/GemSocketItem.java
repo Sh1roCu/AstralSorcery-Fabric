@@ -16,7 +16,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import java.util.List;
 
@@ -32,7 +32,7 @@ public interface GemSocketItem {
     /**
      * Called when an itemstack is inserted into the given socket perk.
      * Note: This will only occur if {@link #canInsert} ended up returning true.
-     * Note: only called on {@link LogicalSide#SERVER}
+     * Note: only called on {@link EnvType#SERVER}
      *
      * @param stack
      * @param perk
@@ -43,7 +43,7 @@ public interface GemSocketItem {
 
     /**
      * Called when the itemstack is removed from the socket perk.
-     * Note: only called on {@link LogicalSide#SERVER}
+     * Note: only called on {@link EnvType#SERVER}
      *
      * @param stack
      * @param perk
@@ -64,7 +64,7 @@ public interface GemSocketItem {
      * @param side
      * @return if the gem socket can be *inserted*
      */
-    default <T extends GemSocketPerk> boolean canInsert(ItemStack stack, T perk, Player player, PlayerProgress progress, LogicalSide side) {
+    default <T extends GemSocketPerk> boolean canInsert(ItemStack stack, T perk, Player player, PlayerProgress progress, EnvType side) {
         return !this.getModifiers(stack, perk, player, side).isEmpty();
     }
 
@@ -78,7 +78,7 @@ public interface GemSocketItem {
      * @param side
      * @return the list of modifiers
      */
-    default <T extends GemSocketPerk> List<DynamicAttributeModifier> getModifiers(ItemStack stack, T perk, Player player, LogicalSide side) {
+    default <T extends GemSocketPerk> List<DynamicAttributeModifier> getModifiers(ItemStack stack, T perk, Player player, EnvType side) {
         return stack.getOrDefault(DataComponentsAS.DYNAMIC_MODIFIERS, DynamicModifiersComponent.EMPTY).modifiers();
     }
 

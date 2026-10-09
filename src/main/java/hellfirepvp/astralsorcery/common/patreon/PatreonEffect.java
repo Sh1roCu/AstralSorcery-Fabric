@@ -10,7 +10,6 @@ package hellfirepvp.astralsorcery.common.patreon;
 
 import hellfirepvp.astralsorcery.common.patreon.entity.PatreonPartialEntity;
 import net.minecraft.util.RandomSource;
-import net.neoforged.bus.api.IEventBus;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -37,9 +36,11 @@ public class PatreonEffect {
         return this.effectUUID;
     }
 
-    public void initialize() {}
+    public void initialize() {
+    }
 
-    public void attachEventListeners(IEventBus bus) {}
+    public void attachEventListeners() {
+    }
 
     @Nullable
     public PatreonPartialEntity.Provider getPartialEntityProvider() {

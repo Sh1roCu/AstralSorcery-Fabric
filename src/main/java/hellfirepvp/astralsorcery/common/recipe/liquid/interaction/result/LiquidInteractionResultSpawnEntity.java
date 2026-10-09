@@ -63,7 +63,7 @@ public class LiquidInteractionResultSpawnEntity extends LiquidInteractionResult 
 
     @Override
     public Type<?> getType() {
-        return LiquidInteractionResultTypesAS.SPAWN_ENTITY.get();
+        return LiquidInteractionResultTypesAS.SPAWN_ENTITY;
     }
 
     @Override

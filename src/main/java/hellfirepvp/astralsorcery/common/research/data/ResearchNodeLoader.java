@@ -15,17 +15,16 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.research.ResearchNode;
-import hellfirepvp.astralsorcery.common.research.ResearchTier;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.Item;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -34,7 +33,7 @@ import java.util.stream.Stream;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class ResearchNodeLoader extends SimpleJsonResourceReloadListener {
+public class ResearchNodeLoader extends SimpleJsonResourceReloadListener implements IdentifiableResourceReloadListener {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
@@ -44,6 +43,8 @@ public class ResearchNodeLoader extends SimpleJsonResourceReloadListener {
     private final List<ResearchNode> nodes = new ArrayList<>();
     private final Map<Item, ResearchNode> indexedLookupMap = new HashMap<>();
 
+    public static final ResourceLocation ID = AstralSorcery.key("research");
+
     private ResearchNodeLoader() {
         super(GSON, "research");
     }
@@ -52,7 +53,12 @@ public class ResearchNodeLoader extends SimpleJsonResourceReloadListener {
         return INSTANCE;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Override
+    public ResourceLocation getFabricId() {
+        return ID;
+    }
+
+    @Environment(EnvType.CLIENT)
     public void updateServerNodes(List<ResearchNode> nodes) {
         this.indexedLookupMap.clear();
         this.nodeMap.clear();

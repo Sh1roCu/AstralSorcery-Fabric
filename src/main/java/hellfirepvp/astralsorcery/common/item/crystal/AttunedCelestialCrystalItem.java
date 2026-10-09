@@ -37,7 +37,7 @@ public class AttunedCelestialCrystalItem extends CelestialCrystalItem {
 
     @Override
     public CreativeModeTab getCreativeTab() {
-        return CreativeTabsAS.CREATIVE_TAB_AS_ATTUNED_CRYSTALS.get();
+        return CreativeTabsAS.CREATIVE_TAB_AS_ATTUNED_CRYSTALS;
     }
 
     @Override
@@ -52,6 +52,6 @@ public class AttunedCelestialCrystalItem extends CelestialCrystalItem {
     @Nonnull
     @Override
     public RockCrystalItem getCrystalSplitItem() {
-        return ItemsAS.CELESTIAL_CRYSTAL.get();
+        return ItemsAS.CELESTIAL_CRYSTAL;
     }
 }

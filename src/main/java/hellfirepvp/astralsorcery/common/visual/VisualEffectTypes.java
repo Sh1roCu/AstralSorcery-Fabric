@@ -8,10 +8,13 @@
 
 package hellfirepvp.astralsorcery.common.visual;
 
-import hellfirepvp.astralsorcery.common.visual.type.*;
+import cn.sh1rocu.astralsorcery.util.neoforge.network.PacketDistributor;
 import hellfirepvp.astralsorcery.common.network.play.PktPlayVisualEffect;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
+import hellfirepvp.astralsorcery.common.visual.type.*;
 import io.netty.buffer.ByteBuf;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -19,9 +22,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -79,12 +79,14 @@ public class VisualEffectTypes {
                     PktPlayVisualEffect.playEffect(this));
         }
 
-        @OnlyIn(Dist.CLIENT)
+        @Environment(EnvType.CLIENT)
         void playEffect(RandomSource rand);
 
         EffectType<?> getType();
 
     }
 
-    public record EffectType<T extends Effect>(ResourceLocation key, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {}
+    public record EffectType<T extends Effect>(ResourceLocation key,
+                                               StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
+    }
 }

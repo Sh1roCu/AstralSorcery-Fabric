@@ -15,7 +15,6 @@ import hellfirepvp.astralsorcery.client.effect.EffectHelper;
 import hellfirepvp.astralsorcery.client.effect.function.FXColorFunction;
 import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
 import hellfirepvp.astralsorcery.common.config.ConfigEntry;
-import hellfirepvp.astralsorcery.common.visual.type.BlockHarvestDraw;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.LumenAS;
 import hellfirepvp.astralsorcery.common.lib.StarlightNetworkNodesAS;
@@ -29,7 +28,6 @@ import hellfirepvp.astralsorcery.common.lumen.capability.LumenHandlerView;
 import hellfirepvp.astralsorcery.common.lumen.capability.LumenHandlerViewFactory;
 import hellfirepvp.astralsorcery.common.lumen.capability.LumenStackList;
 import hellfirepvp.astralsorcery.common.lumen.transfer.LumenRequestHelper;
-import hellfirepvp.astralsorcery.common.starlight.api.provider.TransmissionNodeProvider;
 import hellfirepvp.astralsorcery.common.starlight.transmission.StarlightTransmissionPacket;
 import hellfirepvp.astralsorcery.common.tile.base.TileEntityLumenDisplay;
 import hellfirepvp.astralsorcery.common.tile.base.TileEntityNetwork;
@@ -40,6 +38,9 @@ import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
 import hellfirepvp.astralsorcery.common.util.data.TileRegistryObject;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.level.DayTimeHelper;
+import hellfirepvp.astralsorcery.common.visual.type.BlockHarvestDraw;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -49,10 +50,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.registries.DeferredHolder;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -101,7 +99,7 @@ public class TileTreeBeacon extends TileEntityNetwork<ForwardingStarlightReceive
                     evLevel.setBlock(snapshot.getPos(), snapshot.getState(), Block.UPDATE_CLIENTS);
                     return;
                 }
-                evLevel.setBlock(snapshot.getPos(), BlocksAS.TRANSLUCENT_TREE.get().defaultBlockState(), Block.UPDATE_CLIENTS);
+                evLevel.setBlock(snapshot.getPos(), BlocksAS.TRANSLUCENT_TREE.defaultBlockState(), Block.UPDATE_CLIENTS);
                 MiscUtil.getTileAt(evLevel, snapshot.getPos(), TileTranslucentTree.class, true).ifPresent(tile -> {
                     TileTranslucentTree.Data data = tile.getTileData();
                     data.setStoredState(snapshot.getState());
@@ -203,7 +201,7 @@ public class TileTreeBeacon extends TileEntityNetwork<ForwardingStarlightReceive
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void clientTick(Level level) {
         super.clientTick(level);
 
@@ -285,7 +283,7 @@ public class TileTreeBeacon extends TileEntityNetwork<ForwardingStarlightReceive
     }
 
     @Override
-    public DeferredHolder<TransmissionNodeProvider<?>, ForwardingStarlightReceiverNodeProvider> getNodeProvider() {
+    public ForwardingStarlightReceiverNodeProvider getNodeProvider() {
         return StarlightNetworkNodesAS.FORWARDING_RECEIVER_NODE;
     }
 
@@ -390,17 +388,17 @@ public class TileTreeBeacon extends TileEntityNetwork<ForwardingStarlightReceive
 
     public static class Config extends ConfigEntry {
 
-        private static final double defaultRange           = 12.0;
-        private static final int    defaultProductionPivot = 300;
-        private static final int    defaultHarvestChance   = 15;
-        private static final int    defaultBreakChance     = 800;
-        private static final int    defaultLogWeight       = 2;
+        private static final double defaultRange = 12.0;
+        private static final int defaultProductionPivot = 300;
+        private static final int defaultHarvestChance = 15;
+        private static final int defaultBreakChance = 800;
+        private static final int defaultLogWeight = 2;
 
         public ModConfigSpec.DoubleValue range;
-        public ModConfigSpec.IntValue    productionPivot;
-        public ModConfigSpec.IntValue    harvestChance;
-        public ModConfigSpec.IntValue    breakChance;
-        public ModConfigSpec.IntValue    logWeight;
+        public ModConfigSpec.IntValue productionPivot;
+        public ModConfigSpec.IntValue harvestChance;
+        public ModConfigSpec.IntValue breakChance;
+        public ModConfigSpec.IntValue logWeight;
 
         private Config() {
             super("tree_beacon");

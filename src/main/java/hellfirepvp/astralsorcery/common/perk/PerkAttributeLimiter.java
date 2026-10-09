@@ -8,12 +8,11 @@
 
 package hellfirepvp.astralsorcery.common.perk;
 
+import cn.sh1rocu.astralsorcery.api.event.BaseEvent;
 import hellfirepvp.astralsorcery.common.event.AttributeEvent;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.perk.type.base.PerkAttributeType;
 import net.minecraft.util.Mth;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.IEventBus;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -27,9 +26,9 @@ import java.util.function.Supplier;
  */
 public class PerkAttributeLimiter {
 
-    public static void attachEventListeners(IEventBus bus) {
-        bus.addListener(EventPriority.HIGH, PerkAttributeLimiter::onModded);
-        bus.addListener(EventPriority.HIGH, PerkAttributeLimiter::onVanilla);
+    public static void attachEventListeners() {
+        AttributeEvent.PostProcessModded.EVENT.register(BaseEvent.HIGH, PerkAttributeLimiter::onModded);
+        AttributeEvent.PostProcessVanilla.EVENT.register(BaseEvent.HIGH, PerkAttributeLimiter::onVanilla);
     }
 
     public static Optional<Limit> getLimit(PerkAttributeType type) {

@@ -11,14 +11,12 @@ package hellfirepvp.astralsorcery.common.lumen.binding.data;
 import hellfirepvp.astralsorcery.common.lib.LumenAS;
 import hellfirepvp.astralsorcery.common.lumen.Lumen;
 import hellfirepvp.astralsorcery.common.lumen.binding.LumenBindingType;
-import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -48,7 +46,7 @@ public abstract class LumenBindingDataProvider implements DataProvider {
 
     public abstract void registerBindingTypes();
 
-    protected void registerBinding(LumenAS.DeferredLumen<Lumen> lumen, BuiltBindingType bindingType) {
+    protected void registerBinding(LumenAS.DeferredLumen lumen, BuiltBindingType bindingType) {
         this.registerBinding(lumen.getKey(), bindingType.id);
     }
 
@@ -64,7 +62,7 @@ public abstract class LumenBindingDataProvider implements DataProvider {
         return new LumenBindingTypeBuilder(this, id);
     }
 
-    protected LumenBindingTypeBuilder newBindingType(DeferredHolder<?, ?> reference) {
+    protected LumenBindingTypeBuilder newBindingType(LumenAS.DeferredLumen reference) {
         return this.newBindingType(reference.getKey().location());
     }
 
@@ -120,7 +118,7 @@ public abstract class LumenBindingDataProvider implements DataProvider {
             this.bindingType = bindingType;
         }
 
-        public void registerBinding(LumenAS.DeferredLumen<? extends Lumen> lumen) {
+        public void registerBinding(LumenAS.DeferredLumen lumen) {
             this.registerBinding(lumen.getKey());
         }
 

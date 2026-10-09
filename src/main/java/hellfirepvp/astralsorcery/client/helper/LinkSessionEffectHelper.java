@@ -8,27 +8,20 @@
 
 package hellfirepvp.astralsorcery.client.helper;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.network.PacketDistributor;
 import hellfirepvp.astralsorcery.client.ClientProxy;
 import hellfirepvp.astralsorcery.client.effect.EffectHelper;
-import hellfirepvp.astralsorcery.client.effect.EntityVisualFX;
 import hellfirepvp.astralsorcery.client.effect.function.FXAlphaFunction;
-import hellfirepvp.astralsorcery.client.effect.function.FXColorFunction;
 import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
-import hellfirepvp.astralsorcery.client.lib.TexturesAS;
-import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.network.play.PktRequestCancelLinkSession;
 import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.InputEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,24 +36,26 @@ public class LinkSessionEffectHelper {
 
     private static final RandomSource rand = RandomSource.create();
 
-    public static void attachEventListeners(IEventBus eventBus) {
-        eventBus.addListener(LinkSessionEffectHelper::onMouseClick);
-        eventBus.addListener(LinkSessionEffectHelper::onClientTick);
+    public static void attachEventListeners() {
+        // impl via mixin
+        // InputEvent.InteractionKeyMappingTriggered.EVENT.register(LinkSessionEffectHelper::onMouseClick);
+        ClientTickEvents.START_CLIENT_TICK.register(LinkSessionEffectHelper::onClientTick);
     }
 
-    private static void onMouseClick(InputEvent.InteractionKeyMappingTriggered event) {
-        if (!event.isAttack()) return;
+    public static void onMouseClick(int button) {
+        // if (!event.isAttack()) return;
+        if (button == 0) return;
 
         ClientLinkHelper.getActiveSession().ifPresent(session -> {
             PacketDistributor.sendToServer(PktRequestCancelLinkSession.cancelSession());
         });
     }
 
-    private static void onClientTick(ClientTickEvent.Pre event) {
-        if (Minecraft.getInstance().isPaused()) return;
+    private static void onClientTick(Minecraft client) {
+        if (client.isPaused()) return;
         if (ClientProxy.getClientTick() % 30 != 0) return;
 
-        Level level = Minecraft.getInstance().level;
+        Level level = client.level;
         if (level == null) return;
         ClientLinkHelper.getActiveSession().ifPresent(session -> {
             session.selected().resolveLocation(level).ifPresent(from -> {

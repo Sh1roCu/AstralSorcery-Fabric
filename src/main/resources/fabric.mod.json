@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "astralsorcery",
+  "version": "${version}",
+  "name": "Astral Sorcery",
+  "description": "An unofficial Fabric port of Astral Sorcery",
+  "authors": [
+    "Sh1roCu",
+    "HellFirePvP"
+  ],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "logo.png",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-datagen": [
+      "cn.sh1rocu.astralsorcery.client.AstralSorceryFabricDataGenerator"
+    ],
+    "client": [
+      "cn.sh1rocu.astralsorcery.client.AstralSorceryFabricClient"
+    ],
+    "main": [
+      "cn.sh1rocu.astralsorcery.AstralSorceryFabric"
+    ],
+    "jei_mod_plugin": [
+      "hellfirepvp.astralsorcery.common.integration.jei.ASJeiPlugin"
+    ]
+  },
+  "mixins": [
+    "astralsorcery.mixins.json",
+    "astralsorcery.fabric.mixins.json"
+  ],
+  "accessWidener": "astralsorcery.classtweaker",
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}",
+    "forgeconfigapiport": "*",
+    "observerlib": ">=1.10.3",
+    "trinkets": ">=3.10.0"
+  }
+}

@@ -29,12 +29,12 @@ import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.DiminishingMultiplier;
+import net.fabricmc.api.EnvType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.stats.StatsCounter;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
 
 import java.util.*;
 
@@ -57,7 +57,7 @@ public class RootPerkVicio extends RootPerk<AbstractPerk.Data> implements Tickab
     private final Map<ResourceLocation, Map<UUID, Integer>> moveTrackMap = new HashMap<>();
 
     private RootPerkVicio(ResourceLocation key, float x, float y) {
-        this(key, defaultNameKey(key), x, y, PerkCategory.ROOT, Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), ConstellationsAS.VICIO.get());
+        this(key, defaultNameKey(key), x, y, PerkCategory.ROOT, Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), ConstellationsAS.VICIO);
     }
 
     protected RootPerkVicio(ResourceLocation key, String nameKey, float x, float y, PerkCategory category, Collection<PerkRequirement> requirements, Collection<PerkAttributeConverter> converters, Collection<PerkAttributeModifier> modifiers, BaseConstellation constellation) {
@@ -80,26 +80,26 @@ public class RootPerkVicio extends RootPerk<AbstractPerk.Data> implements Tickab
     }
 
     @Override
-    protected void removePerkLogic(Player player, LogicalSide dist) {
+    protected void removePerkLogic(Player player, EnvType dist) {
         super.removePerkLogic(player, dist);
 
-        if (dist.isServer()) {
+        if (dist == EnvType.SERVER) {
             this.moveTrackMap.values().forEach(map -> map.remove(player.getUUID()));
         }
     }
 
     @Override
-    public void clearCaches(LogicalSide side) {
+    public void clearCaches(EnvType side) {
         super.clearCaches(side);
 
-        if (side.isServer()) {
+        if (side == EnvType.SERVER) {
             this.moveTrackMap.clear();
         }
     }
 
     @Override
-    public void tick(Player player, LogicalSide side) {
-        if (!side.isServer()) return;
+    public void tick(Player player, EnvType side) {
+        if (side != EnvType.SERVER) return;
         if (!(player instanceof ServerPlayer sPlayer)) return;
         PlayerProgress progress = ResearchManager.getProgress(sPlayer, side);
         PerkAttributeMap perkMap = PerkManager.getOrCreateAttributes(sPlayer);
@@ -155,5 +155,6 @@ public class RootPerkVicio extends RootPerk<AbstractPerk.Data> implements Tickab
         trackedStats.add(new TrackedStat(stat, gainMultiplier));
     }
 
-    public record TrackedStat(ResourceLocation stat, float gainMultiplier) {}
+    public record TrackedStat(ResourceLocation stat, float gainMultiplier) {
+    }
 }

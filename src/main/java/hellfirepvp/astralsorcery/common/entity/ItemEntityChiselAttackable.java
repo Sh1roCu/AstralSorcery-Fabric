@@ -11,6 +11,8 @@ package hellfirepvp.astralsorcery.common.entity;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.SoundsAS;
 import hellfirepvp.astralsorcery.common.util.ServerSoundHelper;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -20,8 +22,6 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -48,7 +48,7 @@ public abstract class ItemEntityChiselAttackable extends ItemEntityHighlighted {
         this.setPos(posX, posY, posZ);
         this.setDeltaMovement(deltaX, deltaY, deltaZ);
         this.setItem(itemStack);
-        this.lifespan = itemStack.getEntityLifespan(level);
+        // this.lifespan = itemStack.getEntityLifespan(level);
     }
 
     @Override
@@ -86,7 +86,7 @@ public abstract class ItemEntityChiselAttackable extends ItemEntityHighlighted {
 
     public abstract void onAttack(ServerPlayer sPlayer, ItemStack chisel);
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private boolean clientHoldsChisel() {
         Player player = Minecraft.getInstance().player;
         if (player == null) return false;

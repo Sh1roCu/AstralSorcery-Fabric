@@ -19,6 +19,9 @@ import hellfirepvp.observerlib.api.ObserverProvider;
 import hellfirepvp.observerlib.api.structure.MatchableStructure;
 import hellfirepvp.observerlib.common.change.ObserverProviderStructure;
 import hellfirepvp.observerlib.common.registry.RegistryProviders;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -26,7 +29,6 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -52,7 +54,7 @@ public class PktPlayStructurePreview extends PlayPacketHandler.ToClient<PktPlayS
     }
 
     public static Request showPreview(BlockPos tilePos, ObserverRegistryObject registryObject) {
-        return new Request(tilePos, registryObject.observer().getKey());
+        return new Request(tilePos, RegistryProviders.getRegistry().getResourceKey(registryObject.observer()).orElseThrow());
     }
 
     @Override
@@ -60,9 +62,10 @@ public class PktPlayStructurePreview extends PlayPacketHandler.ToClient<PktPlayS
         return CODEC;
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
-    public void handle(Request payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
+    public void receive(Request payload, ClientPlayNetworking.Context context) {
+        context.client().execute(() -> {
             ObserversAS.getByName(payload.observerKey()).ifPresent(obj -> {
                 Player clientPlayer = context.player();
                 Level level = clientPlayer.level();
@@ -70,9 +73,9 @@ public class PktPlayStructurePreview extends PlayPacketHandler.ToClient<PktPlayS
                 if (tile == null) return;
 
                 MatchableStructure neededStructure;
-                if (obj.observer().get() instanceof ObserverProviderStructure structureObserver) {
+                if (obj.observer() instanceof ObserverProviderStructure structureObserver) {
                     neededStructure = structureObserver.getStructure();
-                } else if (obj.observer().get() instanceof CompoundObserverProviderStructure compoundStructureObserver) {
+                } else if (obj.observer() instanceof CompoundObserverProviderStructure compoundStructureObserver) {
                     neededStructure = compoundStructureObserver.getStructures().stream()
                             .filter(structure -> !structure.matches(level, payload.tilePos()))
                             .findFirst()
@@ -97,7 +100,8 @@ public class PktPlayStructurePreview extends PlayPacketHandler.ToClient<PktPlayS
         });
     }
 
-    public record Request(BlockPos tilePos, ResourceKey<ObserverProvider<?>> observerKey) implements CustomPacketPayload {
+    public record Request(BlockPos tilePos,
+                          ResourceKey<ObserverProvider<?>> observerKey) implements CustomPacketPayload {
 
         @Override
         public Type<? extends CustomPacketPayload> type() {

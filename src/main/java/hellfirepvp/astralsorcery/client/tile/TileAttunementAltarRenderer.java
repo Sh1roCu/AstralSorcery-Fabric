@@ -19,7 +19,6 @@ import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.util.Mth;
-import net.minecraft.world.phys.AABB;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -36,10 +35,11 @@ public class TileAttunementAltarRenderer implements BlockEntityRenderer<TileAttu
         this.model = ModelAttunementAltar.bake(modelSet);
     }
 
-    @Override
-    public AABB getRenderBoundingBox(TileAttunementAltar blockEntity) {
-        return BlockEntityRenderer.super.getRenderBoundingBox(blockEntity).inflate(1, 2, 1);
-    }
+    // TODO?
+//    @Override
+//    public AABB getRenderBoundingBox(TileAttunementAltar blockEntity) {
+//        return BlockEntityRenderer.super.getRenderBoundingBox(blockEntity).inflate(1, 2, 1);
+//    }
 
     @Override
     public void render(TileAttunementAltar tile, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
@@ -53,10 +53,10 @@ public class TileAttunementAltarRenderer implements BlockEntityRenderer<TileAttu
         float spinStart = TileAttunementAltar.MAX_START_ANIMATION_TICK;
 
         float startY = -1.2F;
-        float endY   = -0.5F;
+        float endY = -0.5F;
         float tickPartY = (endY - startY) / spinStart;
         float prevPosY = endY + (tile.prevActivationTick * tickPartY);
-        float posY     = endY + (tile.activationTick     * tickPartY);
+        float posY = endY + (tile.activationTick * tickPartY);
         float framePosY = RenderVectorUtil.interpolate(prevPosY, posY, partialTick);
 
         double generalAnimationTick = (ClientProxy.getClientTick() + partialTick) / 4D;
@@ -78,7 +78,7 @@ public class TileAttunementAltarRenderer implements BlockEntityRenderer<TileAttu
         for (int i = 1; i < 9; i++) {
             float incrementer = (spinDur / 8F) * i;
 
-            double aFrame =     generalAnimationTick + incrementer;
+            double aFrame = generalAnimationTick + incrementer;
             double prevAFrame = generalAnimationTick + incrementer - 1;
             double renderFrame = RenderVectorUtil.interpolate(prevAFrame, aFrame, 0);
 

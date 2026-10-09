@@ -13,6 +13,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -24,8 +26,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -162,7 +162,7 @@ public class Vector3 {
     }
 
     public static Vector3 directionFromYawPitch(float yaw, float pitch) {
-        float radYaw   = yaw   * 0.017453292F;/* / 180F * Math.PI; */
+        float radYaw = yaw * 0.017453292F;/* / 180F * Math.PI; */
         float radPitch = pitch * 0.017453292F;/* / 180F * Math.PI; */
         float x = -Mth.sin(radYaw) * Mth.cos(radPitch);
         float y = -Mth.sin(radPitch);
@@ -562,13 +562,13 @@ public class Vector3 {
                 (z == next.z ? z : z + ((next.z - z) * partial)));
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public VertexConsumer drawPos(VertexConsumer buf) {
         buf.addVertex((float) this.x, (float) this.y, (float) this.z);
         return buf;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public VertexConsumer drawPos(Matrix4f renderMatrix, VertexConsumer buf) {
         buf.addVertex(renderMatrix, (float) this.x, (float) this.y, (float) this.z);
         return buf;
@@ -714,7 +714,7 @@ public class Vector3 {
         }
 
         public void leftMultiply(Quat quat) {
-            double d =  this.s * quat.s - this.i * quat.i - this.j * quat.j - this.k * quat.k;
+            double d = this.s * quat.s - this.i * quat.i - this.j * quat.j - this.k * quat.k;
             double d1 = this.s * quat.i + this.i * quat.s - this.j * quat.k + this.k * quat.j;
             double d2 = this.s * quat.j + this.i * quat.k + this.j * quat.s - this.k * quat.i;
             double d3 = this.s * quat.k - this.i * quat.j + this.j * quat.i + this.k * quat.s;
@@ -725,7 +725,7 @@ public class Vector3 {
         }
 
         public void rightMultiply(Quat quat) {
-            double d =  this.s * quat.s - this.i * quat.i - this.j * quat.j - this.k * quat.k;
+            double d = this.s * quat.s - this.i * quat.i - this.j * quat.j - this.k * quat.k;
             double d1 = this.s * quat.i + this.i * quat.s + this.j * quat.k - this.k * quat.j;
             double d2 = this.s * quat.j - this.i * quat.k + this.j * quat.s + this.k * quat.i;
             double d3 = this.s * quat.k + this.i * quat.j - this.j * quat.i + this.k * quat.s;

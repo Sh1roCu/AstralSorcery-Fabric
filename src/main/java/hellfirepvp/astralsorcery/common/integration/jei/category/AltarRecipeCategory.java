@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.integration.jei.category;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
+import cn.sh1rocu.astralsorcery.util.neoforge.common.crafting.SizedIngredient;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.ClientProxy;
 import hellfirepvp.astralsorcery.common.constellation.BaseConstellation;
@@ -27,12 +29,13 @@ import hellfirepvp.astralsorcery.common.tile.TileAltar;
 import hellfirepvp.astralsorcery.common.util.IngredientUtil;
 import hellfirepvp.astralsorcery.common.util.data.IntRectangle;
 import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.fabric.constants.FabricTypes;
+import mezz.jei.api.fabric.ingredients.fluids.JeiFluidIngredient;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
-import mezz.jei.api.neoforge.NeoForgeTypes;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
@@ -43,8 +46,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
-import net.neoforged.neoforge.common.crafting.SizedIngredient;
-import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,9 +62,9 @@ public class AltarRecipeCategory extends ASRecipeCategory<AltarRecipe> {
 
     public static final RecipeType<AltarRecipe> RECIPE_TYPE = makeType("altar_crafting", AltarRecipe.class);
 
-    private static final ResourceLocation ALTAR_T1         = AstralSorcery.key("textures/screen/jei/altar_grid_1.png");
-    private static final ResourceLocation ALTAR_T2         = AstralSorcery.key("textures/screen/jei/altar_grid_2.png");
-    private static final ResourceLocation ALTAR_T3         = AstralSorcery.key("textures/screen/jei/altar_grid_3.png");
+    private static final ResourceLocation ALTAR_T1 = AstralSorcery.key("textures/screen/jei/altar_grid_1.png");
+    private static final ResourceLocation ALTAR_T2 = AstralSorcery.key("textures/screen/jei/altar_grid_2.png");
+    private static final ResourceLocation ALTAR_T3 = AstralSorcery.key("textures/screen/jei/altar_grid_3.png");
     private static final ResourceLocation ALTAR_ADDITIONAL = AstralSorcery.key("textures/screen/jei/altar_grid_additional.png");
     private static final IntRectangle INFO_ICON = new IntRectangle(86, 3, 12, 12);
 
@@ -173,8 +174,8 @@ public class AltarRecipeCategory extends ASRecipeCategory<AltarRecipe> {
                         .addIngredients(VanillaTypes.ITEM_STACK, List.of(sizedIngredient.getItems()));
             } else if (ingredient instanceof FluidStack fluidStack) {
                 builder.addSlot(RecipeIngredientRole.INPUT, offsetX, offsetY)
-                        .setFluidRenderer(1000, false, 16, 16)
-                        .addIngredients(NeoForgeTypes.FLUID_STACK, List.of(fluidStack));
+                        .setFluidRenderer(1000 * 81, false, 16, 16)
+                        .addIngredients(FabricTypes.FLUID_STACK, List.of(new JeiFluidIngredient(fluidStack.getFluidVariant(), fluidStack.getAmount())));
             }
         }
     }
@@ -302,10 +303,10 @@ public class AltarRecipeCategory extends ASRecipeCategory<AltarRecipe> {
     @Override
     public List<ItemStack> provideCatalyst() {
         return List.of(
-                ItemsAS.BLOCK_ALTAR_ILLUMINATION.toStack(),
-                ItemsAS.BLOCK_ALTAR_RESONANCE.toStack(),
-                ItemsAS.BLOCK_ALTAR_LUMINANCE.toStack(),
-                ItemsAS.BLOCK_ALTAR_RADIANCE.toStack()
+                ItemsAS.BLOCK_ALTAR_ILLUMINATION.getDefaultInstance(),
+                ItemsAS.BLOCK_ALTAR_RESONANCE.getDefaultInstance(),
+                ItemsAS.BLOCK_ALTAR_LUMINANCE.getDefaultInstance(),
+                ItemsAS.BLOCK_ALTAR_RADIANCE.getDefaultInstance()
         );
     }
 

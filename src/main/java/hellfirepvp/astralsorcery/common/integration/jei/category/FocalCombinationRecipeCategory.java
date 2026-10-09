@@ -13,7 +13,6 @@ import hellfirepvp.astralsorcery.common.integration.jei.base.ASRecipeCategory;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
 import hellfirepvp.astralsorcery.common.recipe.focal.drop.FocalCombineRecipe;
-import hellfirepvp.astralsorcery.common.recipe.focal.place.FocalTransmutationRecipe;
 import hellfirepvp.astralsorcery.common.util.data.IntRectangle;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
@@ -129,7 +128,7 @@ public class FocalCombinationRecipeCategory extends ASRecipeCategory<FocalCombin
 
     @Override
     public List<ItemStack> provideCatalyst() {
-        return List.of(ItemsAS.BLOCK_STARLIGHT_FOCUS_ROCK_CRYSTAL.toStack());
+        return List.of(ItemsAS.BLOCK_STARLIGHT_FOCUS_ROCK_CRYSTAL.getDefaultInstance());
     }
 
     @Override

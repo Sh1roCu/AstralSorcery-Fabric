@@ -107,7 +107,7 @@ public class SimpleTransmissionNode implements TransmissionNode, SimpleLineOfSig
 
     @Override
     public TransmissionNodeProvider<?> getProvider() {
-        return StarlightNetworkNodesAS.SIMPLE_NODE.value();
+        return StarlightNetworkNodesAS.SIMPLE_NODE;
     }
 
     @Override

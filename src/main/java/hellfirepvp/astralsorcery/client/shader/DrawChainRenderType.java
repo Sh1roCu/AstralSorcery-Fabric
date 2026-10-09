@@ -41,7 +41,7 @@ public class DrawChainRenderType extends RenderType {
     private int thisFrameTarget = 0;
 
     protected DrawChainRenderType(RenderType decorated, Supplier<RenderTarget> newTarget, Runnable preRender, Runnable postRender) {
-        super(decorated.name, decorated.format, decorated.mode, decorated.bufferSize, decorated.affectsCrumbling, decorated.sortOnUpload, decorated.setupState, decorated.clearState);
+        super(decorated.toString(), decorated.format(), decorated.mode(), decorated.bufferSize(), decorated.affectsCrumbling(), decorated.sortOnUpload(), decorated.setupState, decorated.clearState);
         this.decorated = decorated;
         this.newTarget = newTarget;
         this.preRender = preRender;
@@ -57,7 +57,7 @@ public class DrawChainRenderType extends RenderType {
     }
 
     public static DrawChainRenderType wrap(String id, RenderType type, Supplier<RenderTarget> newTarget, Runnable preRender, Runnable postRender) {
-        String reference = String.format("%s_%s", id, type.name);
+        String reference = String.format("%s_%s", id, type.toString());
         if (WRAPPED_CACHE.containsKey(reference)) return WRAPPED_CACHE.get(reference);
 
         DrawChainRenderType drawType = new DrawChainRenderType(type, newTarget, preRender, postRender);

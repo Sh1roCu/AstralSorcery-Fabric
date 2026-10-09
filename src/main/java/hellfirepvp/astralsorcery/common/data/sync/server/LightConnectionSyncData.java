@@ -97,7 +97,7 @@ public class LightConnectionSyncData extends SyncData<LightConnectionSyncData.Cl
 
     @Override
     public Type<?, ClientSync, ClientDiffSync, LightConnectionClientData> getType() {
-        return SyncDataTypesAS.LIGHT_CONNECTION.get();
+        return SyncDataTypesAS.LIGHT_CONNECTION;
     }
 
     public static class ClientSync extends ClientSyncData<LightConnectionClientData> {
@@ -123,7 +123,7 @@ public class LightConnectionSyncData extends SyncData<LightConnectionSyncData.Cl
 
         @Override
         public Type<?, ?, ?, LightConnectionClientData> type() {
-            return SyncDataTypesAS.LIGHT_CONNECTION.get();
+            return SyncDataTypesAS.LIGHT_CONNECTION;
         }
     }
 
@@ -163,7 +163,7 @@ public class LightConnectionSyncData extends SyncData<LightConnectionSyncData.Cl
 
         @Override
         public Type<?, ?, ?, LightConnectionClientData> type() {
-            return SyncDataTypesAS.LIGHT_CONNECTION.get();
+            return SyncDataTypesAS.LIGHT_CONNECTION;
         }
     }
 

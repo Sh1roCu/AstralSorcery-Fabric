@@ -22,8 +22,9 @@ import hellfirepvp.astralsorcery.common.research.perk.PerkRemovalResult;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
 import hellfirepvp.astralsorcery.common.util.codec.HashComparedCodec;
-import hellfirepvp.astralsorcery.common.util.data.MapStream;
 import hellfirepvp.astralsorcery.common.util.codec.SetCodec;
+import hellfirepvp.astralsorcery.common.util.data.MapStream;
+import net.fabricmc.api.EnvType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -32,7 +33,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -55,7 +55,7 @@ public class PlayerPerkData {
     ).apply(inst, PlayerPerkData::resolveServerPerkData));
     public static final Codec<PlayerPerkData> PERKTREE_HASH_CODEC =
             HashComparedCodec.wrap(CODEC,
-                    () -> PerkTree.getInstance().getVersion(LogicalSide.SERVER).orElse(0L),
+                    () -> PerkTree.getInstance().getVersion(EnvType.SERVER).orElse(0L),
                     () -> {
                         AstralSorcery.LOG.warn("Clearing player perk tree as player version was outdated.");
                         return PlayerPerkData.blankData();
@@ -74,7 +74,7 @@ public class PlayerPerkData {
     static PlayerPerkData resolveServerPerkData(Set<ResourceLocation> pointTokens, Map<ResourceLocation, AppliedPerkData<?>> perkReferences, double perkExp) {
         Map<AbstractPerk<?>, AppliedPerkData<?>> resolvedPerks = new HashMap<>();
         perkReferences.forEach((ref, data) -> {
-            PerkTree.getInstance().getPerk(LogicalSide.SERVER, ref).ifPresent(perk -> {
+            PerkTree.getInstance().getPerk(EnvType.SERVER, ref).ifPresent(perk -> {
                 resolvedPerks.put(perk, data);
             });
         });
@@ -207,7 +207,7 @@ public class PlayerPerkData {
         return PerkRemovalResult.FAILURE;
     }
 
-    public Collection<AbstractPerk<?>> getDependentPerks(PlayerProgress progress, AbstractPerk<?> perk, RootPerk<?> rootPerk, LogicalSide side) {
+    public Collection<AbstractPerk<?>> getDependentPerks(PlayerProgress progress, AbstractPerk<?> perk, RootPerk<?> rootPerk, EnvType side) {
         Set<AbstractPerk<?>> allocated = new HashSet<>(this.getAllocatedPerks(PerkAllocationType.UNLOCKED));
         allocated.addAll(this.getAllocatedPerks(PerkAllocationType.UNLOCKED_NON_CONNECT));
 
@@ -303,7 +303,7 @@ public class PlayerPerkData {
         return this.pointTokens.remove(token);
     }
 
-    public int getAvailablePerkPoints(Player player, LogicalSide side) {
+    public int getAvailablePerkPoints(Player player, EnvType side) {
         int allocatedPerks = (int) this.perks.values().stream()
                 .filter(perk -> perk.isAllocated(PerkAllocationType.UNLOCKED) || perk.isAllocated(PerkAllocationType.UNLOCKED_NON_CONNECT))
                 .count() - 1;
@@ -311,7 +311,7 @@ public class PlayerPerkData {
         return (allocationLevels + this.pointTokens.size()) - allocatedPerks;
     }
 
-    public boolean hasFreeAllocationPoint(Player player, LogicalSide side) {
+    public boolean hasFreeAllocationPoint(Player player, EnvType side) {
         return getAvailablePerkPoints(player, side) > 0;
     }
 
@@ -321,22 +321,22 @@ public class PlayerPerkData {
         return this.perkExp;
     }
 
-    public int getPerkLevel(@Nullable Player player, LogicalSide side) {
+    public int getPerkLevel(@Nullable Player player, EnvType side) {
         return PerkLevelManager.getInstance().getLevel(getPerkExp(), player, side);
     }
 
-    public float getPercentToNextLevel(@Nullable Player player, LogicalSide side) {
+    public float getPercentToNextLevel(@Nullable Player player, EnvType side) {
         return PerkLevelManager.getInstance().getNextLevelPercent(getPerkExp(), player, side);
     }
 
     protected void modifyExp(@Nullable ServerPlayer player, double exp) {
         PerkLevelManager mgr = PerkLevelManager.getInstance();
-        int currLevel = mgr.getLevel(getPerkExp(), player, LogicalSide.SERVER);
-        if (exp >= 0 && currLevel >= mgr.getMaxLevel(LogicalSide.SERVER, player)) {
+        int currLevel = mgr.getLevel(getPerkExp(), player, EnvType.SERVER);
+        if (exp >= 0 && currLevel >= mgr.getMaxLevel(EnvType.SERVER, player)) {
             return;
         }
-        long expThisLevel = mgr.getExpForLevel(currLevel, player, LogicalSide.SERVER);
-        long expNextLevel = mgr.getExpForLevel(currLevel + 1, player, LogicalSide.SERVER);
+        long expThisLevel = mgr.getExpForLevel(currLevel, player, EnvType.SERVER);
+        long expNextLevel = mgr.getExpForLevel(currLevel + 1, player, EnvType.SERVER);
         long cap = Mth.lfloor(((float) (expNextLevel - expThisLevel)) * 0.08F);
         if (exp > cap) {
             exp = cap;

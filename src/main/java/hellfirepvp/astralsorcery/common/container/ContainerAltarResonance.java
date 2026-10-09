@@ -71,10 +71,4 @@ public class ContainerAltarResonance extends ContainerAltar {
     protected IntPoint getPlayerInventoryOffset() {
         return this.isExpanded() ? new IntPoint(48, 173) : new IntPoint(28, 133);
     }
-
-    @Override
-    public void writeClientData(RegistryFriendlyByteBuf buf) {
-        super.writeClientData(buf);
-        buf.writeBoolean(this.isExpanded);
-    }
 }

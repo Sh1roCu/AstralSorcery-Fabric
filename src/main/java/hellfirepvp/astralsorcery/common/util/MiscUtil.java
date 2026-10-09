@@ -10,6 +10,7 @@ package hellfirepvp.astralsorcery.common.util;
 
 import com.google.common.collect.Iterables;
 import com.mojang.authlib.GameProfile;
+import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -38,12 +39,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import org.apache.logging.log4j.util.TriConsumer;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.function.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -234,7 +236,7 @@ public class MiscUtil {
     public static MutableComponent getBlockStateDisplayName(Level level, Player player, BlockPos pos, BlockHitResult hitResult) {
         BlockState state = level.getBlockState(pos);
         try {
-            ItemStack picked = state.getCloneItemStack(hitResult, level, pos, player);
+            ItemStack picked = state.getBlock().getCloneItemStack(level, pos, state);
             Block pickedBlock = Block.byItem(picked.getItem());
             if (pickedBlock != Blocks.AIR && state.is(pickedBlock)) { //Bi-directional resolvable
                 return Component.empty().append(picked.getHoverName());
@@ -253,7 +255,7 @@ public class MiscUtil {
             return true;
         }
         try {
-            player.connection.getConnection().getRemoteAddress().toString();
+            player.connection.getRemoteAddress().toString();
         } catch (Exception exc) {
             return true;
         }
@@ -262,7 +264,7 @@ public class MiscUtil {
 
     public static ServerPlayer getAstralFakePlayer(ServerLevel sLevel) {
         GameProfile fakePlayerProfile = new GameProfile(UUID.fromString("9af7f161-0186-41d4-a590-976a9996fce5"), "AS-FakePlayer");
-        return FakePlayerFactory.get(sLevel, fakePlayerProfile);
+        return FakePlayer.get(sLevel, fakePlayerProfile);
     }
 
     public static <T> T safeGetConfig(ModConfigSpec.ConfigValue<T> cfg, T defaultValue) {

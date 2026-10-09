@@ -18,6 +18,8 @@ import hellfirepvp.astralsorcery.common.artifact.ArtifactCondition;
 import hellfirepvp.astralsorcery.common.artifact.SelectableArtifactCondition;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.data.MapStream;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -34,16 +36,25 @@ import java.util.*;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class ArtifactConditionLoader extends SimpleJsonResourceReloadListener {
+public class ArtifactConditionLoader extends SimpleJsonResourceReloadListener implements IdentifiableResourceReloadListener {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+
     private static final ArtifactConditionLoader INSTANCE = new ArtifactConditionLoader();
 
     private final Set<SelectableArtifactCondition> conditions = new HashSet<>();
     private final Map<ArtifactCondition.Type<?>, Set<SelectableArtifactCondition>> byTypeConditions = new HashMap<>();
 
+    public static final ResourceLocation ID = AstralSorcery.key("artifact_conditions");
+    public HolderLookup.Provider provider;
+
     private ArtifactConditionLoader() {
         super(GSON, "artifact_conditions");
+    }
+
+    @Override
+    public ResourceLocation getFabricId() {
+        return ID;
     }
 
     public static ArtifactConditionLoader getInstance() {
@@ -60,7 +71,8 @@ public class ArtifactConditionLoader extends SimpleJsonResourceReloadListener {
 
     public static Optional<ArtifactCondition> pickNextCondition(RandomSource rand, List<ArtifactCondition> existingConditions) {
         List<ResourceLocation> existingIds = existingConditions.stream().map(ArtifactCondition::getId).toList();
-        List<SelectableArtifactCondition> availableConditions = getInstance().getLoadedConditions().stream()
+        List<SelectableArtifactCondition> availableConditions = Optional.ofNullable(getInstance()).orElseGet(ArtifactConditionLoader::new)
+                .getLoadedConditions().stream()
                 .filter(select -> !existingIds.contains(select.condition().getId()))
                 .filter(select -> !select.selector().conflictsWith(existingIds))
                 .toList();
@@ -77,7 +89,7 @@ public class ArtifactConditionLoader extends SimpleJsonResourceReloadListener {
         AstralSorcery.LOG.info("Loading artifact conditions with {} conditions.", conditionObjects.size());
 
         this.conditions.clear();
-        RegistryOps<JsonElement> ops = this.getRegistryLookup().createSerializationContext(JsonOps.INSTANCE);
+        RegistryOps<JsonElement> ops = this.provider.createSerializationContext(JsonOps.INSTANCE);
         conditionObjects.forEach((key, obj) -> {
             SelectableArtifactCondition.CODEC.parse(ops, obj)
                     .ifError(error -> AstralSorcery.LOG.warn("Failed to load artifact condition {}: {}", key, error.message()))

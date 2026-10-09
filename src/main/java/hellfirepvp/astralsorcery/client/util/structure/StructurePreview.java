@@ -16,12 +16,10 @@ import hellfirepvp.astralsorcery.client.lib.ShaderProgramsAS;
 import hellfirepvp.astralsorcery.client.shader.DrawChainRenderType;
 import hellfirepvp.astralsorcery.client.shader.WrappedBufferSource;
 import hellfirepvp.astralsorcery.client.util.RenderUtil;
-import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.observerlib.api.block.MatchableState;
 import hellfirepvp.observerlib.api.structure.MatchableStructure;
 import hellfirepvp.observerlib.api.tile.MatchableTile;
-import hellfirepvp.observerlib.api.util.StructureBlockArray;
 import hellfirepvp.observerlib.api.util.StructureUtil;
 import hellfirepvp.observerlib.client.util.LightmapUtil;
 import hellfirepvp.observerlib.client.util.SimpleBossInfo;
@@ -42,15 +40,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
 import org.joml.Quaternionf;
@@ -240,7 +235,7 @@ public class StructurePreview {
                 pose.scale(size, size, size);
 
                 brd.renderSingleBlock(expected, pose, buffers,
-                        LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, null);
+                        LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY/*, ModelData.EMPTY, null*/);
 
                 FluidState fluidState = expected.getFluidState();
                 if (!fluidState.isEmpty()) {

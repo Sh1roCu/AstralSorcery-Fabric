@@ -15,21 +15,17 @@ import hellfirepvp.astralsorcery.client.screen.tome.page.RenderPage;
 import hellfirepvp.astralsorcery.client.screen.tome.page.RenderPageStructure;
 import hellfirepvp.astralsorcery.common.lib.types.TomePageTypesAS;
 import hellfirepvp.astralsorcery.common.research.ResearchNode;
-import hellfirepvp.astralsorcery.common.structure.observer.CompoundObserverProviderStructure;
 import hellfirepvp.astralsorcery.common.util.data.ObserverRegistryObject;
 import hellfirepvp.observerlib.api.ObserverProvider;
-import hellfirepvp.observerlib.api.structure.MatchableStructure;
 import hellfirepvp.observerlib.api.util.StructureBlockArray;
-import hellfirepvp.observerlib.common.change.ObserverProviderStructure;
 import hellfirepvp.observerlib.common.registry.RegistryProviders;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,20 +54,21 @@ public record TomePageStructure(ObserverProvider<?> structureObserver, int struc
     }
 
     public static TomePageStructure of(ObserverRegistryObject structureObject, int structureIndex) {
-        return new TomePageStructure(structureObject.observer().get(), structureIndex);
+        return new TomePageStructure(structureObject.observer(), structureIndex);
     }
 
     @Override
     public TomePageType<?> getType() {
-        return TomePageTypesAS.STRUCTURE_PAGE.get();
+        return TomePageTypesAS.STRUCTURE_PAGE;
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public RenderPage createPage(@Nullable ResearchNode node, int page) {
         List<StructureBlockArray> structures = ObserverRegistryObject.extractRequiredStructures(this.structureObserver());
         if (structures.isEmpty()) return TomePageEmpty.getInstance().createPage(node, page);
-        if (this.structureIndex() < 0 || this.structureIndex() >= structures.size()) return TomePageEmpty.getInstance().createPage(node, page);
+        if (this.structureIndex() < 0 || this.structureIndex() >= structures.size())
+            return TomePageEmpty.getInstance().createPage(node, page);
         return Optional.ofNullable(structures.get(this.structureIndex()))
                 .map(structure -> (RenderPage) new RenderPageStructure(node, page, structure))
                 .orElse(TomePageEmpty.getInstance().createPage(node, page));

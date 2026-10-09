@@ -14,7 +14,7 @@ import hellfirepvp.astralsorcery.common.perk.tree.AbstractPerk;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -27,7 +27,7 @@ public class PerkSourceProvider extends ModifierSourceProvider<AbstractPerk<?>> 
 
     public static final StreamCodec<RegistryFriendlyByteBuf, AbstractPerk<?>> STREAM_CODEC = StreamCodec.of(
             (buf, perk) -> buf.writeResourceLocation(perk.getKey()),
-            buf -> PerkTree.getInstance().getPerk(LogicalSide.CLIENT, buf.readResourceLocation()).orElseThrow()
+            buf -> PerkTree.getInstance().getPerk(EnvType.CLIENT, buf.readResourceLocation()).orElseThrow()
     );
 
     @Override

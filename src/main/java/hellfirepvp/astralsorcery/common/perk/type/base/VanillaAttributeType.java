@@ -17,7 +17,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import java.util.EnumMap;
 import java.util.Locale;
@@ -52,19 +52,19 @@ public abstract class VanillaAttributeType extends PerkAttributeType implements 
     }
 
     @Override
-    public void onApply(Player player, LogicalSide side, ModifierSource source) {
+    public void onApply(Player player, EnvType side, ModifierSource source) {
         super.onApply(player, side, source);
         this.refreshAttribute(player, side);
     }
 
     @Override
-    public void onRemove(Player player, LogicalSide side, boolean removedCompletely, ModifierSource source) {
+    public void onRemove(Player player, EnvType side, boolean removedCompletely, ModifierSource source) {
         super.onRemove(player, side, removedCompletely, source);
         this.refreshAttribute(player, side);
     }
 
     @Override
-    public void refreshAttribute(Player player, LogicalSide side) {
+    public void refreshAttribute(Player player, EnvType side) {
         AttributeInstance attr = player.getAttributes().getInstance(this.getAttribute());
         if (attr == null) return;
 

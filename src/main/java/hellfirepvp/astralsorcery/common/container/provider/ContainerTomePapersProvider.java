@@ -11,13 +11,11 @@ package hellfirepvp.astralsorcery.common.container.provider;
 import hellfirepvp.astralsorcery.common.container.ContainerTomePapers;
 import hellfirepvp.astralsorcery.common.container.base.ContainerProviderCustom;
 import hellfirepvp.astralsorcery.common.lib.MenuTypesAS;
-import hellfirepvp.astralsorcery.common.util.data.MenuTypeRegistryObject;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.MenuProvider;
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 
 import javax.annotation.Nullable;
 
@@ -28,9 +26,11 @@ import javax.annotation.Nullable;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class ContainerTomePapersProvider extends ContainerProviderCustom<ContainerTomePapers> {
+public class ContainerTomePapersProvider extends ContainerProviderCustom<ContainerTomePapers, Integer> {
 
     private final int tomeSlotId;
+
+    public static final ExtendedScreenHandlerType<ContainerTomePapers, Integer> TYPE = new ExtendedScreenHandlerType<>(ContainerTomePapersProvider::createServer, ByteBufCodecs.INT);
 
     protected ContainerTomePapersProvider(int tomeSlotId) {
         super(MenuTypesAS.TOME_PAPERS);
@@ -42,8 +42,8 @@ public class ContainerTomePapersProvider extends ContainerProviderCustom<Contain
     }
 
     @Override
-    public void writeClientSideData(AbstractContainerMenu menu, RegistryFriendlyByteBuf buffer) {
-        buffer.writeInt(this.tomeSlotId);
+    public Integer getScreenOpeningData(ServerPlayer player) {
+        return this.tomeSlotId;
     }
 
     @Nullable
@@ -54,9 +54,5 @@ public class ContainerTomePapersProvider extends ContainerProviderCustom<Contain
 
     public static ContainerTomePapers createServer(int containerId, Inventory playerInventory, int tomeSlotId) {
         return new ContainerTomePapers(MenuTypesAS.TOME_PAPERS.type(), playerInventory, tomeSlotId, containerId);
-    }
-
-    public static ContainerTomePapers createClient(int windowId, Inventory inv, RegistryFriendlyByteBuf data) {
-        return new ContainerTomePapers(MenuTypesAS.TOME_PAPERS.type(), inv, data.readInt(), windowId);
     }
 }

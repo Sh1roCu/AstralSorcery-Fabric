@@ -8,20 +8,18 @@
 
 package hellfirepvp.astralsorcery.common.perk.type;
 
+import cn.sh1rocu.astralsorcery.api.event.BaseEvent;
+import cn.sh1rocu.astralsorcery.api.event.CriticalHitEvent;
+import cn.sh1rocu.astralsorcery.api.event.EntityJoinLevelEvent;
 import hellfirepvp.astralsorcery.common.event.AttributeEvent;
-import hellfirepvp.astralsorcery.common.lib.PerksAS;
 import hellfirepvp.astralsorcery.common.perk.PerkManager;
 import hellfirepvp.astralsorcery.common.perk.type.base.PerkAttributeType;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.SidedHelper;
+import net.fabricmc.api.EnvType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Arrow;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
-import net.neoforged.neoforge.event.entity.player.CriticalHitEvent;
 
 import java.util.Random;
 
@@ -41,17 +39,17 @@ public class AttributeTypeCriticalHitChance extends PerkAttributeType {
     }
 
     @Override
-    protected void attachListeners(IEventBus eventBus) {
-        super.attachListeners(eventBus);
-        eventBus.addListener(EventPriority.HIGH, this::onCritHit);
-        eventBus.addListener(EventPriority.HIGH, this::onArrowSpawn);
+    protected void attachListeners() {
+        super.attachListeners();
+        CriticalHitEvent.EVENT.register(BaseEvent.HIGH, this::onCritHit);
+        EntityJoinLevelEvent.EVENT.register(BaseEvent.HIGH, this::onArrowSpawn);
     }
 
     private void onCritHit(CriticalHitEvent event) {
         if (event.isCriticalHit()) return;
 
         Player attacker = event.getEntity();
-        LogicalSide side = SidedHelper.getSide(attacker);
+        EnvType side = SidedHelper.getSide(attacker);
         if (!this.hasTypeApplied(attacker, side)) return;
 
         PlayerProgress progress = ResearchManager.getProgress(attacker, side);
@@ -68,7 +66,7 @@ public class AttributeTypeCriticalHitChance extends PerkAttributeType {
     private void onArrowSpawn(EntityJoinLevelEvent event) {
         if (!(event.getEntity() instanceof Arrow arrow)) return;
         if (!(arrow.getOwner() instanceof Player player)) return;
-        LogicalSide side = SidedHelper.getSide(player);
+        EnvType side = SidedHelper.getSide(player);
         if (!this.hasTypeApplied(player, side)) return;
 
         PlayerProgress progress = ResearchManager.getProgress(player, side);

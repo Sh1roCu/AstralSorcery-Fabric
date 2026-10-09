@@ -30,7 +30,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
 import org.joml.Quaternionf;
 
 import java.util.Optional;
@@ -47,7 +46,8 @@ public class GatewayInterfaceRenderHelper {
     private static final GatewayInterfaceRenderHelper INSTANCE = new GatewayInterfaceRenderHelper();
     private GatewayUserInterface currentUI = null;
 
-    private GatewayInterfaceRenderHelper() {}
+    private GatewayInterfaceRenderHelper() {
+    }
 
     public static GatewayInterfaceRenderHelper getInstance() {
         return INSTANCE;
@@ -88,7 +88,7 @@ public class GatewayInterfaceRenderHelper {
         }
     }
 
-    public static void onClientTick(ClientTickEvent.Post event) {
+    public static void onClientTick(Minecraft client) {
         GatewayInterfaceRenderHelper.getInstance().getCurrentUI().ifPresent(GatewayUserInterface::tick);
     }
 
@@ -155,7 +155,8 @@ public class GatewayInterfaceRenderHelper {
     private void renderFocusedEntryDetails(PoseStack poseStack, Camera camera, MultiBufferSource.BufferSource buffers, float alpha, float pTicks) {
         Player player = Minecraft.getInstance().player;
         if (player == null) return;
-        if (!MiscUtil.getTileExists(Minecraft.getInstance().level, player.blockPosition(), TileCelestialGateway.class, true)) return;
+        if (!MiscUtil.getTileExists(Minecraft.getInstance().level, player.blockPosition(), TileCelestialGateway.class, true))
+            return;
 
         this.findMatching(camera.getYRot(), camera.getXRot()).ifPresent(target -> {
             Optional.ofNullable(target.getEntry().getCustomName()).ifPresent(displayName -> {
@@ -183,7 +184,7 @@ public class GatewayInterfaceRenderHelper {
 
         float matchAccuracy = 4;
         for (GatewayUserInterface.GatewayTarget target : this.currentUI.getGatewayTargets()) {
-            if(Math.abs(target.getPitch() - pitch) < matchAccuracy &&
+            if (Math.abs(target.getPitch() - pitch) < matchAccuracy &&
                     (Math.abs(target.getYaw() - yaw) <= matchAccuracy || Math.abs(target.getYaw() - yaw - 360F) <= matchAccuracy)) {
                 return Optional.of(target);
             }

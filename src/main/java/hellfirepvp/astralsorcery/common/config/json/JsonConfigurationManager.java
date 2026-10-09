@@ -15,8 +15,8 @@ import com.google.gson.JsonParser;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import hellfirepvp.astralsorcery.AstralSorcery;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
-import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.File;
 import java.io.FileReader;
@@ -40,7 +40,8 @@ public class JsonConfigurationManager {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private final Map<String, JsonDataRegistry<?>> registries = new HashMap<>();
 
-    private JsonConfigurationManager() {}
+    private JsonConfigurationManager() {
+    }
 
     public static JsonConfigurationManager getInstance() {
         return INSTANCE;
@@ -51,7 +52,7 @@ public class JsonConfigurationManager {
     }
 
     public void loadRegistries(MinecraftServer server) {
-        Path cfgDir = FMLPaths.CONFIGDIR.get().resolve(AstralSorcery.MODID);
+        Path cfgDir = FabricLoader.getInstance().getConfigDir().resolve(AstralSorcery.MODID);
         if (!cfgDir.toFile().exists()) cfgDir.toFile().mkdirs();
         DynamicOps<JsonElement> jsonOps = server.registryAccess().createSerializationContext(JsonOps.INSTANCE);
         this.registries.forEach((name, registry) -> {

@@ -16,10 +16,8 @@ import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.perk.type.base.PerkAttributeType;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.RegistryFixedCodec;
-import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -32,7 +30,8 @@ public class PerkGemModifierRegistry extends JsonDataRegistry<PerkGemModifierReg
 
     private static final PerkGemModifierRegistry INSTANCE = new PerkGemModifierRegistry();
 
-    private PerkGemModifierRegistry() {}
+    private PerkGemModifierRegistry() {
+    }
 
     public static PerkGemModifierRegistry getInstance() {
         return INSTANCE;
@@ -66,6 +65,10 @@ public class PerkGemModifierRegistry extends JsonDataRegistry<PerkGemModifierReg
     }
 
     public record Entry(Holder<PerkAttributeType> type, int weight) {
+
+        public Entry(PerkAttributeType type, int weight) {
+            this(RegistriesAS.REGISTRY_PERK_ATTRIBUTE_TYPES.wrapAsHolder(type), weight);
+        }
 
         public static final Codec<Entry> CODEC = RecordCodecBuilder.create(inst -> inst.group(
                 RegistryFixedCodec.create(RegistriesAS.KEY_PERK_ATTRIBUTE_TYPES).fieldOf("attribute").forGetter(Entry::type),

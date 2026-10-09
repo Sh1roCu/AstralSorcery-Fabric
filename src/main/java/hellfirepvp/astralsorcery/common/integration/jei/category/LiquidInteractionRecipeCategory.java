@@ -8,52 +8,48 @@
 
 package hellfirepvp.astralsorcery.common.integration.jei.category;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
+import cn.sh1rocu.astralsorcery.util.neoforge.fluids.crafing.SizedFluidIngredient;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.integration.jei.base.ASRecipeCategory;
 import hellfirepvp.astralsorcery.common.integration.jei.base.StatefulCategory;
-import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
 import hellfirepvp.astralsorcery.common.recipe.liquid.interaction.LiquidInteractionRecipe;
 import hellfirepvp.astralsorcery.common.recipe.liquid.interaction.result.LiquidInteractionResultDropItem;
 import hellfirepvp.astralsorcery.common.recipe.liquid.interaction.result.LiquidInteractionResultSpawnEntity;
 import hellfirepvp.observerlib.client.util.LightmapUtil;
+import mezz.jei.api.fabric.constants.FabricTypes;
+import mezz.jei.api.fabric.ingredients.fluids.IJeiFluidIngredient;
+import mezz.jei.api.fabric.ingredients.fluids.JeiFluidIngredient;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
-import mezz.jei.api.neoforge.NeoForgeTypes;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
-import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.material.Fluid;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 
 import javax.annotation.Nullable;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -102,9 +98,11 @@ public class LiquidInteractionRecipeCategory extends ASRecipeCategory<LiquidInte
 
     private static void addReactantSlot(IRecipeLayoutBuilder builder, SizedFluidIngredient reactant, int x, int y) {
         List<FluidStack> variants = collectVariants(reactant);
+        List<IJeiFluidIngredient> ingredients = variants.stream().map(stack ->
+                new JeiFluidIngredient(stack.getFluidVariant(), stack.getAmount())).collect(Collectors.toList());
         builder.addSlot(RecipeIngredientRole.INPUT, x, y)
                 .setFluidRenderer(reactant.amount(), false, 16, 16)
-                .addIngredients(NeoForgeTypes.FLUID_STACK, variants);
+                .addIngredients(FabricTypes.FLUID_STACK, ingredients);
     }
 
     private static List<FluidStack> collectVariants(SizedFluidIngredient reactant) {
@@ -136,7 +134,7 @@ public class LiquidInteractionRecipeCategory extends ASRecipeCategory<LiquidInte
 
         int totalWeight = 0;
         for (RecipeHolder<LiquidInteractionRecipe> holder :
-                mc.level.getRecipeManager().getAllRecipesFor(RecipeTypesAS.LIQUID_INTERACTION_TYPE.get())) {
+                mc.level.getRecipeManager().getAllRecipesFor(RecipeTypesAS.LIQUID_INTERACTION_TYPE.type())) {
             LiquidInteractionRecipe other = holder.value();
             if (sharesReactants(recipe, other)) {
                 totalWeight += other.getWeight();
@@ -194,7 +192,7 @@ public class LiquidInteractionRecipeCategory extends ASRecipeCategory<LiquidInte
 
     @Override
     public List<ItemStack> provideCatalyst() {
-        return List.of(ItemsAS.BLOCK_CHALICE.toStack());
+        return List.of(ItemsAS.BLOCK_CHALICE.getDefaultInstance());
     }
 
     @Override

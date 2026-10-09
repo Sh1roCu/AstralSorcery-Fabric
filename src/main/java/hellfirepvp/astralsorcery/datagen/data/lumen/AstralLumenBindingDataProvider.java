@@ -29,7 +29,8 @@ import java.util.concurrent.CompletableFuture;
 
 import static hellfirepvp.astralsorcery.common.lib.PerksAS.AttributeTypes.*;
 import static hellfirepvp.astralsorcery.common.perk.type.base.ModifierType.*;
-import static hellfirepvp.astralsorcery.common.util.TimeUtil.*;
+import static hellfirepvp.astralsorcery.common.util.TimeUtil.minutes;
+import static hellfirepvp.astralsorcery.common.util.TimeUtil.seconds;
 
 /**
  * This class is part of the Astral Sorcery Mod

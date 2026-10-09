@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.tile;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.resource.UVFrame;
@@ -17,6 +18,7 @@ import hellfirepvp.astralsorcery.common.tile.TileLightwell;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.tank.FluidTankView;
+import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -24,9 +26,6 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -39,14 +38,15 @@ public class TileLightwellRenderer implements BlockEntityRenderer<TileLightwell>
 
     private final ItemRenderer itemRenderer;
 
-    public TileLightwellRenderer(ItemRenderer itemRenderer)  {
+    public TileLightwellRenderer(ItemRenderer itemRenderer) {
         this.itemRenderer = itemRenderer;
     }
 
-    @Override
-    public AABB getRenderBoundingBox(TileLightwell blockEntity) {
-        return BlockEntityRenderer.super.getRenderBoundingBox(blockEntity).inflate(0, 1, 0);
-    }
+    // TODO?
+//    @Override
+//    public AABB getRenderBoundingBox(TileLightwell blockEntity) {
+//        return BlockEntityRenderer.super.getRenderBoundingBox(blockEntity).inflate(0, 1, 0);
+//    }
 
     @Override
     public void render(TileLightwell lightwell, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
@@ -70,8 +70,7 @@ public class TileLightwellRenderer implements BlockEntityRenderer<TileLightwell>
         FluidStack contained = tank.getFluidInTank(0);
         if (contained.isEmpty()) return;
 
-        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(contained.getFluidType());
-        ColorWrapper color = ColorWrapper.transparent(ext.getTintColor(contained));
+        ColorWrapper color = ColorWrapper.transparent(FluidVariantRendering.getColor(contained.getFluidVariant()));
         RenderType rendertype = RenderType.entityTranslucent(InventoryMenu.BLOCK_ATLAS);
         TextureAtlasSprite tas = RenderSpriteUtil.getTexture(contained);
         VertexConsumer vb = bufferSource.getBuffer(rendertype);

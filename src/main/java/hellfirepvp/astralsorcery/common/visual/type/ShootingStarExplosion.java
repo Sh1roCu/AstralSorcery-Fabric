@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.visual.type;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.network.PacketDistributor;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.effect.EffectHelper;
 import hellfirepvp.astralsorcery.client.effect.function.FXAlphaFunction;
@@ -16,21 +17,20 @@ import hellfirepvp.astralsorcery.client.effect.function.FXPersistenceFunction;
 import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
 import hellfirepvp.astralsorcery.client.resource.AbstractRenderTexture;
-import hellfirepvp.astralsorcery.common.visual.VectorPosEffect;
-import hellfirepvp.astralsorcery.common.visual.VisualEffectTypes;
 import hellfirepvp.astralsorcery.common.network.play.PktPlayVisualEffect;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import hellfirepvp.astralsorcery.common.visual.VectorPosEffect;
+import hellfirepvp.astralsorcery.common.visual.VisualEffectTypes;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.function.Supplier;
 
@@ -68,7 +68,7 @@ public class ShootingStarExplosion extends VectorPosEffect {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void playEffect(RandomSource rand) {
         ColorWrapper brighterColor = this.getColor().brighter();
         Supplier<ColorWrapper> randomColor = () -> MiscUtil.getRandomEntry(rand, this.getColor(), brighterColor, ColorWrapper.WHITE).orElseThrow();

@@ -8,14 +8,15 @@
 
 package hellfirepvp.astralsorcery.common.event.helper;
 
+import cn.sh1rocu.astralsorcery.api.event.PlayerTickEvent;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.*;
 
@@ -31,7 +32,8 @@ public class DamageCancellingHelper {
     private static final Map<UUID, Set<ResourceKey<DamageType>>> invulnerableTypes = new HashMap<>();
     private static final Map<UUID, Integer> groundTicks = new HashMap<>();
 
-    private DamageCancellingHelper() {}
+    private DamageCancellingHelper() {
+    }
 
     public static void preventNextDamage(Player player, ResourceKey<DamageType> type) {
         if (!(player instanceof ServerPlayer)) return;
@@ -42,9 +44,9 @@ public class DamageCancellingHelper {
         invulnerableTypes.clear();
     }
 
-    public static void attachListeners(IEventBus bus) {
-        bus.addListener(DamageCancellingHelper::onDamage);
-        bus.addListener(DamageCancellingHelper::onPlayerTick);
+    public static void attachListeners() {
+        ServerLivingEntityEvents.ALLOW_DAMAGE.register(DamageCancellingHelper::onDamage);
+        PlayerTickEvent.POST.register(DamageCancellingHelper::onPlayerTick);
     }
 
     private static void onPlayerTick(PlayerTickEvent.Post event) {
@@ -68,15 +70,19 @@ public class DamageCancellingHelper {
         }
     }
 
-    private static void onDamage(LivingIncomingDamageEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer sPlayer)) return;
-        ResourceKey<DamageType> type = event.getSource().typeHolder().getKey();
+    private static boolean onDamage(LivingEntity entity, DamageSource source, float amount) {
+        if (!(entity instanceof ServerPlayer sPlayer)) return true;
+        boolean cancelled = false;
+        ResourceKey<DamageType> type = source.typeHolder().unwrapKey().orElse(null);
         Set<ResourceKey<DamageType>> sources = invulnerableTypes.getOrDefault(sPlayer.getUUID(), Collections.emptySet());
         if (sources.remove(type)) {
             if (sources.isEmpty()) {
                 invulnerableTypes.remove(sPlayer.getUUID());
             }
-            event.setCanceled(true);
+            cancelled = true;
+            // event.setCanceled(true);
         }
+
+        return !cancelled;
     }
 }

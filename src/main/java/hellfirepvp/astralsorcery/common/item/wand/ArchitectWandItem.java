@@ -37,8 +37,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.util.BlockSnapshot;
-import net.neoforged.neoforge.event.EventHooks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -115,7 +113,8 @@ public class ArchitectWandItem extends ItemCustom {
         BlockPos pos = context.getClickedPos();
 
         if (player == null || level.isClientSide()) return InteractionResult.SUCCESS;
-        if (!(level instanceof ServerLevel sLevel) || !(player instanceof ServerPlayer sPlayer)) return InteractionResult.SUCCESS;
+        if (!(level instanceof ServerLevel sLevel) || !(player instanceof ServerPlayer sPlayer))
+            return InteractionResult.SUCCESS;
 
         if (player.isShiftKeyDown()) {
             WandBlockStorageHelper.tryStoreBlock(stack, level, pos, player);
@@ -185,7 +184,7 @@ public class ArchitectWandItem extends ItemCustom {
             BlockState stateToPlace = entry.getValue();
 
             if (!player.mayUseItemAt(placePos, Direction.UP, wandStack)) continue;
-            if (EventHooks.onBlockPlace(player, BlockSnapshot.create(level.dimension(), level, placePos), Direction.UP)) continue;
+            // if (EventHooks.onBlockPlace(player, BlockSnapshot.create(level.dimension(), level, placePos), Direction.UP)) continue;
 
             ItemStack blockItem = new ItemStack(stateToPlace.getBlock());
             boolean hasItems = player.isCreative() || WandBlockStorageHelper.consumeBlock(player, blockItem);
@@ -221,10 +220,21 @@ public class ArchitectWandItem extends ItemCustom {
 
                 double cmpFrom, cmpTo;
                 switch (placedAgainst.getAxis()) {
-                    case X -> { cmpFrom = center.getX(); cmpTo = player.getX(); }
-                    case Y -> { cmpFrom = center.getY(); cmpTo = player.getY(); }
-                    case Z -> { cmpFrom = center.getZ(); cmpTo = player.getZ(); }
-                    default -> { return blocks; }
+                    case X -> {
+                        cmpFrom = center.getX();
+                        cmpTo = player.getX();
+                    }
+                    case Y -> {
+                        cmpFrom = center.getY();
+                        cmpTo = player.getY();
+                    }
+                    case Z -> {
+                        cmpFrom = center.getZ();
+                        cmpTo = player.getZ();
+                    }
+                    default -> {
+                        return blocks;
+                    }
                 }
                 int length = (int) Math.min(maxLength, Math.abs(cmpFrom + 0.5 - cmpTo));
                 for (int i = 0; i < length; i++) {

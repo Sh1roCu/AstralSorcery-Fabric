@@ -145,7 +145,7 @@ public class FocalPointSyncData extends SyncData<FocalPointSyncData.ClientSync, 
 
     @Override
     public Type<FocalPointSyncData, ClientSync, ClientDiffSync, FocalPointClientData> getType() {
-        return SyncDataTypesAS.FOCAL_POINT.get();
+        return SyncDataTypesAS.FOCAL_POINT;
     }
 
     private static class LevelData {
@@ -194,7 +194,7 @@ public class FocalPointSyncData extends SyncData<FocalPointSyncData.ClientSync, 
 
         @Override
         public Type<?, ?, ?, FocalPointClientData> type() {
-            return SyncDataTypesAS.FOCAL_POINT.get();
+            return SyncDataTypesAS.FOCAL_POINT;
         }
     }
 
@@ -232,7 +232,7 @@ public class FocalPointSyncData extends SyncData<FocalPointSyncData.ClientSync, 
 
         @Override
         public Type<?, ?, ?, FocalPointClientData> type() {
-            return SyncDataTypesAS.FOCAL_POINT.get();
+            return SyncDataTypesAS.FOCAL_POINT;
         }
     }
 }

@@ -12,15 +12,15 @@ import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.component.IdentifierComponent;
 import hellfirepvp.astralsorcery.common.lib.PerksAS;
 import hellfirepvp.astralsorcery.common.perk.source.ModifierSourceProvider;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
 
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -40,18 +40,18 @@ public class EquipmentSourceProvider extends ModifierSourceProvider<EquipmentMod
         }
     };
 
-    public static void attachEventListeners(IEventBus bus) {
-        bus.addListener(EquipmentSourceProvider::onEquipmentChange);
+    public static void attachEventListeners() {
+        ServerEntityEvents.EQUIPMENT_CHANGE.register(EquipmentSourceProvider::onEquipmentChange);
     }
 
     // update technically also covers this, but this is quicker so it may avoid weird fov jitter
-    private static void onEquipmentChange(LivingEquipmentChangeEvent event) {
-        if (event.getSlot() == EquipmentSlot.OFFHAND) return;
-        if (!(event.getEntity() instanceof ServerPlayer sPlayer)) return;
-        if (event.getEntity().level().isClientSide()) return;
-        EquipmentSourceProvider provider = PerksAS.Sources.EQUIPMENT.get();
+    private static void onEquipmentChange(LivingEntity livingEntity, EquipmentSlot equipmentSlot, ItemStack previousStack, ItemStack currentStack) {
+        if (equipmentSlot == EquipmentSlot.OFFHAND) return;
+        if (!(livingEntity instanceof ServerPlayer sPlayer)) return;
+        if (livingEntity.level().isClientSide()) return;
+        EquipmentSourceProvider provider = PerksAS.Sources.EQUIPMENT;
 
-        provider.updateSource(sPlayer, event.getSlot(), event.getTo());
+        provider.updateSource(sPlayer, equipmentSlot, currentStack);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class EquipmentSourceProvider extends ModifierSourceProvider<EquipmentMod
         ItemStack newStack = stack.copy();
         EquipmentModifierSource slotSource = new EquipmentModifierSource(slot, newStack);
         if (!newStack.isEmpty()) {
-            if (!slotSource.getModifiers(player, LogicalSide.SERVER, false).isEmpty()) {
+            if (!slotSource.getModifiers(player, EnvType.SERVER, false).isEmpty()) {
                 IdentifierComponent.createIdentifierIfNotExists(stack);
                 this.updateSource(player, SLOT_IDS.get(slot), slotSource);
             } else {

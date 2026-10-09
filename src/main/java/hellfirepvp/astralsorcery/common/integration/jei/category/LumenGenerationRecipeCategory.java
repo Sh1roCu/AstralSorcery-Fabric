@@ -10,7 +10,6 @@ package hellfirepvp.astralsorcery.common.integration.jei.category;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.integration.jei.base.ASRecipeCategory;
-import hellfirepvp.astralsorcery.common.integration.jei.ingredient.LumenIngredientRenderer;
 import hellfirepvp.astralsorcery.common.integration.jei.ingredient.LumenIngredientType;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
@@ -28,7 +27,6 @@ import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeManager;
 
 import javax.annotation.Nullable;
@@ -52,7 +50,7 @@ public class LumenGenerationRecipeCategory extends ASRecipeCategory<LumenGenerat
     public LumenGenerationRecipeCategory(IGuiHelper helper) {
         super(116, 54, helper, ItemsAS.BLOCK_LUMEN_ARRAY);
         this.background = createBackground(helper, BACKGROUND, this.getWidth(), this.getHeight());
-        this.lumenAlchemyArrayIcon = helper.createDrawableItemStack(ItemsAS.BLOCK_LUMEN_ALCHEMY_ARRAY.toStack());
+        this.lumenAlchemyArrayIcon = helper.createDrawableItemStack(ItemsAS.BLOCK_LUMEN_ALCHEMY_ARRAY.getDefaultInstance());
     }
 
     @SuppressWarnings("removal")
@@ -105,7 +103,7 @@ public class LumenGenerationRecipeCategory extends ASRecipeCategory<LumenGenerat
 
     @Override
     public List<ItemStack> provideCatalyst() {
-        return List.of(ItemsAS.BLOCK_LUMEN_ARRAY.toStack(), ItemsAS.BLOCK_LUMEN_ALCHEMY_ARRAY.toStack());
+        return List.of(ItemsAS.BLOCK_LUMEN_ARRAY.getDefaultInstance(), ItemsAS.BLOCK_LUMEN_ALCHEMY_ARRAY.getDefaultInstance());
     }
 
     @Override

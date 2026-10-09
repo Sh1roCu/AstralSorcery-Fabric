@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.block.tile;
 
+import cn.sh1rocu.astralsorcery.api.extension.ILandingEffectsBlock;
+import cn.sh1rocu.astralsorcery.api.extension.IRunningEffectsBlock;
 import com.mojang.serialization.MapCodec;
 import hellfirepvp.astralsorcery.client.effect.EffectHelper;
 import hellfirepvp.astralsorcery.client.effect.function.FXAlphaFunction;
@@ -19,15 +21,14 @@ import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
 import hellfirepvp.astralsorcery.common.tile.TileTranslucentBlock;
 import hellfirepvp.astralsorcery.common.tile.base.TileEntitySynchronized;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
-import hellfirepvp.astralsorcery.common.util.data.TileRegistryObject;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -35,12 +36,8 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -49,22 +46,23 @@ import net.neoforged.api.distmarker.OnlyIn;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class TranslucentBlock extends BaseTileBlock<TileTranslucentBlock> {
+public class TranslucentBlock extends BaseTileBlock<TileTranslucentBlock> implements ILandingEffectsBlock, IRunningEffectsBlock {
 
     public static MapCodec<TranslucentBlock> CODEC = simpleCodec(TranslucentBlock::new);
 
     public TranslucentBlock(Properties properties) {
-        super(properties, TileEntitiesAS.TRANSLUCENT_BLOCK);
+        super(properties, () -> TileEntitiesAS.TRANSLUCENT_BLOCK);
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
         MiscUtil.getTileAt(level, pos, TileTranslucentBlock.class, false).ifPresent(tile -> {
             BlockState storedState = tile.getTileData().getStoredState();
             try {
                 storedState.getBlock().animateTick(state, level, pos, random);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         });
 
         if (random.nextInt(10) != 0) return;
@@ -84,11 +82,11 @@ public class TranslucentBlock extends BaseTileBlock<TileTranslucentBlock> {
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
+    public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
         return MiscUtil.getTileAt(level, pos, TileTranslucentBlock.class, true).map(tile -> {
             BlockState stored = tile.getTileData().getStoredState();
             try {
-                return stored.getCloneItemStack(target, level, pos, player);
+                return stored.getBlock().getCloneItemStack(level, pos, stored);
             } catch (Exception exc) {
                 return new ItemStack(stored.getBlock());
             }

@@ -17,7 +17,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -76,7 +76,7 @@ public class SyncPlayerPerkData {
     public PlayerPerkData load() {
         return new PlayerPerkData(this.getPointTokens(),
                 MiscUtil.cast(MapStream.of(this.getPerks())
-                        .mapKey(key -> PerkTree.getInstance().getPerk(LogicalSide.CLIENT, key).orElseThrow())
+                        .mapKey(key -> PerkTree.getInstance().getPerk(EnvType.CLIENT, key).orElseThrow())
                         .toMap()),
                 this.getPerkExp());
     }

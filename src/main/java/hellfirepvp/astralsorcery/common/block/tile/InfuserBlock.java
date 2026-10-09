@@ -28,6 +28,8 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
+import java.util.function.Supplier;
+
 /**
  * This class is part of the Astral Sorcery Mod
  * The complete source code for this mod can be found on GitHub.
@@ -40,10 +42,10 @@ public class InfuserBlock extends BaseTickTileBlock<TileInfuser> {
     public static MapCodec<InfuserBlock> CODEC = simpleCodec(InfuserBlock::new);
 
     public InfuserBlock(Properties properties) {
-        this(properties, TileEntitiesAS.INFUSER);
+        this(properties, () -> TileEntitiesAS.INFUSER);
     }
 
-    protected InfuserBlock(Properties properties, TileRegistryObject<TileInfuser> tileType) {
+    protected InfuserBlock(Properties properties, Supplier<TileRegistryObject<TileInfuser>> tileType) {
         super(properties, tileType);
     }
 

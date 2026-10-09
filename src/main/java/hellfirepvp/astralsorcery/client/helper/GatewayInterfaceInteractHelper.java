@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.helper;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.network.PacketDistributor;
 import hellfirepvp.astralsorcery.client.effect.EffectHelper;
 import hellfirepvp.astralsorcery.client.effect.function.FXColorFunction;
 import hellfirepvp.astralsorcery.client.effect.vfx.VFXFacingParticle;
@@ -19,21 +20,16 @@ import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.ComputeFovModifierEvent;
-import net.neoforged.neoforge.client.event.RenderFrameEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -53,14 +49,15 @@ public class GatewayInterfaceInteractHelper {
     private static GatewayUserInterface.GatewayTarget focusedTarget = null;
     private static int focusTick = 0;
 
-    public static void attachEventListeners(IEventBus bus) {
-        bus.addListener(GatewayInterfaceInteractHelper::onClientInteractTick);
-        bus.addListener(GatewayInterfaceInteractHelper::onFovModifier);
+    public static void attachEventListeners() {
+        ClientTickEvents.END_CLIENT_TICK.register(GatewayInterfaceInteractHelper::onClientInteractTick);
+        // impl via mixin
+        // ComputeFovModifierEvent.EVENT.register(GatewayInterfaceInteractHelper::onFovModifier);
     }
 
-    private static void onClientInteractTick(ClientTickEvent.Post event) {
+    private static void onClientInteractTick(Minecraft client) {
         if (!focusTarget()) return;
-        Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        Camera camera = client.gameRenderer.getMainCamera();
         GatewayUserInterface ui = GatewayInterfaceRenderHelper.getInstance().getCurrentUI().orElseThrow();
         ColorWrapper color = ColorsAS.DYE_COLORS[focusedTarget.getEntry().getColor().getId()];
 
@@ -121,7 +118,7 @@ public class GatewayInterfaceInteractHelper {
         }
 
         if (focusTick == TELEPORT_TRIGGER) {
-            Minecraft.getInstance().player.setShiftKeyDown(false);
+            client.player.setShiftKeyDown(false);
             PacketDistributor.sendToServer(PktRequestGatewayTeleport.teleportTo(focusedTarget.getEntryLevelKey(), focusedTarget.getEntry().getPos()));
         }
     }
@@ -173,7 +170,8 @@ public class GatewayInterfaceInteractHelper {
         focusTick = 0;
     }
 
-    private static void onFovModifier(ComputeFovModifierEvent event) {
+    public static float onFovModifier(float newFovModifier) {
+        float[] result = {newFovModifier};
         GatewayInterfaceRenderHelper.getInstance().getCurrentUI().ifPresent(currentUI -> {
             if (focusTick < TELEPORT_FOCUS_WINDUP) return;
             float focusZoomTick = focusTick - TELEPORT_FOCUS_WINDUP + Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
@@ -183,7 +181,9 @@ public class GatewayInterfaceInteractHelper {
             percZoom = Mth.sqrt(percZoom);
             float targetModifier = 0.9F;
             float modifier = (1F - targetModifier) + (targetModifier * percZoom);
-            event.setNewFovModifier(event.getNewFovModifier() * modifier);
+            // event.setNewFovModifier(event.getNewFovModifier() * modifier);
+            result[0] = newFovModifier * modifier;
         });
+        return result[0];
     }
 }

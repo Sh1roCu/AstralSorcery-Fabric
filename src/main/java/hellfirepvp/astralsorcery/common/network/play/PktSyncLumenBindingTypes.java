@@ -13,14 +13,15 @@ import hellfirepvp.astralsorcery.common.lumen.Lumen;
 import hellfirepvp.astralsorcery.common.lumen.binding.LumenBindingType;
 import hellfirepvp.astralsorcery.common.lumen.binding.data.LumenBindingTypeLoader;
 import hellfirepvp.astralsorcery.common.network.PlayPacketHandler;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -54,8 +55,8 @@ public class PktSyncLumenBindingTypes extends PlayPacketHandler.ToClient<PktSync
     }
 
     public static Request newRequest() {
-        return new Request(LumenBindingTypeLoader.getInstance().getBindings(LogicalSide.SERVER),
-                LumenBindingTypeLoader.getInstance().getLumenApplicationMapping(LogicalSide.SERVER));
+        return new Request(LumenBindingTypeLoader.getInstance().getBindings(EnvType.SERVER),
+                LumenBindingTypeLoader.getInstance().getLumenApplicationMapping(EnvType.SERVER));
     }
 
     @Override
@@ -63,9 +64,10 @@ public class PktSyncLumenBindingTypes extends PlayPacketHandler.ToClient<PktSync
         return CODEC;
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
-    public void handle(Request payload, IPayloadContext context) {
-        context.enqueueWork(() ->
+    public void receive(Request payload, ClientPlayNetworking.Context context) {
+        context.client().execute(() ->
                 LumenBindingTypeLoader.getInstance().updateClientBindings(payload.bindings(), payload.lumenApplicationMapping()));
     }
 

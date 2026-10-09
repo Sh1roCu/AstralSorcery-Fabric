@@ -8,7 +8,6 @@
 
 package hellfirepvp.astralsorcery.common.entity.item;
 
-import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.effect.EffectHelper;
 import hellfirepvp.astralsorcery.client.effect.function.FXAlphaFunction;
 import hellfirepvp.astralsorcery.client.effect.function.FXColorFunction;
@@ -23,19 +22,18 @@ import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.Optional;
 
@@ -49,8 +47,8 @@ import java.util.Optional;
 public class ItemEntityAltarInput extends ItemEntityHighlighted {
 
     protected static final EntityDataAccessor<BlockPos> ALTAR = SynchedEntityData.defineId(ItemEntityAltarInput.class, EntityDataSerializers.BLOCK_POS);
-    protected static final EntityDataAccessor<Vector3> TARGET = SynchedEntityData.defineId(ItemEntityAltarInput.class, EntityDataSerializersAS.VECTOR.get());
-    protected static final EntityDataAccessor<ActiveAltarRecipe.AdditionalInput> INPUT_REFERENCE = SynchedEntityData.defineId(ItemEntityAltarInput.class, EntityDataSerializersAS.ALTAR_INPUT_REFERENCE.get());
+    protected static final EntityDataAccessor<Vector3> TARGET = SynchedEntityData.defineId(ItemEntityAltarInput.class, EntityDataSerializersAS.VECTOR);
+    protected static final EntityDataAccessor<ActiveAltarRecipe.AdditionalInput> INPUT_REFERENCE = SynchedEntityData.defineId(ItemEntityAltarInput.class, EntityDataSerializersAS.ALTAR_INPUT_REFERENCE);
 
     private final ClientObject<ColorWrapper> clientColor = new ClientObject<>();
 
@@ -159,7 +157,7 @@ public class ItemEntityAltarInput extends ItemEntityHighlighted {
         this.setDeltaMovement(targetDir.toVector3d());
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void playClientParticles() {
         if (!this.hasValidAltarReference()) return;
 
@@ -182,7 +180,7 @@ public class ItemEntityAltarInput extends ItemEntityHighlighted {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private Optional<ColorWrapper> resolveClientColor() {
         if (this.clientColor.isNull()) {
             ColorExtractUtil.getColor(this.getItem()).ifPresent(this.clientColor::set);

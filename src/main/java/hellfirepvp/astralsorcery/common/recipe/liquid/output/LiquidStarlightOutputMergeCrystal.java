@@ -15,8 +15,8 @@ import hellfirepvp.astralsorcery.client.effect.function.FXColorFunction;
 import hellfirepvp.astralsorcery.client.effect.function.FXMotionFunction;
 import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
 import hellfirepvp.astralsorcery.common.component.CrystalAttributesComponent;
+import hellfirepvp.astralsorcery.common.event.CrystalPropertyEvent;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
-import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
 import hellfirepvp.astralsorcery.common.lib.types.LiquidStarlightRecipeOutputTypesAS;
 import hellfirepvp.astralsorcery.common.recipe.liquid.LiquidStarlightRecipe;
 import hellfirepvp.astralsorcery.common.recipe.liquid.LiquidStarlightRecipeInput;
@@ -24,14 +24,15 @@ import hellfirepvp.astralsorcery.common.util.ItemUtil;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -48,7 +49,8 @@ public class LiquidStarlightOutputMergeCrystal extends LiquidStarlightRecipeOutp
     public static final StreamCodec<RegistryFriendlyByteBuf, LiquidStarlightOutputMergeCrystal> STREAM_CODEC = StreamCodec.unit(INSTANCE);
     public static final Type<LiquidStarlightOutputMergeCrystal> TYPE = new Type<>(CODEC, STREAM_CODEC);
 
-    private LiquidStarlightOutputMergeCrystal() {}
+    private LiquidStarlightOutputMergeCrystal() {
+    }
 
     public static LiquidStarlightOutputMergeCrystal getInstance() {
         return INSTANCE;
@@ -56,7 +58,7 @@ public class LiquidStarlightOutputMergeCrystal extends LiquidStarlightRecipeOutp
 
     @Override
     public Type<?> getType() {
-        return LiquidStarlightRecipeOutputTypesAS.MERGE_CRYSTAL.get();
+        return LiquidStarlightRecipeOutputTypesAS.MERGE_CRYSTAL;
     }
 
     @Override
@@ -77,6 +79,7 @@ public class LiquidStarlightOutputMergeCrystal extends LiquidStarlightRecipeOutp
 
         CrystalAttributesComponent mergeTo = cmpCrystal.getTotalTierCount() >= cmpOther.getTotalTierCount() ? cmpCrystal : cmpOther;
         CrystalAttributesComponent mergeFrom = mergeTo == cmpCrystal ? cmpOther : cmpCrystal;
+        CrystalAttributesComponent copyTo = mergeTo, copyFrom = mergeFrom;
 
         ItemStack resultStack = mergeTo == cmpCrystal ? crystal.getItem().copy() : otherCrystal.getItem().copy();
 
@@ -95,13 +98,17 @@ public class LiquidStarlightOutputMergeCrystal extends LiquidStarlightRecipeOutp
             }
         }
 
-        resultStack.set(DataComponentsAS.CRYSTAL_ATTRIBUTES, mergeTo);
+        var combineCrystals = new CrystalPropertyEvent.Merge(resultStack,
+                CrystalPropertyEvent.Merge.Type.MERGE_CRYSTALS, List.of(copyFrom, copyTo), mergeTo);
+        CrystalPropertyEvent.Merge.EVENT.invoker().post(combineCrystals);
+
+        resultStack.set(DataComponentsAS.CRYSTAL_ATTRIBUTES, combineCrystals.getResultComponent());
         ItemUtil.dropItemNaturally(crystal.level(), crystal.getX(), crystal.getY(), crystal.getZ(), resultStack);
         recipe.consumeItemInputs(input);
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void playCraftingEffects(LiquidStarlightRecipe recipe, LiquidStarlightRecipeInput input, RandomSource rand, int craftingTick) {
         super.playCraftingEffects(recipe, input, rand, craftingTick);
 

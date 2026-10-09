@@ -8,41 +8,17 @@
 
 package hellfirepvp.astralsorcery.client.effect;
 
-import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import hellfirepvp.astralsorcery.client.ClientProxy;
 import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
-import hellfirepvp.astralsorcery.client.lib.ShaderProgramsAS;
 import hellfirepvp.astralsorcery.client.resource.AssetLibrary;
-import hellfirepvp.astralsorcery.client.shader.DrawChainRenderType;
-import hellfirepvp.astralsorcery.client.shader.WrappedBufferSource;
 import hellfirepvp.astralsorcery.client.util.RenderUtil;
-import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
-import hellfirepvp.observerlib.client.util.LightmapUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import org.joml.Matrix4f;
-import org.joml.Matrix4fStack;
-import org.joml.Quaternionf;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -64,22 +40,23 @@ public final class EffectHandler {
 
     private boolean clear = false;
 
-    private EffectHandler() {}
+    private EffectHandler() {
+    }
 
     public static EffectHandler getInstance() {
         return INSTANCE;
     }
 
-    public void displayDebug(CustomizeGuiOverlayEvent.DebugText event) {
+    public void displayDebug(List<String> left) {
         int count = 0;
         for (List<EntityVisualFX> list : this.effects.values()) {
             count += list.size();
         }
 
-        event.getLeft().add("");
-        event.getLeft().add(ChatFormatting.BLUE + "[AstralSorcery]" + ChatFormatting.RESET + " Effects:");
-        event.getLeft().add(ChatFormatting.BLUE + "[AstralSorcery]" + ChatFormatting.RESET + " > VFX: " + count);
-        event.getLeft().add(ChatFormatting.BLUE + "[AstralSorcery]" + ChatFormatting.RESET + " > VFX Sources: " + this.sources.size());
+        left.add("");
+        left.add(ChatFormatting.BLUE + "[AstralSorcery]" + ChatFormatting.RESET + " Effects:");
+        left.add(ChatFormatting.BLUE + "[AstralSorcery]" + ChatFormatting.RESET + " > VFX: " + count);
+        left.add(ChatFormatting.BLUE + "[AstralSorcery]" + ChatFormatting.RESET + " > VFX Sources: " + this.sources.size());
     }
 
     public void render(Camera renderInfo, @Nullable Frustum cameraFrustum, Predicate<ParticleRenderType> renderTypePredicate, float pTicks) {
@@ -151,7 +128,7 @@ public final class EffectHandler {
     }
     */
 
-    public void tick(ClientTickEvent.Post event) {
+    public void tick(Minecraft client) {
         if (this.clear) {
             this.sources.forEach(EntityFX::setRemoved);
             this.sources.clear();
@@ -161,14 +138,14 @@ public final class EffectHandler {
             return;
         }
 
-        Entity view = Minecraft.getInstance().getCameraEntity();
-        if (view == null) view = Minecraft.getInstance().player;
+        Entity view = client.getCameraEntity();
+        if (view == null) view = client.player;
         if (view == null) {
             clearAllEffects();
             return;
         }
 
-        if (Minecraft.getInstance().isPaused()) return;
+        if (client.isPaused()) return;
 
         this.effects.values().forEach(l -> {
             Iterator<EntityVisualFX> iterator = l.iterator();

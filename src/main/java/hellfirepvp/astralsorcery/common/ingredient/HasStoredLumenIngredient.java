@@ -9,18 +9,20 @@
 package hellfirepvp.astralsorcery.common.ingredient;
 
 import com.mojang.serialization.MapCodec;
+import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.component.StoredLumenComponent;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
-import hellfirepvp.astralsorcery.common.lib.IngredientsAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
-import net.minecraft.ChatFormatting;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.crafting.ICustomIngredient;
-import net.neoforged.neoforge.common.crafting.IngredientType;
 
-import java.util.stream.Stream;
+import java.util.List;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -29,14 +31,35 @@ import java.util.stream.Stream;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class HasStoredLumenIngredient implements ICustomIngredient {
+public class HasStoredLumenIngredient implements CustomIngredient {
 
     public static final HasStoredLumenIngredient INSTANCE = new HasStoredLumenIngredient();
     public static final MapCodec<HasStoredLumenIngredient> CODEC = MapCodec.unit(INSTANCE);
+    public static final StreamCodec<RegistryFriendlyByteBuf, HasStoredLumenIngredient> STREAM_CODEC = StreamCodec.unit(INSTANCE);
+
+    public static final CustomIngredientSerializer<HasStoredLumenIngredient> SERIALIZER = new CustomIngredientSerializer<>() {
+        private static final ResourceLocation ID = AstralSorcery.key("has_stored_lumen");
+
+        @Override
+        public ResourceLocation getIdentifier() {
+            return ID;
+        }
+
+        @Override
+        public MapCodec<HasStoredLumenIngredient> getCodec(boolean allowEmpty) {
+            return CODEC;
+        }
+
+        @Override
+        public StreamCodec<RegistryFriendlyByteBuf, HasStoredLumenIngredient> getPacketCodec() {
+            return STREAM_CODEC;
+        }
+    };
 
     private static ItemStack displayStack = null;
 
-    private HasStoredLumenIngredient() {}
+    private HasStoredLumenIngredient() {
+    }
 
     @Override
     public boolean test(ItemStack stack) {
@@ -45,23 +68,23 @@ public class HasStoredLumenIngredient implements ICustomIngredient {
     }
 
     @Override
-    public Stream<ItemStack> getItems() {
-        if (displayStack != null) return Stream.of(displayStack);
+    public List<ItemStack> getMatchingStacks() {
+        if (displayStack != null) return List.of(displayStack);
 
-        displayStack = ItemsAS.STARDUST.toStack();
+        displayStack = ItemsAS.STARDUST.getDefaultInstance();
         displayStack.set(DataComponents.ITEM_NAME, Component.translatable("ingredient.astralsorcery.has_stored_lumen.description"));
 
-        return Stream.of(displayStack);
+        return List.of(displayStack);
     }
 
     @Override
-    public boolean isSimple() {
-        return false;
+    public boolean requiresTesting() {
+        return true;
     }
 
     @Override
-    public IngredientType<?> getType() {
-        return IngredientsAS.STORED_LUMEN.get();
+    public CustomIngredientSerializer<?> getSerializer() {
+        return SERIALIZER;
     }
 
     public static void clearDisplayCache() {

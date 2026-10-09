@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.tile;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.client.effect.EffectHelper;
@@ -31,24 +32,23 @@ import hellfirepvp.astralsorcery.common.util.tank.FluidContainerList;
 import hellfirepvp.astralsorcery.common.util.tank.FluidTankView;
 import hellfirepvp.astralsorcery.common.util.tank.FluidTankViewFactory;
 import hellfirepvp.astralsorcery.common.visual.type.ChaliceLiquidInteractionEffect;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -63,9 +63,9 @@ import java.util.function.Supplier;
  */
 public class TileChalice extends TileEntityTick<TileChalice.Data> {
 
-    private static final int TANK_CAPACITY = 64 * FluidType.BUCKET_VOLUME;
-    private static final int LIQUID_STARLIGHT_DRAW_AMOUNT = 400;
-    private static final int LIQUID_STARLIGHT_MIN_DRAW = 100;
+    private static final long TANK_CAPACITY = 64 * FluidConstants.BUCKET;
+    private static final long LIQUID_STARLIGHT_DRAW_AMOUNT = 400 * 81;
+    private static final long LIQUID_STARLIGHT_MIN_DRAW = 100 * 81;
     private static final int CHALICE_SEARCH_RANGE = 16;
     private static final int INTERACTION_COOLDOWN_MIN = 20;
     private static final int INTERACTION_COOLDOWN_RANDOM = 40;
@@ -100,7 +100,7 @@ public class TileChalice extends TileEntityTick<TileChalice.Data> {
         if (this.getTileData().getTicksExisted() % 20 == 0) {
             FluidStack stack = this.getTileData().getContainedFluid();
             if (!stack.isEmpty()) {
-                this.setLight(level, stack.getFluidType().getLightLevel(stack));
+                this.setLight(level, FluidVariantAttributes.getLuminance(stack.getFluidVariant()));
             } else {
                 this.setLight(level, 0);
             }
@@ -126,7 +126,7 @@ public class TileChalice extends TileEntityTick<TileChalice.Data> {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void clientTick(Level level) {
         super.clientTick(level);
 
@@ -140,41 +140,49 @@ public class TileChalice extends TileEntityTick<TileChalice.Data> {
     private boolean tickLightwellDraw(ServerLevel level) {
         FluidStack tankContent = this.getContainedFluid();
         boolean tankEmpty = tankContent.isEmpty();
-        boolean tankIsStarlight = !tankEmpty && tankContent.getFluid() == FluidsAS.LIQUID_STARLIGHT.getSource().get();
+        boolean tankIsStarlight = !tankEmpty && tankContent.getFluid() == FluidsAS.LIQUID_STARLIGHT.getSource();
         if (!tankEmpty && (!tankIsStarlight || tankContent.getAmount() + LIQUID_STARLIGHT_MIN_DRAW >= TANK_CAPACITY)) {
             return false;
         }
 
         Vec3 chaliceCenter = TileChalice.getChaliceCenter(this.worldPosition);
         List<BlockPos> lightwells = BlockFinder.findNearbyBlocks(level, this.worldPosition, CHALICE_SEARCH_RANGE,
-                (lvl, pos, state) -> state.is(BlocksAS.LIGHTWELL.get()));
+                (lvl, pos, state) -> state.is(BlocksAS.LIGHTWELL));
         lightwells.removeIf(pos -> RayTraceUtil.clip(level, chaliceCenter, Vec3.atCenterOf(pos), Set.of(this.worldPosition, pos)).getType() == HitResult.Type.BLOCK);
         MiscUtil.shuffle(lightwells, this.rand);
 
         for (BlockPos wellPos : lightwells) {
-            IFluidHandler wellHandler = level.getCapability(Capabilities.FluidHandler.BLOCK, wellPos, Direction.DOWN);
+            var wellHandler = FluidStorage.SIDED.find(level, wellPos, Direction.DOWN);
             if (wellHandler == null) {
                 continue;
             }
-            FluidStack drainable = wellHandler.drain(LIQUID_STARLIGHT_DRAW_AMOUNT, IFluidHandler.FluidAction.SIMULATE);
+            var resourceAmount = StorageUtil.findExtractableContent(wellHandler, null);
+            FluidStack drainable = resourceAmount == null ? FluidStack.EMPTY : new FluidStack(resourceAmount.resource(), Math.min(resourceAmount.amount(), LIQUID_STARLIGHT_DRAW_AMOUNT));
             if (drainable.getAmount() <= LIQUID_STARLIGHT_MIN_DRAW) {
                 continue;
             }
-            if (drainable.getFluid() != FluidsAS.LIQUID_STARLIGHT.getSource().get()) {
+            if (drainable.getFluid() != FluidsAS.LIQUID_STARLIGHT.getSource()) {
                 continue;
             }
             FluidTankView ownTank = this.getTankView();
-            int acceptable = ownTank.fill(drainable, IFluidHandler.FluidAction.SIMULATE);
+            long acceptable = StorageUtil.simulateInsert(ownTank, drainable.getFluidVariant(), drainable.getAmount(), null);
             if (acceptable <= 0) {
                 return false;
             }
-            FluidStack actual = wellHandler.drain(drainable.copyWithAmount(acceptable), IFluidHandler.FluidAction.EXECUTE);
-            if (actual.isEmpty()) {
+            long actual = acceptable;
+            try (Transaction tx = Transaction.openOuter()) {
+                actual = wellHandler.extract(drainable.getFluidVariant(), acceptable, tx);
+                tx.commit();
+            }
+            if (actual <= 0) {
                 continue;
             }
-            ownTank.fill(actual, IFluidHandler.FluidAction.EXECUTE);
+            try (Transaction tx = Transaction.openOuter()) {
+                ownTank.insert(drainable.getFluidVariant(), actual, tx);
+                tx.commit();
+            }
 
-            ChaliceLiquidInteractionEffect.lightwellDraw(Vec3.atCenterOf(wellPos), chaliceCenter, actual)
+            ChaliceLiquidInteractionEffect.lightwellDraw(Vec3.atCenterOf(wellPos), chaliceCenter, drainable.copyWithAmount(actual))
                     .sendToNearby(level, this.worldPosition);
             return true;
         }
@@ -238,12 +246,12 @@ public class TileChalice extends TileEntityTick<TileChalice.Data> {
         return Math.min(1F, content.getAmount() / (float) TANK_CAPACITY);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public Vector3 getRotation() {
         return this.rotation == null ? new Vector3() : this.rotation;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public Vector3 getPrevRotation() {
         return this.prevRotation == null ? new Vector3() : this.prevRotation;
     }
@@ -273,7 +281,7 @@ public class TileChalice extends TileEntityTick<TileChalice.Data> {
             if (chalice == null) {
                 continue;
             }
-            if (chalice.getTankView().drain(expected, IFluidHandler.FluidAction.SIMULATE).getAmount() >= expected.getAmount()) {
+            if (StorageUtil.simulateExtract(chalice.getTankView(), expected.getFluidVariant(), expected.getAmount(), null) >= expected.getAmount()) {
                 out.add(chalice);
             }
         }
@@ -289,9 +297,9 @@ public class TileChalice extends TileEntityTick<TileChalice.Data> {
             if (chalice == null) {
                 continue;
             }
-            FluidStack drained = chalice.getTankView().drain(expected, IFluidHandler.FluidAction.SIMULATE);
-            if (!drained.isEmpty()) {
-                required.shrink(drained.getAmount());
+            long drained = StorageUtil.simulateExtract(chalice.getTankView(), expected.getFluidVariant(), expected.getAmount(), null);
+            if (drained > 0) {
+                required.shrink(drained);
                 out.add(chalice);
             }
         }
@@ -305,9 +313,9 @@ public class TileChalice extends TileEntityTick<TileChalice.Data> {
             if (chalice == null) {
                 continue;
             }
-            FluidStack drained = chalice.getTankView().drain(expected, IFluidHandler.FluidAction.SIMULATE);
-            if (!drained.isEmpty()) {
-                required.shrink(drained.getAmount());
+            long drained = StorageUtil.simulateExtract(chalice.getTankView(), expected.getFluidVariant(), expected.getAmount(), null);
+            if (drained > 0) {
+                required.shrink(drained);
             }
         }
         return required.isEmpty();
@@ -328,6 +336,7 @@ public class TileChalice extends TileEntityTick<TileChalice.Data> {
             super(ticksExisted, hasStructure, skyObstructions);
             this.fluidContents = fluidContents;
         }
+
         public FluidStack getContainedFluid() {
             return this.fluidContents.getTank(0).getContent();
         }
@@ -379,12 +388,16 @@ public class TileChalice extends TileEntityTick<TileChalice.Data> {
         public boolean consumeLiquid(Level level, BlockPos pos, FluidStack search, boolean simulate) {
             if (this.chalices.isEmpty()) return false;
 
-            IFluidHandler.FluidAction action = simulate ? IFluidHandler.FluidAction.SIMULATE : IFluidHandler.FluidAction.EXECUTE;
             var optChalices = TileChalice.findNearbyChalicesCombined(level, pos, search, 16);
             if (optChalices.isPresent()) {
                 FluidStack remaining = search.copy();
                 for (TileChalice chalice : optChalices.get()) {
-                    remaining.shrink(chalice.getTileData().getFluidTank().drain(remaining, action).getAmount());
+                    try (Transaction tx = Transaction.openOuter()) {
+                        remaining.shrink(chalice.getTileData().getFluidTank().extract(remaining.getFluidVariant(), remaining.getAmount(), tx));
+                        if (!simulate) {
+                            tx.commit();
+                        }
+                    }
                     if (remaining.isEmpty()) break;
                 }
                 return remaining.isEmpty();
@@ -392,12 +405,12 @@ public class TileChalice extends TileEntityTick<TileChalice.Data> {
             return false;
         }
 
-        @OnlyIn(Dist.CLIENT)
+        @Environment(EnvType.CLIENT)
         public void playLiquidDrawEffect(Level level, Vector3 target, FluidStack requiredInput) {
             this.playLiquidDrawEffect(level, () -> target, requiredInput, 2F, 0.08F);
         }
 
-        @OnlyIn(Dist.CLIENT)
+        @Environment(EnvType.CLIENT)
         public void playLiquidDrawEffect(Level level, Supplier<Vector3> target, FluidStack requiredInput, float proximityAlphaThreshold, float motionVelocity) {
             if (this.chalices.isEmpty()) return;
 

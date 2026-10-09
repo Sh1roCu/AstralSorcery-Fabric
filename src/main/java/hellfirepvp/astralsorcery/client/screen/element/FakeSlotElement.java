@@ -24,7 +24,6 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -40,7 +39,8 @@ public class FakeSlotElement extends AbstractWidget {
 
     private final AbstractRenderTexture texture;
     private final Supplier<ItemStack> itemStackDisplaySupplier;
-    private Consumer<Integer> onClick = slot -> {};
+    private Consumer<Integer> onClick = slot -> {
+    };
 
     public FakeSlotElement(int x, int y, AbstractRenderTexture texture, Supplier<ItemStack> itemStackDisplaySupplier) {
         super(x, y, 18, 18, Component.empty());
@@ -66,7 +66,7 @@ public class FakeSlotElement extends AbstractWidget {
 
         ItemStack stackToRender = this.itemStackDisplaySupplier.get();
         if (!stackToRender.isEmpty()) {
-            Font fr = IClientItemExtensions.of(stackToRender).getFont(stackToRender, IClientItemExtensions.FontContext.TOOLTIP);
+            Font fr = null /*IClientItemExtensions.of(stackToRender).getFont(stackToRender, IClientItemExtensions.FontContext.TOOLTIP)*/;
             if (fr == null) fr = Minecraft.getInstance().font;
             guiGraphics.renderItem(stackToRender, this.getX() + 1, this.getY() + 1);
             guiGraphics.renderItemDecorations(fr, stackToRender, this.getX() + 1, this.getY() + 1);
@@ -80,7 +80,8 @@ public class FakeSlotElement extends AbstractWidget {
                 boolean flag = this.clicked(mouseX, mouseY);
                 if (flag) {
                     this.playDownSound(Minecraft.getInstance().getSoundManager());
-                    this.onClick(mouseX, mouseY, button);
+                    this.onClick(mouseX, mouseY);
+                    this.onClick.accept(button);
                 }
             }
         }
@@ -88,9 +89,8 @@ public class FakeSlotElement extends AbstractWidget {
     }
 
     @Override
-    public void onClick(double mouseX, double mouseY, int button) {
-        super.onClick(mouseX, mouseY, button);
-        this.onClick.accept(button);
+    public void onClick(double mouseX, double mouseY) {
+        super.onClick(mouseX, mouseY);
     }
 
     @Override
@@ -106,5 +106,6 @@ public class FakeSlotElement extends AbstractWidget {
     }
 
     @Override
-    protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {}
+    protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
+    }
 }

@@ -27,12 +27,10 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -159,7 +157,7 @@ public class FocalCombineRecipe extends CustomRecipe<FocalCombineRecipe, FocalCo
     }
 
     @Override
-    public Supplier<? extends RecipeSerializer<FocalCombineRecipe>> getRecipeSerializer() {
+    public RecipeSerializer<FocalCombineRecipe> getRecipeSerializer() {
         return RecipeTypesAS.FOCAL_COMBINE_SERIALIZER;
     }
 

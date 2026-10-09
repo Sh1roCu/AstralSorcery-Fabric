@@ -8,15 +8,12 @@
 
 package hellfirepvp.astralsorcery.common.integration;
 
+import dev.emi.trinkets.api.TrinketsApi;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import top.theillusivec4.curios.api.CuriosApi;
-import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
-import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
 
 /**
@@ -30,22 +27,17 @@ public class IntegrationCurios {
 
     public static List<ItemStack> getCurio(LivingEntity le, Predicate<ItemStack> stack) {
         List<ItemStack> stacks = new ArrayList<>();
-        Set<String> slotIds = CuriosApi.getSlots(le.level()).keySet();
-        CuriosApi.getCuriosInventory(le).ifPresent(inv -> {
-            slotIds.forEach(slotId -> {
-                ICurioStacksHandler slotHandler = inv.getCurios().get(slotId);
-                if (slotHandler != null) {
-                    IDynamicStackHandler slotStackHandler = slotHandler.getStacks();
-                    for (int slot = 0; slot < slotStackHandler.getSlots(); slot++) {
-                        ItemStack curioSlotStack = slotStackHandler.getStackInSlot(slot);
-                        if (stack.test(curioSlotStack)) {
-                            stacks.add(curioSlotStack);
-                        }
+        TrinketsApi.getTrinketComponent(le).ifPresent(component -> {
+            var allEquipped = component.getAllEquipped();
+            if (allEquipped != null) {
+                allEquipped.forEach(tuple -> {
+                    ItemStack curioSlotStack = tuple.getB();
+                    if (stack.test(curioSlotStack)) {
+                        stacks.add(curioSlotStack);
                     }
-                }
-            });
+                });
+            }
         });
         return stacks;
     }
-
 }

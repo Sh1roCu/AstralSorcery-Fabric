@@ -56,6 +56,6 @@ public record ConditionResearchFlag(ResearchFlag flag) implements ResearchNodeCo
 
     @Override
     public Type<?> getType() {
-        return ResearchNodeConditionTypesAS.RESEARCH_FLAG_SET.get();
+        return ResearchNodeConditionTypesAS.RESEARCH_FLAG_SET;
     }
 }

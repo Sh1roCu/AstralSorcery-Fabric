@@ -8,9 +8,9 @@
 
 package hellfirepvp.astralsorcery.common.component;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.common.util.AttributeTooltipContext;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.util.AttributeTooltipContext;
 
 import java.util.function.Consumer;
 

@@ -8,7 +8,13 @@
 
 package hellfirepvp.astralsorcery.common.util;
 
+import cn.sh1rocu.observerlib.ObserverLibFabric;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -22,13 +28,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.EventHooks;
-import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -45,19 +44,19 @@ public class EntityUtil {
 
     private static final Random rand = new Random();
 
-    public static Optional<Player> getPlayer(UUID playerUUID, LogicalSide side) {
-        return side.isClient() ? getPlayerClient(playerUUID) : getPlayerServer(playerUUID);
+    public static Optional<Player> getPlayer(UUID playerUUID, EnvType side) {
+        return side == EnvType.CLIENT ? getPlayerClient(playerUUID) : getPlayerServer(playerUUID);
     }
 
     public static Optional<Player> getPlayerServer(UUID playerUUID) {
-        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        MinecraftServer server = ObserverLibFabric.getServer();
         if (server == null) {
             return Optional.empty();
         }
         return Optional.ofNullable(server.getPlayerList().getPlayer(playerUUID));
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public static Optional<Player> getPlayerClient(UUID playerUUID) {
         ClientLevel clWorld = Minecraft.getInstance().level;
         if (clWorld == null) {
@@ -108,12 +107,15 @@ public class EntityUtil {
     public static <T extends Entity> T transferEntity(T entity, ResourceKey<Level> targetLevel, Vector3 targetPos) {
         if (!(entity.level() instanceof ServerLevel srcLevel)) return entity;
         MinecraftServer server = srcLevel.getServer();
-        EntityTeleportEvent event = new EntityTeleportEvent(entity, targetPos.getX(), targetPos.getY(), targetPos.getZ());
-        NeoForge.EVENT_BUS.post(event);
-        if (event.isCanceled()) return entity;
-        double x = event.getTargetX();
-        double y = event.getTargetY();
-        double z = event.getTargetZ();
+//        EntityTeleportEvent event = new EntityTeleportEvent(entity, targetPos.getX(), targetPos.getY(), targetPos.getZ());
+//        NeoForge.EVENT_BUS.post(event);
+//        if (event.isCanceled()) return entity;
+//        double x = event.getTargetX();
+//        double y = event.getTargetY();
+//        double z = event.getTargetZ();
+        double x = targetPos.getX();
+        double y = targetPos.getY();
+        double z = targetPos.getZ();
 
         entity.setShiftKeyDown(false);
         ServerLevel dstLevel = server.getLevel(targetLevel);

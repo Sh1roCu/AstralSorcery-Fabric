@@ -11,6 +11,7 @@ package hellfirepvp.astralsorcery.client.effect;
 import com.mojang.blaze3d.vertex.*;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.client.Camera;
+import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -70,10 +71,11 @@ public class EffectTemplate<T extends EntityVisualFX> implements ParticleRenderT
         return null;
     }
 
-    @Override
-    public final boolean isTranslucent() {
-        return this.isTranslucent;
-    }
+    // TODO?
+//    @Override
+//    public final boolean isTranslucent() {
+//        return this.isTranslucent;
+//    }
 
     @Override
     public boolean equals(Object o) {

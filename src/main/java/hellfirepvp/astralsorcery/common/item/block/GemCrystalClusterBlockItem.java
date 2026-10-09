@@ -8,7 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.item.block;
 
-import hellfirepvp.astralsorcery.common.block.tile.CelestialCrystalClusterBlock;
+import cn.sh1rocu.astralsorcery.api.extension.IMaxDamageItem;
+import cn.sh1rocu.astralsorcery.api.extension.INoRepairItem;
 import hellfirepvp.astralsorcery.common.block.tile.GemCrystalClusterBlock;
 import hellfirepvp.astralsorcery.common.item.base.BlockItemCustom;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
@@ -26,7 +27,7 @@ import java.util.function.Consumer;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class GemCrystalClusterBlockItem extends BlockItemCustom {
+public class GemCrystalClusterBlockItem extends BlockItemCustom implements IMaxDamageItem, INoRepairItem {
 
     public GemCrystalClusterBlockItem(Block block) {
         super(block, new Properties());
@@ -39,16 +40,17 @@ public class GemCrystalClusterBlockItem extends BlockItemCustom {
 
     public static List<ItemStack> getVariants() {
         return GemCrystalClusterBlock.STAGE.getPossibleValues().stream().map(stage -> {
-            ItemStack stack = ItemsAS.BLOCK_GEM_CRYSTAL_CLUSTER.toStack();
+            ItemStack stack = ItemsAS.BLOCK_GEM_CRYSTAL_CLUSTER.getDefaultInstance();
             setStage(stack, stage);
             return stack;
         }).toList();
     }
 
-    @Override
-    public boolean isDamageable(ItemStack stack) {
-        return false;
-    }
+    // the same as INoRepairItem
+//    @Override
+//    public boolean isDamageable(ItemStack stack) {
+//        return false;
+//    }
 
     @Override
     public int getMaxDamage(ItemStack stack) {

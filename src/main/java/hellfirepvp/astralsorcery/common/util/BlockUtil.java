@@ -8,9 +8,13 @@
 
 package hellfirepvp.astralsorcery.common.util;
 
+import cn.sh1rocu.astralsorcery.api.mixin.LevelInjection;
+import cn.sh1rocu.astralsorcery.util.neoforge.common.util.BlockSnapshot;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -23,9 +27,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.util.BlockSnapshot;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -57,7 +61,7 @@ public class BlockUtil {
     public static List<ItemStack> getDrops(ServerLevel sLevel, BlockState state, BlockPos pos, int fortuneLevel, ItemStack stack) {
         stack = stack.copy();
         EnchantmentHelper.updateEnchantments(stack, mutable -> {
-            mutable.set(sLevel.registryAccess().holderOrThrow(Enchantments.FORTUNE), fortuneLevel);
+            mutable.set(sLevel.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.FORTUNE), fortuneLevel);
         });
         try {
             return Block.getDrops(state, sLevel, pos, sLevel.getBlockEntity(pos), null, stack);
@@ -82,16 +86,17 @@ public class BlockUtil {
     }
 
     public static <T> LevelChanges<T> captureLevelChanges(Level level, Supplier<ChangeResult<T>> fn) {
-        boolean wasCapturingBlockStates = level.captureBlockSnapshots;
-        List<BlockSnapshot> previousCapturedStates = new ArrayList<>(level.capturedBlockSnapshots);
+        var injection = (LevelInjection) level;
+        boolean wasCapturingBlockStates = injection.as$getCapturingBlockSnapshots();
+        List<BlockSnapshot> previousCapturedStates = new ArrayList<>(injection.as$getCapturedBlockSnapshots());
 
-        level.capturedBlockSnapshots.clear();
-        level.captureBlockSnapshots = true;
+        injection.as$getCapturedBlockSnapshots().clear();
+        injection.as$setCapturingBlockSnapshots(true);
 
         ChangeResult<T> result = fn.get();
-        List<BlockSnapshot> capturedSnapshots = new ArrayList<>(level.capturedBlockSnapshots.size());
+        List<BlockSnapshot> capturedSnapshots = new ArrayList<>(injection.as$getCapturedBlockSnapshots().size());
         ResourceKey<Level> dimKey = level.dimension();
-        level.capturedBlockSnapshots.stream()
+        injection.as$getCapturedBlockSnapshots().stream()
                 .map(BlockSnapshot::getPos)
                 .collect(Collectors.toSet())
                 .forEach(pos -> capturedSnapshots.add(BlockSnapshot.create(dimKey, level, pos)));
@@ -105,30 +110,63 @@ public class BlockUtil {
     }
 
     private static void applyWorldState(Level level, boolean wasCapturingBlockStates, List<BlockSnapshot> previousCapturedStates) {
-        level.capturedBlockSnapshots.forEach(snapshot -> {
+        var injection = (LevelInjection) level;
+        injection.as$getCapturedBlockSnapshots().forEach(snapshot -> {
             int flags = snapshot.getFlags();
             BlockState previous = snapshot.getState();
             BlockState newState = level.getBlockState(snapshot.getPos());
 
             newState.onPlace(level, snapshot.getPos(), previous, false);
-            level.markAndNotifyBlock(snapshot.getPos(), level.getChunkAt(snapshot.getPos()), previous, newState, flags, Block.UPDATE_LIMIT);
+            markAndNotifyBlock(level, snapshot.getPos(), level.getChunkAt(snapshot.getPos()), previous, newState, flags, Block.UPDATE_LIMIT);
         });
 
-        level.captureBlockSnapshots = wasCapturingBlockStates;
-        level.capturedBlockSnapshots.clear();
-        level.capturedBlockSnapshots.addAll(previousCapturedStates);
+        injection.as$setCapturingBlockSnapshots(wasCapturingBlockStates);
+        injection.as$getCapturedBlockSnapshots().clear();
+        injection.as$getCapturedBlockSnapshots().addAll(previousCapturedStates);
     }
 
     private static void restoreWorldState(Level level, boolean wasCapturingBlockStates, List<BlockSnapshot> previousCapturedStates) {
-        level.captureBlockSnapshots = false;
+        var injection = (LevelInjection) level;
+        injection.as$setCapturingBlockSnapshots(false);
 
-        level.restoringBlockSnapshots = true;
-        level.capturedBlockSnapshots.forEach(snapshot -> snapshot.restore(Block.UPDATE_ALL));
-        level.capturedBlockSnapshots.clear();
-        level.restoringBlockSnapshots = false;
+        injection.as$setRestoringBlockSnapshots(true);
+        injection.as$getCapturedBlockSnapshots().forEach(snapshot -> snapshot.restore(Block.UPDATE_ALL));
+        injection.as$getCapturedBlockSnapshots().clear();
+        injection.as$setRestoringBlockSnapshots(false);
 
-        level.captureBlockSnapshots = wasCapturingBlockStates;
-        level.capturedBlockSnapshots.addAll(previousCapturedStates);
+        injection.as$setCapturingBlockSnapshots(wasCapturingBlockStates);
+        injection.as$getCapturedBlockSnapshots().addAll(previousCapturedStates);
+    }
+
+    private static void markAndNotifyBlock(Level level, BlockPos pos, @Nullable LevelChunk levelchunk, BlockState oldState, BlockState newState, int flags, int recursionLeft) {
+        Block block = newState.getBlock();
+        BlockState blockstate1 = level.getBlockState(pos);
+        if (blockstate1 == newState) {
+            if (oldState != blockstate1) {
+                level.setBlocksDirty(pos, oldState, blockstate1);
+            }
+
+            if ((flags & 2) != 0 && (!level.isClientSide() || (flags & 4) == 0) && (level.isClientSide() ||
+                    levelchunk.getFullStatus() != null && levelchunk.getFullStatus().isOrAfter(FullChunkStatus.BLOCK_TICKING))) {
+                level.sendBlockUpdated(pos, oldState, newState, flags);
+            }
+
+            if ((flags & 1) != 0) {
+                level.blockUpdated(pos, oldState.getBlock());
+                if (!level.isClientSide && newState.hasAnalogOutputSignal()) {
+                    level.updateNeighbourForOutputSignal(pos, block);
+                }
+            }
+
+            if ((flags & 16) == 0 && recursionLeft > 0) {
+                int i = flags & -34;
+                oldState.updateIndirectNeighbourShapes(level, pos, i, recursionLeft - 1);
+                newState.updateNeighbourShapes(level, pos, i, recursionLeft - 1);
+                newState.updateIndirectNeighbourShapes(level, pos, i, recursionLeft - 1);
+            }
+
+            level.onBlockStateChange(pos, oldState, blockstate1);
+        }
     }
 
     public static class ChangeResult<T> {
@@ -159,7 +197,8 @@ public class BlockUtil {
         }
     }
 
-    public record LevelChanges<T>(List<BlockSnapshot> capturedChanges, T value) {}
+    public record LevelChanges<T>(List<BlockSnapshot> capturedChanges, T value) {
+    }
 
     public static class TestBlockUseContext extends BlockPlaceContext {
 

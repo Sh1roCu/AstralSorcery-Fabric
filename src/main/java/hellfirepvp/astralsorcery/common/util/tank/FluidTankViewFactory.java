@@ -9,14 +9,12 @@
 package hellfirepvp.astralsorcery.common.util.tank;
 
 import hellfirepvp.astralsorcery.common.tile.base.TileEntitySynchronized;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.core.Direction;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -31,8 +29,9 @@ public class FluidTankViewFactory {
 
     protected final int tankCount;
     protected final Set<Direction> accessibleSides = new HashSet<>();
-    protected Consumer<Integer> changeListener = slot -> {};
-    protected Function<Integer, Integer> tankCapacityGetter = tank -> FluidType.BUCKET_VOLUME;
+    protected Consumer<Integer> changeListener = slot -> {
+    };
+    protected Function<Integer, Long> tankCapacityGetter = tank -> FluidConstants.BUCKET;
     protected FluidTankView.InputFilter inputFilter = FluidTankView.InputFilter.NO_FILTER;
     protected FluidTankView.ExtractFilter extractFilter = FluidTankView.ExtractFilter.NO_FILTER;
 
@@ -54,7 +53,7 @@ public class FluidTankViewFactory {
         return this;
     }
 
-    public FluidTankViewFactory tankCapacity(Function<Integer, Integer> tankCapacityGetter) {
+    public FluidTankViewFactory tankCapacity(Function<Integer, Long> tankCapacityGetter) {
         this.tankCapacityGetter = tankCapacityGetter;
         return this;
     }

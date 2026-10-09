@@ -12,7 +12,6 @@ import hellfirepvp.astralsorcery.common.event.ItemCooldownEvent;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ServerItemCooldowns;
-import net.neoforged.neoforge.common.NeoForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -31,8 +30,8 @@ public class MixinItemCooldowns {
     public int adjustCooldown(int cooldownTicks) {
         ItemCooldowns cooldowns = MiscUtil.cast(this);
         if (cooldowns instanceof ServerItemCooldowns serverItemCooldowns) {
-            ItemCooldownEvent event = new ItemCooldownEvent(serverItemCooldowns.player, cooldownTicks);
-            NeoForge.EVENT_BUS.post(event);
+            var event = new ItemCooldownEvent(serverItemCooldowns.player, cooldownTicks);
+            ItemCooldownEvent.EVENT.invoker().post(event);
             cooldownTicks = Math.max(event.getCooldown(), 1);
         }
         return cooldownTicks;

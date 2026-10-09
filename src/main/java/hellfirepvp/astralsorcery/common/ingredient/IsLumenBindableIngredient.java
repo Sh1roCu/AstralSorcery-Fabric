@@ -9,27 +9,29 @@
 package hellfirepvp.astralsorcery.common.ingredient;
 
 import com.mojang.serialization.MapCodec;
+import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.component.FlagsComponent;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
-import hellfirepvp.astralsorcery.common.lib.IngredientsAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lumen.binding.LumenBindingType;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
-import net.neoforged.neoforge.common.crafting.ICustomIngredient;
-import net.neoforged.neoforge.common.crafting.IngredientType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -38,22 +40,59 @@ import java.util.stream.Stream;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class IsLumenBindableIngredient implements ICustomIngredient {
+public class IsLumenBindableIngredient implements CustomIngredient {
 
     public static final IsLumenBindableIngredient INSTANCE = new IsLumenBindableIngredient();
     public static final MapCodec<IsLumenBindableIngredient> CODEC = MapCodec.unit(INSTANCE);
+    public static final StreamCodec<RegistryFriendlyByteBuf, IsLumenBindableIngredient> STREAM_CODEC = StreamCodec.unit(INSTANCE);
+
+    public static final CustomIngredientSerializer<IsLumenBindableIngredient> SERIALIZER = new CustomIngredientSerializer<>() {
+        private static final ResourceLocation ID = AstralSorcery.key("lumen_bindable");
+
+        @Override
+        public ResourceLocation getIdentifier() {
+            return ID;
+        }
+
+        @Override
+        public MapCodec<IsLumenBindableIngredient> getCodec(boolean allowEmpty) {
+            return CODEC;
+        }
+
+        @Override
+        public StreamCodec<RegistryFriendlyByteBuf, IsLumenBindableIngredient> getPacketCodec() {
+            return STREAM_CODEC;
+        }
+    };
 
     private static boolean buildingCache = false;
     private static List<ItemStack> inputDisplayCache = null;
 
-    private IsLumenBindableIngredient() {}
+    private IsLumenBindableIngredient() {
+    }
 
     @Override
     public boolean test(ItemStack stack) {
-        if (!buildingCache && getDisplayCache().contains(stack)) return true; //Hard-test against specifically created display objects
+        if (!buildingCache && getDisplayCache().contains(stack))
+            return true; //Hard-test against specifically created display objects
         if (this.isPotionLumenBindable(stack)) return true;
         return Arrays.stream(LumenBindingType.SlotType.values())
-                .anyMatch(type -> type.isSlotTypeFor(stack)) ;
+                .anyMatch(type -> type.isSlotTypeFor(stack));
+    }
+
+    @Override
+    public List<ItemStack> getMatchingStacks() {
+        return getDisplayCache();
+    }
+
+    @Override
+    public boolean requiresTesting() {
+        return true;
+    }
+
+    @Override
+    public CustomIngredientSerializer<?> getSerializer() {
+        return SERIALIZER;
     }
 
     public boolean isPotionLumenBindable(ItemStack stack) {
@@ -66,11 +105,6 @@ public class IsLumenBindableIngredient implements ICustomIngredient {
         return contents.is(Potions.WATER) || (contents.potion().isEmpty() &&
                 ((isPrismaticSet && contents.customEffects().size() < 2) ||
                         (!isPrismaticSet && contents.customEffects().size() < 3)));
-    }
-
-    @Override
-    public Stream<ItemStack> getItems() {
-        return getDisplayCache().stream();
     }
 
     private static List<ItemStack> getDisplayCache() {
@@ -90,15 +124,5 @@ public class IsLumenBindableIngredient implements ICustomIngredient {
 
     public static void clearDisplayCache() {
         inputDisplayCache = null;
-    }
-
-    @Override
-    public boolean isSimple() {
-        return false;
-    }
-
-    @Override
-    public IngredientType<?> getType() {
-        return IngredientsAS.LUMEN_BINDABLE.get();
     }
 }

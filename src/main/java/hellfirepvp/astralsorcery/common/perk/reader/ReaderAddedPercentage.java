@@ -14,12 +14,10 @@ import hellfirepvp.astralsorcery.common.perk.type.base.ModifierType;
 import hellfirepvp.astralsorcery.common.perk.type.base.PerkAttributeType;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
-import hellfirepvp.astralsorcery.common.util.MiscUtil;
+import net.fabricmc.api.EnvType;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nullable;
-import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -32,26 +30,26 @@ public class ReaderAddedPercentage extends PerkAttributeTypeReader {
 
     protected final boolean addPercentageSymbol;
 
-    protected ReaderAddedPercentage(Supplier<? extends PerkAttributeType> type, boolean addPercentageSymbol) {
+    protected ReaderAddedPercentage(PerkAttributeType type, boolean addPercentageSymbol) {
         super(type);
         this.addPercentageSymbol = addPercentageSymbol;
     }
 
-    public static ReaderAddedPercentage withoutPercent(Supplier<? extends PerkAttributeType> type) {
+    public static ReaderAddedPercentage withoutPercent(PerkAttributeType type) {
         return new ReaderAddedPercentage(type, false);
     }
 
-    public static ReaderAddedPercentage withPercent(Supplier<? extends PerkAttributeType> type) {
+    public static ReaderAddedPercentage withPercent(PerkAttributeType type) {
         return new ReaderAddedPercentage(type, true);
     }
 
     @Override
-    public double getDefaultValue(PerkAttributeMap statMap, Player player, LogicalSide side) {
+    public double getDefaultValue(PerkAttributeMap statMap, Player player, EnvType side) {
         return this.getType().isMultiplicative() ? 1 : 0;
     }
 
     @Override
-    public double getModifierValueForMode(PerkAttributeMap statMap, Player player, LogicalSide side, ModifierType mode) {
+    public double getModifierValueForMode(PerkAttributeMap statMap, Player player, EnvType side, ModifierType mode) {
         return statMap.getModifier(player, ResearchManager.getProgress(player, side), this.getType(), mode);
     }
 

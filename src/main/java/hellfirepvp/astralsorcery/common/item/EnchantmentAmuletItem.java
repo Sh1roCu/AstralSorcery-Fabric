@@ -33,7 +33,7 @@ public class EnchantmentAmuletItem extends ItemCustom implements ItemDynamicColo
     public EnchantmentAmuletItem() {
         super(new Properties()
                 .component(DataComponentsAS.ENCHANTMENT_MODIFIERS, EnchantmentModifierComponent.EMPTY)
-                .rarity(EnumExtensions.RARITY_RELIC.getValue())
+                .rarity(EnumExtensions.RARITY_RELIC)
                 .stacksTo(1));
     }
 

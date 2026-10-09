@@ -51,7 +51,7 @@ public class LensBlock extends BaseTickTileBlock<TileLens> {
     public static EnumProperty<Direction> PLACED_AGAINST = EnumProperty.create("against", Direction.class);
 
     public LensBlock(Properties properties) {
-        super(properties, TileEntitiesAS.LENS);
+        super(properties, () -> TileEntitiesAS.LENS);
         this.registerDefaultState(this.stateDefinition.any().setValue(PLACED_AGAINST, Direction.DOWN));
     }
 

@@ -8,15 +8,19 @@
 
 package hellfirepvp.astralsorcery.datagen.assets;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.common.data.SpriteSourceProvider;
 import hellfirepvp.astralsorcery.AstralSorcery;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.minecraft.client.renderer.texture.atlas.SpriteSource;
 import net.minecraft.client.renderer.texture.atlas.sources.SingleFile;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.data.PackOutput;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import net.neoforged.neoforge.common.data.SpriteSourceProvider;
+import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -27,13 +31,18 @@ import java.util.concurrent.CompletableFuture;
  */
 public class AstralCustomSpriteProvider extends SpriteSourceProvider {
 
-    public AstralCustomSpriteProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, ExistingFileHelper existingFileHelper) {
-        super(output, lookupProvider, AstralSorcery.MODID, existingFileHelper);
+    public AstralCustomSpriteProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
+        super(output, lookupProvider);
     }
 
     @Override
-    protected void gather() {
-        this.atlas(BLOCKS_ATLAS)
-                .addSource(new SingleFile(AstralSorcery.key("model/astrolabe_in_hand"), Optional.empty()));
+    protected void configure(BiConsumer<ResourceLocation, List<SpriteSource>> provider, HolderLookup.Provider lookup) {
+        provider.accept(BLOCKS_ATLAS, this.atlas(BLOCKS_ATLAS)
+                .addSource(new SingleFile(AstralSorcery.key("model/astrolabe_in_hand"), Optional.empty())).sources());
+    }
+
+    @Override
+    public @NotNull String getName() {
+        return "AstralSorcery Custom Sprites";
     }
 }

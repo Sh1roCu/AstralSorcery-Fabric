@@ -8,11 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.lib;
 
-import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.constellation.BaseConstellation;
 import hellfirepvp.astralsorcery.common.init.InitConstellations;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -23,21 +20,23 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  */
 public class ConstellationsAS {
 
-    public static final DeferredRegister<BaseConstellation> CONSTELLATION_REGISTER =
-            DeferredRegister.create(RegistriesAS.KEY_CONSTELLATIONS, AstralSorcery.MODID);
+    public static void init() {
 
-    public static final DeferredHolder<BaseConstellation, BaseConstellation> AEVITAS = InitConstellations.aevitas(CONSTELLATION_REGISTER);
-    public static final DeferredHolder<BaseConstellation, BaseConstellation> ARMARA = InitConstellations.armara(CONSTELLATION_REGISTER);
-    public static final DeferredHolder<BaseConstellation, BaseConstellation> DISCIDIA = InitConstellations.discidia(CONSTELLATION_REGISTER);
-    public static final DeferredHolder<BaseConstellation, BaseConstellation> EVORSIO = InitConstellations.evorsio(CONSTELLATION_REGISTER);
-    public static final DeferredHolder<BaseConstellation, BaseConstellation> VICIO = InitConstellations.vicio(CONSTELLATION_REGISTER);
+    }
 
-    public static final DeferredHolder<BaseConstellation, BaseConstellation> LUCERNA = InitConstellations.lucerna(CONSTELLATION_REGISTER);
-    public static final DeferredHolder<BaseConstellation, BaseConstellation> MINERALIS = InitConstellations.mineralis(CONSTELLATION_REGISTER);
-    public static final DeferredHolder<BaseConstellation, BaseConstellation> HOROLOGIUM = InitConstellations.horologium(CONSTELLATION_REGISTER);
-    public static final DeferredHolder<BaseConstellation, BaseConstellation> OCTANS = InitConstellations.octans(CONSTELLATION_REGISTER);
-    public static final DeferredHolder<BaseConstellation, BaseConstellation> BOOTES = InitConstellations.bootes(CONSTELLATION_REGISTER);
-    public static final DeferredHolder<BaseConstellation, BaseConstellation> FORNAX = InitConstellations.fornax(CONSTELLATION_REGISTER);
-    public static final DeferredHolder<BaseConstellation, BaseConstellation> PELOTRIO = InitConstellations.pelotrio(CONSTELLATION_REGISTER);
+    public static final BaseConstellation AEVITAS = InitConstellations.aevitas();
+    public static final BaseConstellation ARMARA = InitConstellations.armara();
+    public static final BaseConstellation DISCIDIA = InitConstellations.discidia();
+    public static final BaseConstellation EVORSIO = InitConstellations.evorsio();
+    public static final BaseConstellation VICIO = InitConstellations.vicio();
+
+    public static final BaseConstellation LUCERNA = InitConstellations.lucerna();
+    public static final BaseConstellation MINERALIS = InitConstellations.mineralis();
+    public static final BaseConstellation HOROLOGIUM = InitConstellations.horologium();
+    public static final BaseConstellation OCTANS = InitConstellations.octans();
+    public static final BaseConstellation BOOTES = InitConstellations.bootes();
+    public static final BaseConstellation FORNAX = InitConstellations.fornax();
+    public static final BaseConstellation PELOTRIO = InitConstellations.pelotrio();
+
 
 }

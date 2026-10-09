@@ -23,7 +23,6 @@ import hellfirepvp.astralsorcery.common.tile.base.TileDataLumenContainer;
 import hellfirepvp.astralsorcery.common.tile.base.TileEntityTick;
 import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
-import hellfirepvp.astralsorcery.common.util.data.TileRegistryObject;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -77,7 +76,7 @@ public class TileLumenCrystalCluster extends TileEntityTick<TileLumenCrystalClus
 
         protected static <T extends Data> Products.P4<RecordCodecBuilder.Mu<T>, Long, Boolean, Map<BlockPos, Boolean>, Lumen> crystalClusterFields(RecordCodecBuilder.Instance<T> instance) {
             return tickFields(instance).and(
-                    CodecUtil.defaulted(RegistriesAS.REGISTRY_LUMEN.byNameCodec(), "lumen", LumenAS.NONE, Data::getLumen)
+                    CodecUtil.defaulted(RegistriesAS.REGISTRY_LUMEN.byNameCodec(), "lumen", LumenAS.NONE::get, Data::getLumen)
             );
         }
 

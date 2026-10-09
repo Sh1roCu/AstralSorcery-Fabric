@@ -8,11 +8,9 @@
 
 package hellfirepvp.astralsorcery.common.research;
 
+import net.fabricmc.api.EnvType;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.StringRepresentable;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.fml.common.asm.enumextension.ExtensionInfo;
-import net.neoforged.fml.common.asm.enumextension.IExtensibleEnum;
 
 import java.util.Locale;
 
@@ -23,7 +21,7 @@ import java.util.Locale;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public enum ResearchFlag implements StringRepresentable, IExtensibleEnum {
+public enum ResearchFlag implements StringRepresentable/*, IExtensibleEnum */ {
 
     HAS_OBTAINED_ARTIFACT;
 
@@ -42,7 +40,7 @@ public enum ResearchFlag implements StringRepresentable, IExtensibleEnum {
     }
 
     public void setIfAbsent(ServerPlayer sPlayer) {
-        PlayerProgress prog = ResearchManager.getProgress(sPlayer, LogicalSide.SERVER);
+        PlayerProgress prog = ResearchManager.getProgress(sPlayer, EnvType.SERVER);
         if (prog.isValid() && !prog.isFlagSet(this)) {
             if (ResearchHelper.setKnowledgeFlag(sPlayer, this)) {
                 ResearchMessageHelper.sendResearchFlagDiscovery(sPlayer, this);
@@ -55,7 +53,7 @@ public enum ResearchFlag implements StringRepresentable, IExtensibleEnum {
         return this.name().toLowerCase(Locale.ROOT);
     }
 
-    public static ExtensionInfo getExtensionInfo() {
-        return ExtensionInfo.nonExtended(ResearchFlag.class);
-    }
+//    public static ExtensionInfo getExtensionInfo() {
+//        return ExtensionInfo.nonExtended(ResearchFlag.class);
+//    }
 }

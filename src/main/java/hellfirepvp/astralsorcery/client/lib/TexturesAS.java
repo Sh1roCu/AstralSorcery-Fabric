@@ -8,11 +8,11 @@
 
 package hellfirepvp.astralsorcery.client.lib;
 
+import cn.sh1rocu.astralsorcery.api.event.RegisterMaterialAtlasesEvent;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.resource.AbstractRenderTexture;
 import hellfirepvp.astralsorcery.client.resource.AssetLocation;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.client.event.RegisterMaterialAtlasesEvent;
 
 import static hellfirepvp.astralsorcery.client.resource.AssetLibrary.loadTexture;
 
@@ -179,42 +179,42 @@ public class TexturesAS {
 
         SCREEN_CONSTELLATION_PAPER = loadTexture(AssetLocation.SCREEN, "constellation_paper");
 
-        SCREEN_OVERLAY_ASTROLABE           = loadTexture(AssetLocation.SCREEN, "overlay", "astrolabe_overlay");
+        SCREEN_OVERLAY_ASTROLABE = loadTexture(AssetLocation.SCREEN, "overlay", "astrolabe_overlay");
         SCREEN_OVERLAY_ASTROLABE_INDICATOR = loadTexture(AssetLocation.SCREEN, "overlay", "astrolabe_overlay_indicator");
-        SCREEN_OVERLAY_ASTROLABE_RULE      = loadTexture(AssetLocation.SCREEN, "overlay", "astrolabe_overlay_rule");
-        SCREEN_PERK_EXPERIENCE_BAR         = loadTexture(AssetLocation.SCREEN, "overlay", "perk_experience_bar");
-        SCREEN_PERK_EXPERIENCE_FRAME       = loadTexture(AssetLocation.SCREEN, "overlay", "perk_experience_frame");
+        SCREEN_OVERLAY_ASTROLABE_RULE = loadTexture(AssetLocation.SCREEN, "overlay", "astrolabe_overlay_rule");
+        SCREEN_PERK_EXPERIENCE_BAR = loadTexture(AssetLocation.SCREEN, "overlay", "perk_experience_bar");
+        SCREEN_PERK_EXPERIENCE_FRAME = loadTexture(AssetLocation.SCREEN, "overlay", "perk_experience_frame");
 
-        SOLAR_ECLIPSE  = loadTexture(AssetLocation.ENVIRONMENT, "solar_eclipse");
-        STAR_1         = loadTexture(AssetLocation.ENVIRONMENT, "star_1");
-        STAR_2         = loadTexture(AssetLocation.ENVIRONMENT, "star_2");
-        STAR_LINE      = loadTexture(AssetLocation.ENVIRONMENT, "star_line");
+        SOLAR_ECLIPSE = loadTexture(AssetLocation.ENVIRONMENT, "solar_eclipse");
+        STAR_1 = loadTexture(AssetLocation.ENVIRONMENT, "star_1");
+        STAR_2 = loadTexture(AssetLocation.ENVIRONMENT, "star_2");
+        STAR_LINE = loadTexture(AssetLocation.ENVIRONMENT, "star_line");
 
-        PARTICLE_SMALL         = loadTexture(AssetLocation.EFFECT, "particle_small");
-        PARTICLE_LARGE         = loadTexture(AssetLocation.EFFECT, "particle_large");
-        LIGHT_BEAM             = loadTexture(AssetLocation.EFFECT, "light_beam");
-        LIGHT_BEAM_TRANSFER    = loadTexture(AssetLocation.EFFECT, "light_beam_transfer");
+        PARTICLE_SMALL = loadTexture(AssetLocation.EFFECT, "particle_small");
+        PARTICLE_LARGE = loadTexture(AssetLocation.EFFECT, "particle_large");
+        LIGHT_BEAM = loadTexture(AssetLocation.EFFECT, "light_beam");
+        LIGHT_BEAM_TRANSFER = loadTexture(AssetLocation.EFFECT, "light_beam_transfer");
         ATTUNEMENT_RELAY_FLARE = loadTexture(AssetLocation.EFFECT, "attunement_relay_flare");
-        ATTUNEMENT_ITEM_FLARE  = loadTexture(AssetLocation.EFFECT, "attunement_item_flare");
-        LIGHTNING_ELEMENT      = loadTexture(AssetLocation.EFFECT, "lightning_element");
-        ENTITY_FLARE           = loadTexture(AssetLocation.EFFECT, "entity_flare");
-        GRAPPLING_HOOK         = loadTexture(AssetLocation.EFFECT, "grappling_hook");
+        ATTUNEMENT_ITEM_FLARE = loadTexture(AssetLocation.EFFECT, "attunement_item_flare");
+        LIGHTNING_ELEMENT = loadTexture(AssetLocation.EFFECT, "lightning_element");
+        ENTITY_FLARE = loadTexture(AssetLocation.EFFECT, "entity_flare");
+        GRAPPLING_HOOK = loadTexture(AssetLocation.EFFECT, "grappling_hook");
 
         EFFECT_SMOKE_1 = loadTexture(AssetLocation.EFFECT, "smoke_1");
         EFFECT_SMOKE_2 = loadTexture(AssetLocation.EFFECT, "smoke_2");
         EFFECT_SMOKE_3 = loadTexture(AssetLocation.EFFECT, "smoke_3");
         EFFECT_SMOKE_4 = loadTexture(AssetLocation.EFFECT, "smoke_4");
 
-        SCREEN_EFFECT_PERK_ACTIVATABLE      = loadTexture(AssetLocation.EFFECT, "perk", "activateable");
-        SCREEN_EFFECT_PERK_ACTIVE           = loadTexture(AssetLocation.EFFECT, "perk", "active");
-        SCREEN_EFFECT_PERK_INACTIVE         = loadTexture(AssetLocation.EFFECT, "perk", "inactive");
+        SCREEN_EFFECT_PERK_ACTIVATABLE = loadTexture(AssetLocation.EFFECT, "perk", "activateable");
+        SCREEN_EFFECT_PERK_ACTIVE = loadTexture(AssetLocation.EFFECT, "perk", "active");
+        SCREEN_EFFECT_PERK_INACTIVE = loadTexture(AssetLocation.EFFECT, "perk", "inactive");
         SCREEN_EFFECT_PERK_HALO_ACTIVATABLE = loadTexture(AssetLocation.EFFECT, "perk", "halo_activateable");
-        SCREEN_EFFECT_PERK_HALO_ACTIVE      = loadTexture(AssetLocation.EFFECT, "perk", "halo_active");
-        SCREEN_EFFECT_PERK_HALO_INACTIVE    = loadTexture(AssetLocation.EFFECT, "perk", "halo_inactive");
-        SCREEN_EFFECT_PERK_SEARCH           = SCREEN_EFFECT_PERK_HALO_INACTIVE;
-        SCREEN_EFFECT_PERK_SEAL             = loadTexture(AssetLocation.EFFECT, "perk", "seal");
-        SCREEN_EFFECT_PERK_SEAL_BREAK       = loadTexture(AssetLocation.EFFECT, "perk", "seal_break");
-        SCREEN_EFFECT_PERK_UNLOCK           = loadTexture(AssetLocation.EFFECT, "perk", "unlock");
+        SCREEN_EFFECT_PERK_HALO_ACTIVE = loadTexture(AssetLocation.EFFECT, "perk", "halo_active");
+        SCREEN_EFFECT_PERK_HALO_INACTIVE = loadTexture(AssetLocation.EFFECT, "perk", "halo_inactive");
+        SCREEN_EFFECT_PERK_SEARCH = SCREEN_EFFECT_PERK_HALO_INACTIVE;
+        SCREEN_EFFECT_PERK_SEAL = loadTexture(AssetLocation.EFFECT, "perk", "seal");
+        SCREEN_EFFECT_PERK_SEAL_BREAK = loadTexture(AssetLocation.EFFECT, "perk", "seal_break");
+        SCREEN_EFFECT_PERK_UNLOCK = loadTexture(AssetLocation.EFFECT, "perk", "unlock");
     }
 
     public static void registerAtlases(RegisterMaterialAtlasesEvent event) {

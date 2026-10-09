@@ -19,6 +19,8 @@ import hellfirepvp.astralsorcery.common.util.BlockUtil;
 import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
@@ -29,10 +31,6 @@ import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.common.util.BlockSnapshot;
-import net.neoforged.neoforge.event.EventHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -48,11 +46,11 @@ public class EntityIlluminationSpark extends ThrowableProjectile {
     }
 
     public EntityIlluminationSpark(LivingEntity shooter, Level level) {
-        this(EntitiesAS.ILLUMINATION_SPARK.get(), shooter, level);
+        this(EntitiesAS.ILLUMINATION_SPARK, shooter, level);
     }
 
     public EntityIlluminationSpark(double x, double y, double z, Level level) {
-        this(EntitiesAS.ILLUMINATION_SPARK.get(), x, y, z, level);
+        this(EntitiesAS.ILLUMINATION_SPARK, x, y, z, level);
     }
 
     protected EntityIlluminationSpark(EntityType<? extends ThrowableProjectile> entityType, LivingEntity shooter, Level level) {
@@ -69,7 +67,8 @@ public class EntityIlluminationSpark extends ThrowableProjectile {
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {}
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+    }
 
     @Override
     public boolean canUsePortal(boolean allowPassengers) {
@@ -85,7 +84,7 @@ public class EntityIlluminationSpark extends ThrowableProjectile {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void clientTick() {
         for (int i = 0; i < 5; i++) {
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
@@ -136,12 +135,12 @@ public class EntityIlluminationSpark extends ThrowableProjectile {
 
         if (sLevel.isInWorldBounds(placePos) && sLevel.getWorldBorder().isWithinBounds(placePos)) {
             if (this.getOwner() instanceof ServerPlayer sPlayer) {
-                if (!sPlayer.mayInteract(sLevel, placePos) || EventHooks.onBlockPlace(sPlayer, BlockSnapshot.create(sLevel.dimension(), sLevel, placePos), result.getDirection())) {
+                if (!sPlayer.mayInteract(sLevel, placePos) /*|| EventHooks.onBlockPlace(sPlayer, BlockSnapshot.create(sLevel.dimension(), sLevel, placePos), result.getDirection())*/) {
                     this.remove(RemovalReason.KILLED);
                     return;
                 }
             }
-            sLevel.setBlockAndUpdate(placePos, BlocksAS.FLARE_LIGHT.get().defaultBlockState());
+            sLevel.setBlockAndUpdate(placePos, BlocksAS.FLARE_LIGHT.defaultBlockState());
         }
         this.remove(RemovalReason.KILLED);
     }

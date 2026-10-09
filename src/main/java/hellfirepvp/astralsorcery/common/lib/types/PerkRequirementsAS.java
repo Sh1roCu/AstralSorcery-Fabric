@@ -13,8 +13,9 @@ import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.perk.tree.requirement.PerkRequirement;
 import hellfirepvp.astralsorcery.common.perk.tree.requirement.PerkRequirementConstellation;
 import hellfirepvp.astralsorcery.common.perk.tree.requirement.PerkRequirementProgress;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.Registry;
+
+import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -25,11 +26,16 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  */
 public class PerkRequirementsAS {
 
-    public static final DeferredRegister<PerkRequirement.Type<?>> PERK_REQUIREMENT_REGISTER =
-            DeferredRegister.create(RegistriesAS.KEY_PERK_REQUIREMENT_TYPES, AstralSorcery.MODID);
+    public static void init() {
 
-    public static final DeferredHolder<PerkRequirement.Type<?>, PerkRequirement.Type<PerkRequirementConstellation>> CONSTELLATION =
-            PERK_REQUIREMENT_REGISTER.register("constellation", () -> PerkRequirementConstellation.TYPE);
-    public static final DeferredHolder<PerkRequirement.Type<?>, PerkRequirement.Type<PerkRequirementProgress>> PROGRESS =
-            PERK_REQUIREMENT_REGISTER.register("progress", () -> PerkRequirementProgress.TYPE);
+    }
+
+    public static final PerkRequirement.Type<PerkRequirementConstellation> CONSTELLATION =
+            register("constellation", () -> PerkRequirementConstellation.TYPE);
+    public static final PerkRequirement.Type<PerkRequirementProgress> PROGRESS =
+            register("progress", () -> PerkRequirementProgress.TYPE);
+
+    private static <T extends PerkRequirement> PerkRequirement.Type<T> register(String name, Supplier<PerkRequirement.Type<T>> supplier) {
+        return Registry.register(RegistriesAS.REGISTRY_PERK_REQUIREMENT_TYPES, AstralSorcery.key(name), supplier.get());
+    }
 }

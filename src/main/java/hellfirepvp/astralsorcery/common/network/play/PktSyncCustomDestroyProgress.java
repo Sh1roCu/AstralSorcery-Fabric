@@ -10,12 +10,14 @@ package hellfirepvp.astralsorcery.common.network.play;
 
 import hellfirepvp.astralsorcery.client.helper.ClientBlockDestroyProgressHelper;
 import hellfirepvp.astralsorcery.common.network.PlayPacketHandler;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -58,9 +60,10 @@ public class PktSyncCustomDestroyProgress extends PlayPacketHandler.ToClient<Pkt
         return CODEC;
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
-    public void handle(Request payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
+    public void receive(Request payload, ClientPlayNetworking.Context context) {
+        context.client().execute(() -> {
             if (payload.progress >= 0 && payload.progress < 10) {
                 ClientBlockDestroyProgressHelper.addBreakProgress(payload.entityId, payload.originPos, payload.breakPos, payload.progress);
             } else {
@@ -69,7 +72,8 @@ public class PktSyncCustomDestroyProgress extends PlayPacketHandler.ToClient<Pkt
         });
     }
 
-    public record Request(int entityId, BlockPos originPos, BlockPos breakPos, int progress) implements CustomPacketPayload {
+    public record Request(int entityId, BlockPos originPos, BlockPos breakPos,
+                          int progress) implements CustomPacketPayload {
 
         @Override
         public Type<? extends CustomPacketPayload> type() {

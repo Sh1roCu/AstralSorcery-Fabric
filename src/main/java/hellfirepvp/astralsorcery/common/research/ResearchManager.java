@@ -13,12 +13,11 @@ import hellfirepvp.astralsorcery.client.screen.tome.TomeResearchScreen;
 import hellfirepvp.astralsorcery.common.research.io.ResearchIOThread;
 import hellfirepvp.astralsorcery.common.research.io.ResearchWriter;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -40,8 +39,8 @@ public class ResearchManager {
     private static final Map<UUID, PlayerProgress> serverProgress = new HashMap<>();
 
     @Nonnull
-    public static PlayerProgress getProgress(@Nullable Player player, LogicalSide side) {
-        if (side.isClient()) {
+    public static PlayerProgress getProgress(@Nullable Player player, EnvType side) {
+        if (side == EnvType.CLIENT) {
             return getClientProgress();
         } else if (player instanceof ServerPlayer) {
             return getProgressServer((ServerPlayer) player);
@@ -73,19 +72,19 @@ public class ResearchManager {
         return progress;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public static void setClientProgress(@Nonnull PlayerProgress progress) {
         setClientProgress(progress, Minecraft.getInstance().player);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public static void setClientProgress(@Nonnull PlayerProgress progress, @Nullable Player player) {
-        int prevClientLevel = ResearchManager.getClientProgress().getPerkData().getPerkLevel(player, LogicalSide.CLIENT);
+        int prevClientLevel = ResearchManager.getClientProgress().getPerkData().getPerkLevel(player, EnvType.CLIENT);
         if (progress.hasResearchRelevantChanges(clientProgress)) {
             TomeResearchScreen.resetOpenTome();
         }
         clientProgress = progress;
-        int newLevel = progress.getPerkData().getPerkLevel(player, LogicalSide.CLIENT);
+        int newLevel = progress.getPerkData().getPerkLevel(player, EnvType.CLIENT);
         if (newLevel > prevClientLevel) {
             RenderPerkExperienceOverlay.RENDERER.revealExperienceBar(160);
         }
@@ -99,7 +98,7 @@ public class ResearchManager {
         serverProgress.clear();
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public static void clearClientCache() {
         clientProgress = PlayerProgressTestAccess.get();
         TomeResearchScreen.resetOpenTome();

@@ -52,6 +52,6 @@ public class GenerateDynamismGemRollsFunction extends LootItemConditionalFunctio
 
     @Override
     public LootItemFunctionType<? extends LootItemConditionalFunction> getType() {
-        return LootAS.GENERATE_DYNAMISM_GEM_ROLLS_FUNCTION.get();
+        return LootAS.GENERATE_DYNAMISM_GEM_ROLLS_FUNCTION;
     }
 }

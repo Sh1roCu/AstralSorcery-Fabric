@@ -36,7 +36,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import java.util.List;
 
@@ -80,7 +80,7 @@ public class StoredLumenClientComponent implements ClientTooltipComponent {
         int totalHeight = 0;
         int totalWidth = EFFECT_BAR_WIDTH;
         for (StoredLumenComponent.StoredLumen store : this.dataComponent.getLumenDisplay()) {
-            List<Component> displayTexts = this.dataComponent.getLumenDisplayTexts(LogicalSide.CLIENT, this.stack, store.lumen());
+            List<Component> displayTexts = this.dataComponent.getLumenDisplayTexts(EnvType.CLIENT, this.stack, store.lumen());
             for (Component displayText : displayTexts) {
                 int msgWidth = TEXT_X_OFFSET + font.width(displayText);
                 if (msgWidth > totalWidth) {
@@ -93,7 +93,7 @@ public class StoredLumenClientComponent implements ClientTooltipComponent {
         for (StoredLumenComponent.StoredLumen store : this.dataComponent.getLumenDisplay()) {
             totalHeight += EFFECT_ROW_HEIGHT;
 
-            List<Component> displayTexts = this.dataComponent.getLumenDisplayTexts(LogicalSide.CLIENT, this.stack, store.lumen());
+            List<Component> displayTexts = this.dataComponent.getLumenDisplayTexts(EnvType.CLIENT, this.stack, store.lumen());
             if (!displayTexts.isEmpty()) {
                 for (Component cmp : displayTexts) {
                     totalHeight += font.split(cmp, componentWidth).size() * (font.lineHeight + 1);
@@ -129,7 +129,7 @@ public class StoredLumenClientComponent implements ClientTooltipComponent {
             this.renderLumenBar(guiGraphics, store, effectTick, x + 3, stepY + 6);
             stepY += EFFECT_ROW_HEIGHT;
 
-            List<Component> displayTexts = this.dataComponent.getLumenDisplayTexts(LogicalSide.CLIENT, this.stack, store.lumen());
+            List<Component> displayTexts = this.dataComponent.getLumenDisplayTexts(EnvType.CLIENT, this.stack, store.lumen());
             stepY += -EFFECT_BOTTOM_PADDING + 1;
 
             int color = store.lumen().getColor(effectTick).getColor();
@@ -215,7 +215,7 @@ public class StoredLumenClientComponent implements ClientTooltipComponent {
 
             stepY += EFFECT_ROW_HEIGHT;
 
-            List<Component> displayTexts = this.dataComponent.getLumenDisplayTexts(LogicalSide.CLIENT, this.stack, lumen);
+            List<Component> displayTexts = this.dataComponent.getLumenDisplayTexts(EnvType.CLIENT, this.stack, lumen);
             stepY += displayTexts.size() * (font.lineHeight + 1);
         }
     }

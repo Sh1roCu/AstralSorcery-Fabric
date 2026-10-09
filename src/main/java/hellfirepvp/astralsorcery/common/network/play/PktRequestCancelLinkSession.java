@@ -10,11 +10,11 @@ package hellfirepvp.astralsorcery.common.network.play;
 
 import hellfirepvp.astralsorcery.common.linking.session.LinkSessionHelper;
 import hellfirepvp.astralsorcery.common.network.PlayPacketHandler;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -44,8 +44,8 @@ public class PktRequestCancelLinkSession extends PlayPacketHandler.ToServer<PktR
     }
 
     @Override
-    public void handle(Request payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
+    public void receive(Request payload, ServerPlayNetworking.Context context) {
+        context.server().execute(() -> {
             if (context.player() instanceof ServerPlayer sPlayer) {
                 LinkSessionHelper.stopSession(sPlayer);
             }
@@ -56,7 +56,8 @@ public class PktRequestCancelLinkSession extends PlayPacketHandler.ToServer<PktR
 
         private static final Request INSTANCE = new Request();
 
-        private Request() {}
+        private Request() {
+        }
 
         @Override
         public Type<? extends CustomPacketPayload> type() {

@@ -8,12 +8,13 @@
 
 package hellfirepvp.astralsorcery.common.item;
 
+import cn.sh1rocu.astralsorcery.api.extension.IMaxStackSizeItem;
+import cn.sh1rocu.astralsorcery.api.extension.INoRepairItem;
 import hellfirepvp.astralsorcery.common.item.base.CauldronInteractableItem;
 import hellfirepvp.astralsorcery.common.item.base.CreativeTabItem;
 import hellfirepvp.astralsorcery.common.item.base.ItemDynamicColor;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.cauldron.CauldronInteraction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,7 +26,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -37,7 +37,6 @@ import net.minecraft.world.item.component.Unbreakable;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.LayeredCauldronBlock;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 
 import java.util.List;
@@ -51,11 +50,11 @@ import java.util.function.Consumer;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class StardewItem extends PotionItem implements ItemDynamicColor, CreativeTabItem, CauldronInteractableItem {
+public class StardewItem extends PotionItem implements ItemDynamicColor, CreativeTabItem, CauldronInteractableItem, IMaxStackSizeItem, INoRepairItem {
 
     public StardewItem() {
         super(new Properties()
-                .setNoRepair()
+                // .setNoRepair() impl via mixin
                 .durability(4)
                 .component(DataComponents.UNBREAKABLE, new Unbreakable(false)));
     }
@@ -68,7 +67,7 @@ public class StardewItem extends PotionItem implements ItemDynamicColor, Creativ
     }
 
     public static ItemStack create(List<MobEffectInstance> effects) {
-        ItemStack stack = ItemsAS.STARDEW.toStack();
+        ItemStack stack = ItemsAS.STARDEW.getDefaultInstance();
         stack.set(DataComponents.POTION_CONTENTS, new PotionContents(Optional.empty(), Optional.empty(), effects));
         return stack;
     }
@@ -122,10 +121,11 @@ public class StardewItem extends PotionItem implements ItemDynamicColor, Creativ
         return ItemUtils.startUsingInstantly(level, player, hand);
     }
 
-    @Override
-    public boolean isDamageable(ItemStack stack) {
-        return false;
-    }
+    // the same as INoRepairItem
+//    @Override
+//    public boolean isDamageable(ItemStack stack) {
+//        return false;
+//    }
 
     @Override
     public boolean isBarVisible(ItemStack stack) {
@@ -141,7 +141,7 @@ public class StardewItem extends PotionItem implements ItemDynamicColor, Creativ
 
     @Override
     public int getMaxStackSize(ItemStack stack) {
-        return isWater(stack) || isEmpty(stack) ? 16 : super.getMaxStackSize(stack);
+        return isWater(stack) || isEmpty(stack) ? 16 : stack.getOrDefault(DataComponents.MAX_STACK_SIZE, 1);
     }
 
     public static boolean isWater(ItemStack stack) {

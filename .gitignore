@@ -41,6 +41,7 @@ hs_err_pid*
 /logs
 /runs
 
+
 # Mac filesystem dust
 /.DS_Store
 
@@ -53,3 +54,6 @@ hs_err_pid*
 # For good measure...
 *.jks
 gradle.attributes
+
+/src/generated/.cache/
+/src/main/generated/.cache/

@@ -10,12 +10,16 @@ package hellfirepvp.astralsorcery.common.recipe.altar.output;
 
 import com.mojang.serialization.MapCodec;
 import hellfirepvp.astralsorcery.common.component.CrystalAttributesComponent;
+import hellfirepvp.astralsorcery.common.event.CrystalPropertyEvent;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
 import hellfirepvp.astralsorcery.common.recipe.altar.AltarCraftingInput;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -31,19 +35,26 @@ public class AltarOutputMergeCrystalProperties extends AltarRecipeOutputModifier
     public static final StreamCodec<RegistryFriendlyByteBuf, AltarOutputMergeCrystalProperties> STREAM_CODEC = StreamCodec.unit(INSTANCE);
     public static final Type<AltarOutputMergeCrystalProperties> TYPE = new Type<>(CODEC, STREAM_CODEC);
 
-    private AltarOutputMergeCrystalProperties() {}
+    private AltarOutputMergeCrystalProperties() {
+    }
 
     @Override
     public ItemStack modifyOutput(ItemStack output, AltarCraftingInput input, HolderLookup.Provider registries) {
         CrystalAttributesComponent cmp = output.getOrDefault(DataComponentsAS.CRYSTAL_ATTRIBUTES, CrystalAttributesComponent.defaultEmpty());
+        List<CrystalAttributesComponent> inputs = new ArrayList<>();
         for (ItemStack stack : input.getGridInputs()) {
             CrystalAttributesComponent inputCmp = stack.getOrDefault(DataComponentsAS.CRYSTAL_ATTRIBUTES, CrystalAttributesComponent.defaultEmpty());
+            inputs.add(inputCmp);
             for (CrystalAttributesComponent.TieredAttribute attr : inputCmp.getAttributes()) {
                 int existing = cmp.getAttributeTier(attr);
                 cmp = cmp.setAttributeTier(attr, existing + attr.getTier());
             }
         }
-        output.set(DataComponentsAS.CRYSTAL_ATTRIBUTES, cmp);
+        var merge = new CrystalPropertyEvent.Merge(output,
+                CrystalPropertyEvent.Merge.Type.ALTAR_RECIPE_MERGE, inputs, cmp);
+        CrystalPropertyEvent.Merge.EVENT.invoker().post(merge);
+
+        output.set(DataComponentsAS.CRYSTAL_ATTRIBUTES, merge.getResultComponent());
         return output;
     }
 

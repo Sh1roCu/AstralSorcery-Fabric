@@ -12,7 +12,7 @@ import hellfirepvp.astralsorcery.common.config.server.PerkConfig;
 import hellfirepvp.astralsorcery.common.util.data.SidedReference;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -37,24 +37,24 @@ public class PerkLevelManager {
         return INSTANCE;
     }
 
-    public void clearCache(LogicalSide side) {
+    public void clearCache(EnvType side) {
         levelData.setData(side, null);
     }
 
     public void initializeClientLevels(int maxLevel) {
-        this.levelData.setData(LogicalSide.CLIENT, new LevelData(maxLevel));
+        this.levelData.setData(EnvType.CLIENT, new LevelData(maxLevel));
     }
 
     public void initializeServerLevels() {
         int maxLevel = PerkConfig.CONFIG.perkLevelCap.getAsInt();
-        this.levelData.setData(LogicalSide.SERVER, new LevelData(maxLevel));
+        this.levelData.setData(EnvType.SERVER, new LevelData(maxLevel));
     }
 
-    public int getLevel(double totalExp, @Nullable Player player, LogicalSide side) {
+    public int getLevel(double totalExp, @Nullable Player player, EnvType side) {
         return getLevel(Mth.lfloor(totalExp), player, side);
     }
 
-    private int getLevel(long totalExp, @Nullable Player player, LogicalSide side) {
+    private int getLevel(long totalExp, @Nullable Player player, EnvType side) {
         if (totalExp <= 0) {
             return 1;
         }
@@ -70,7 +70,7 @@ public class PerkLevelManager {
         }).orElse(1);
     }
 
-    public long getExpForLevel(int targetLevel, @Nullable Player player, LogicalSide side) {
+    public long getExpForLevel(int targetLevel, @Nullable Player player, EnvType side) {
         if (targetLevel <= 1) {
             return 0;
         }
@@ -85,7 +85,7 @@ public class PerkLevelManager {
         }).orElse(0L);
     }
 
-    public float getNextLevelPercent(double totalExp, @Nullable Player player, LogicalSide side) {
+    public float getNextLevelPercent(double totalExp, @Nullable Player player, EnvType side) {
         int level = getLevel(totalExp, player, side);
         if (level >= getMaxLevel(side, player)) {
             return 1F; //Done.
@@ -97,7 +97,7 @@ public class PerkLevelManager {
         }).orElse(1F);
     }
 
-    public int getMaxLevel(LogicalSide side, @Nullable Player player) {
+    public int getMaxLevel(EnvType side, @Nullable Player player) {
         return this.levelData.getData(side).map(data -> data.maxLevel).orElse(1);
     }
 

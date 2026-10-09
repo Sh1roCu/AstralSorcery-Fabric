@@ -13,7 +13,6 @@ import hellfirepvp.astralsorcery.common.integration.jei.base.ASRecipeCategory;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
 import hellfirepvp.astralsorcery.common.recipe.focal.place.FocalTransmutationRecipe;
-import hellfirepvp.astralsorcery.common.recipe.lightwell.LightwellRecipe;
 import hellfirepvp.astralsorcery.common.util.data.IntRectangle;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
@@ -24,19 +23,15 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.registration.IRecipeRegistration;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.level.ItemLike;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -105,7 +100,7 @@ public class FocalTransmutationRecipeCategory extends ASRecipeCategory<FocalTran
 
     @Override
     public List<ItemStack> provideCatalyst() {
-        return List.of(ItemsAS.BLOCK_STARLIGHT_FOCUS_ROCK_CRYSTAL.toStack());
+        return List.of(ItemsAS.BLOCK_STARLIGHT_FOCUS_ROCK_CRYSTAL.getDefaultInstance());
     }
 
     @Override

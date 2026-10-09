@@ -1,0 +1,26 @@
+{
+  "effect": {
+    "type": "astralsorcery:effects",
+    "effects": [
+      {
+        "ambient": true,
+        "amplifier": 2,
+        "duration": 1000,
+        "id": "minecraft:haste",
+        "show_icon": false
+      },
+      {
+        "ambient": true,
+        "duration": 1000,
+        "id": "minecraft:speed",
+        "show_icon": false
+      }
+    ],
+    "id": "astralsorcery:effect_speed",
+    "range": 8
+  },
+  "selector": {
+    "conflicts": [],
+    "weight": 1
+  }
+}

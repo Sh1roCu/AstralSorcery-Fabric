@@ -10,13 +10,14 @@ package hellfirepvp.astralsorcery.common.network.play;
 
 import hellfirepvp.astralsorcery.common.network.PlayPacketHandler;
 import hellfirepvp.astralsorcery.common.perk.PerkLevelManager;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -41,7 +42,7 @@ public class PktSyncPerkLevels extends PlayPacketHandler.ToClient<PktSyncPerkLev
     }
 
     public static PktSyncPerkLevels.Request sync(ServerPlayer sPlayer) {
-        return new Request(PerkLevelManager.getInstance().getMaxLevel(LogicalSide.SERVER, sPlayer));
+        return new Request(PerkLevelManager.getInstance().getMaxLevel(EnvType.SERVER, sPlayer));
     }
 
     @Override
@@ -49,9 +50,10 @@ public class PktSyncPerkLevels extends PlayPacketHandler.ToClient<PktSyncPerkLev
         return CODEC;
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
-    public void handle(Request payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
+    public void receive(Request payload, ClientPlayNetworking.Context context) {
+        context.client().execute(() -> {
             PerkLevelManager.getInstance().initializeClientLevels(payload.maxPerkLevel());
         });
     }

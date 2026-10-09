@@ -8,16 +8,15 @@
 
 package hellfirepvp.astralsorcery.datagen.assets;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.common.data.SoundDefinition;
+import cn.sh1rocu.astralsorcery.util.neoforge.common.data.SoundDefinitionsProvider;
 import hellfirepvp.astralsorcery.AstralSorcery;
-import hellfirepvp.astralsorcery.common.sound.CategorizedSoundEvent;
 import hellfirepvp.astralsorcery.common.lib.SoundsAS;
+import hellfirepvp.astralsorcery.common.sound.CategorizedSoundEvent;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
-import net.minecraft.data.PackOutput;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import net.neoforged.neoforge.common.data.SoundDefinition;
-import net.neoforged.neoforge.common.data.SoundDefinitionsProvider;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -28,8 +27,8 @@ import net.neoforged.neoforge.common.data.SoundDefinitionsProvider;
  */
 public class AstralSoundsProvider extends SoundDefinitionsProvider {
 
-    public AstralSoundsProvider(PackOutput output, ExistingFileHelper helper) {
-        super(output, AstralSorcery.MODID, helper);
+    public AstralSoundsProvider(FabricDataOutput output) {
+        super(output, AstralSorcery.MODID);
     }
 
     @Override

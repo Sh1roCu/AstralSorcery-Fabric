@@ -9,20 +9,23 @@
 package hellfirepvp.astralsorcery.common.ingredient;
 
 import com.mojang.serialization.MapCodec;
+import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.artifact.ArtifactStability;
 import hellfirepvp.astralsorcery.common.component.ArtifactComponent;
 import hellfirepvp.astralsorcery.common.item.ArtifactItem;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
-import hellfirepvp.astralsorcery.common.lib.IngredientsAS;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.crafting.ICustomIngredient;
-import net.neoforged.neoforge.common.crafting.IngredientType;
 
-import java.util.stream.Stream;
+import java.util.List;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -31,12 +34,33 @@ import java.util.stream.Stream;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class IsStableArtifactIngredient implements ICustomIngredient {
+public class IsStableArtifactIngredient implements CustomIngredient {
 
     public static final IsStableArtifactIngredient INSTANCE = new IsStableArtifactIngredient();
     public static final MapCodec<IsStableArtifactIngredient> CODEC = MapCodec.unit(INSTANCE);
+    public static final StreamCodec<RegistryFriendlyByteBuf, IsStableArtifactIngredient> STREAM_CODEC = StreamCodec.unit(INSTANCE);
 
-    private IsStableArtifactIngredient() {}
+    public static final CustomIngredientSerializer<IsStableArtifactIngredient> SERIALIZER = new CustomIngredientSerializer<>() {
+        private static final ResourceLocation ID = AstralSorcery.key("is_stable_artifact");
+
+        @Override
+        public ResourceLocation getIdentifier() {
+            return ID;
+        }
+
+        @Override
+        public MapCodec<IsStableArtifactIngredient> getCodec(boolean allowEmpty) {
+            return CODEC;
+        }
+
+        @Override
+        public StreamCodec<RegistryFriendlyByteBuf, IsStableArtifactIngredient> getPacketCodec() {
+            return STREAM_CODEC;
+        }
+    };
+
+    private IsStableArtifactIngredient() {
+    }
 
     @Override
     public boolean test(ItemStack stack) {
@@ -45,7 +69,7 @@ public class IsStableArtifactIngredient implements ICustomIngredient {
     }
 
     @Override
-    public Stream<ItemStack> getItems() {
+    public List<ItemStack> getMatchingStacks() {
         Component display = Component.translatable("ingredient.astralsorcery.stable_artifact.description")
                 .withStyle(ChatFormatting.GOLD);
         return RegistriesAS.REGISTRY_ARTIFACT_TYPES.stream()
@@ -57,16 +81,16 @@ public class IsStableArtifactIngredient implements ICustomIngredient {
                         artifact.set(DataComponentsAS.ARTIFACT, cmp);
                     }
                     artifact.set(DataComponents.ITEM_NAME, display);
-                });
+                }).toList();
     }
 
     @Override
-    public boolean isSimple() {
-        return false;
+    public boolean requiresTesting() {
+        return true;
     }
 
     @Override
-    public IngredientType<?> getType() {
-        return IngredientsAS.IS_STABLE_ARTIFACT.get();
+    public CustomIngredientSerializer<?> getSerializer() {
+        return SERIALIZER;
     }
 }

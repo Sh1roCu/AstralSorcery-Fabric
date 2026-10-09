@@ -11,9 +11,6 @@ package hellfirepvp.astralsorcery.common.perk.tree;
 import com.mojang.serialization.MapCodec;
 import hellfirepvp.astralsorcery.common.util.TriFunction;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.registries.DeferredHolder;
-
-import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -25,21 +22,23 @@ import java.util.function.Supplier;
 public abstract class PerkType<T extends AbstractPerk<?>> {
 
     private final MapCodec<T> codec;
-    private final Supplier<? extends PerkDataType<?>> dataTypeSupplier;
+    private final PerkDataType<?> dataType;
 
-    public PerkType(MapCodec<T> codec, Supplier<? extends PerkDataType<?>> dataTypeSupplier) {
+    public PerkType(MapCodec<T> codec, PerkDataType<?> dataType) {
         this.codec = codec;
-        this.dataTypeSupplier = dataTypeSupplier;
+        this.dataType = dataType;
     }
 
-    public static <T extends AbstractPerk<?>> PerkType<T> of(MapCodec<T> codec, Supplier<? extends PerkDataType<?>> dataTypeSupplier, TriFunction<ResourceLocation, Float, Float, T> constructor) {
+    public static <T extends AbstractPerk<?>> PerkType<T> of(MapCodec<T> codec, PerkDataType<?> dataTypeSupplier, TriFunction<ResourceLocation, Float, Float, T> constructor) {
         return new PerkType<T>(codec, dataTypeSupplier) {
             @Override
             public T newBlankPerk(ResourceLocation key, float x, float y) {
                 return constructor.apply(key, x, y);
             }
         };
-    };
+    }
+
+    ;
 
     public abstract T newBlankPerk(ResourceLocation key, float x, float y);
 
@@ -48,6 +47,6 @@ public abstract class PerkType<T extends AbstractPerk<?>> {
     }
 
     public PerkDataType<?> dataType() {
-        return this.dataTypeSupplier.get();
+        return this.dataType;
     }
 }

@@ -16,7 +16,7 @@ import hellfirepvp.astralsorcery.common.perk.source.ModifierSource;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,7 +30,7 @@ import java.util.Collection;
  */
 public class PerkApplicationManager {
 
-    public static void updateSource(Player player, LogicalSide side, ModifierSource oldSource, ModifierSource newSource) {
+    public static void updateSource(Player player, EnvType side, ModifierSource oldSource, ModifierSource newSource) {
         PlayerProgress progress = ResearchManager.getProgress(player, side);
         if (!progress.isValid()) {
             return;
@@ -45,7 +45,7 @@ public class PerkApplicationManager {
         }
     }
 
-    public static <T extends ModifierSource> void modifySources(Player player, LogicalSide side, Collection<T> sources, PerkManager.Action action) {
+    public static <T extends ModifierSource> void modifySources(Player player, EnvType side, Collection<T> sources, PerkManager.Action action) {
         PlayerProgress progress = ResearchManager.getProgress(player, side);
         if (!progress.isValid()) {
             return;
@@ -65,7 +65,7 @@ public class PerkApplicationManager {
         }
     }
 
-    public static void modifySource(Player player, LogicalSide side, ModifierSource source, PerkManager.Action action) {
+    public static void modifySource(Player player, EnvType side, ModifierSource source, PerkManager.Action action) {
         PlayerProgress progress = ResearchManager.getProgress(player, side);
         if (!progress.isValid()) {
             return;
@@ -85,7 +85,7 @@ public class PerkApplicationManager {
 
     //***************************************** RAW APPLICATION *****************************************//
 
-    static void applySource(PerkAttributeMap attrMap, Player player, LogicalSide side, ModifierSource add) {
+    static void applySource(PerkAttributeMap attrMap, Player player, EnvType side, ModifierSource add) {
         //The onlyAdd perk is already on the playerprogress (potentially with other, not-yet-added perks); filter it away.
         Collection<ModifierSource> sources = ModifierManager.getAppliedModifiers(player, side);
 
@@ -109,7 +109,7 @@ public class PerkApplicationManager {
         newModifiers.forEach(mod -> mod.getAttributeType().onApply(player, side, add));
     }
 
-    static Collection<PerkAttributeModifier> applyModifiers(ModifierSource source, PerkAttributeMap attrMap, Player player, LogicalSide side) {
+    static Collection<PerkAttributeModifier> applyModifiers(ModifierSource source, PerkAttributeMap attrMap, Player player, EnvType side) {
         Collection<PerkAttributeModifier> addedModifiers = new ArrayList<>();
         if (source instanceof AttributeModifierProvider modifierSource) {
             for (PerkAttributeModifier modifier : modifierSource.getModifiers(player, side, false)) {
@@ -119,7 +119,7 @@ public class PerkApplicationManager {
         return addedModifiers;
     }
 
-    static void removeSource(PerkAttributeMap attrMap, Player player, LogicalSide side, ModifierSource remove) {
+    static void removeSource(PerkAttributeMap attrMap, Player player, EnvType side, ModifierSource remove) {
         //Drop the old source
         ModifierManager.removeModifier(player, side, remove);
 
@@ -146,7 +146,7 @@ public class PerkApplicationManager {
         });
     }
 
-    static Collection<PerkAttributeModifier> removeModifiers(ModifierSource source, PerkAttributeMap attrMap, Player player, LogicalSide side) {
+    static Collection<PerkAttributeModifier> removeModifiers(ModifierSource source, PerkAttributeMap attrMap, Player player, EnvType side) {
         Collection<PerkAttributeModifier> removedModifiers = new ArrayList<>();
         if (source instanceof AttributeModifierProvider modifierSource) {
             for (PerkAttributeModifier modifier : modifierSource.getModifiers(player, side, false)) {

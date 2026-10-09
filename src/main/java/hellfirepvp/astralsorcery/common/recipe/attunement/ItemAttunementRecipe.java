@@ -26,6 +26,7 @@ import hellfirepvp.astralsorcery.common.component.AttunedConstellationComponent;
 import hellfirepvp.astralsorcery.common.component.ConstellationPaperComponent;
 import hellfirepvp.astralsorcery.common.constellation.BaseConstellation;
 import hellfirepvp.astralsorcery.common.item.base.AttuneableItem;
+import hellfirepvp.astralsorcery.common.lib.AdvancementsAS;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.lib.SoundsAS;
@@ -38,6 +39,8 @@ import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.level.DayTimeHelper;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -49,9 +52,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.LogicalSide;
 
 import java.util.List;
 import java.util.Optional;
@@ -176,19 +176,19 @@ public class ItemAttunementRecipe extends AttunementRecipe<ItemAttunementRecipe.
                     itemEntity.setItem(stack);
 
                     if (itemEntity.getOwner() instanceof ServerPlayer sPlayer) {
-                        //TODO attune advancement
+                        AdvancementsAS.ITEM_ATTUNEMENT.trigger(sPlayer, cst, stack);
                     }
                 });
             });
         }
 
         @Override
-        public void doTick(LogicalSide side, TileAttunementAltar altar) {
+        public void doTick(EnvType side, TileAttunementAltar altar) {
             this.getEntity(altar.getLevel()).ifPresent(itemEntity -> {
                 this.updateEntityPosition(itemEntity, altar.getBlockPos());
             });
 
-            if (side.isClient()) {
+            if (side == EnvType.CLIENT) {
                 altar.getTileData().getActiveConstellation().ifPresent(cst -> {
                     this.spawnActiveEffects(altar, cst);
                     this.tickPlaySound(altar);
@@ -196,7 +196,7 @@ public class ItemAttunementRecipe extends AttunementRecipe<ItemAttunementRecipe.
             }
         }
 
-        @OnlyIn(Dist.CLIENT)
+        @Environment(EnvType.CLIENT)
         private void spawnActiveEffects(TileAttunementAltar altar, BaseConstellation cst) {
             if (this.orbitalSource.isNull()) {
                 FXItemAttunementOrbitalSource src = new FXItemAttunementOrbitalSource(Vector3.atBottomCenter(altar), Vector3.atBottomCenter(altar).addY(1.75F), cst)
@@ -344,7 +344,7 @@ public class ItemAttunementRecipe extends AttunementRecipe<ItemAttunementRecipe.
                             .alpha(FXAlphaFunction.FADE_OUT)
                             .setAlpha(0.75F)
                             .setScale(0.25F + rand.nextFloat() * 0.15F)
-                            .setMotion(Vector3.random(rand).setY(0).normalize().multiply(0.025F + rand.nextFloat()  * 0.075F))
+                            .setMotion(Vector3.random(rand).setY(0).normalize().multiply(0.025F + rand.nextFloat() * 0.075F))
                             .setMaxAge(60 + rand.nextInt(40));
 
                     if (rand.nextBoolean()) {
@@ -354,7 +354,7 @@ public class ItemAttunementRecipe extends AttunementRecipe<ItemAttunementRecipe.
             }
         }
 
-        @OnlyIn(Dist.CLIENT)
+        @Environment(EnvType.CLIENT)
         private void tickPlaySound(TileAttunementAltar altar) {
             if (this.attunementSound.isNull()) {
                 PlayableSoundInstance attuneSound = PlayableSoundInstance.of(SoundsAS.ATTUNEMENT_ALTAR_ITEM_LOOP)
@@ -386,7 +386,7 @@ public class ItemAttunementRecipe extends AttunementRecipe<ItemAttunementRecipe.
         }
 
         @Override
-        @OnlyIn(Dist.CLIENT)
+        @Environment(EnvType.CLIENT)
         public void stopEffects(TileAttunementAltar altar) {
             if (this.isFinished(altar)) {
                 PlayableSoundInstance.of(SoundsAS.ATTUNEMENT_ALTAR_ITEM_FINISH)

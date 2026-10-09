@@ -23,6 +23,7 @@ import hellfirepvp.astralsorcery.common.lumen.binding.LumenBinding;
 import hellfirepvp.astralsorcery.common.util.LumenUtil;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.SidedHelper;
+import net.fabricmc.api.EnvType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -30,8 +31,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.registries.DeferredHolder;
 import org.apache.commons.lang3.stream.Streams;
 
 import java.util.ArrayList;
@@ -78,7 +77,7 @@ public abstract class LumenBindingUsage {
     public abstract DeferredType<?> getType();
 
     public Type<?> unwrapType() {
-        return this.getType().holder().get();
+        return this.getType().type();
     }
 
     public int getLumenCost() {
@@ -92,7 +91,7 @@ public abstract class LumenBindingUsage {
     private static void forEachUsedTypes(LivingEntity entity, ItemStack stack, BiConsumer<Lumen, LumenBinding> consumeFn) {
         StoredLumenComponent storedLumenCmp = stack.getOrDefault(DataComponentsAS.STORED_LUMEN, StoredLumenComponent.EMPTY);
         if (storedLumenCmp.isEmpty()) return;
-        LogicalSide side = SidedHelper.getSide(entity);
+        EnvType side = SidedHelper.getSide(entity);
 
         for (Lumen bound : storedLumenCmp.getActiveBindings()) {
             storedLumenCmp.getBinding(side, bound)
@@ -144,7 +143,10 @@ public abstract class LumenBindingUsage {
                 }));
     }
 
-    public record Type<T extends LumenBindingUsage>(MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {}
+    public record Type<T extends LumenBindingUsage>(MapCodec<T> codec,
+                                                    StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
+    }
 
-    public record DeferredType<T extends LumenBindingUsage>(DeferredHolder<Type<?>, Type<T>> holder) {}
+    public record DeferredType<T extends LumenBindingUsage>(Type<T> type) {
+    }
 }

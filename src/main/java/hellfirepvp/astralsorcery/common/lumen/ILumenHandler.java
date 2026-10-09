@@ -9,10 +9,10 @@
 package hellfirepvp.astralsorcery.common.lumen;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
+import net.fabricmc.fabric.api.lookup.v1.entity.EntityApiLookup;
+import net.fabricmc.fabric.api.lookup.v1.item.ItemApiLookup;
 import net.minecraft.core.Direction;
-import net.neoforged.neoforge.capabilities.BlockCapability;
-import net.neoforged.neoforge.capabilities.EntityCapability;
-import net.neoforged.neoforge.capabilities.ItemCapability;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -27,12 +27,12 @@ import java.util.Optional;
  */
 public interface ILumenHandler {
 
-    BlockCapability<ILumenHandler, @Nullable Direction> BLOCK =
-            BlockCapability.createSided(AstralSorcery.key("lumen_handler"), ILumenHandler.class);
-    EntityCapability<ILumenHandler, @Nullable Void> ENTITY =
-            EntityCapability.createVoid(AstralSorcery.key("lumen_handler"), ILumenHandler.class);
-    ItemCapability<ILumenHandler, @Nullable Void> ITEM =
-            ItemCapability.createVoid(AstralSorcery.key("lumen_handler"), ILumenHandler.class);
+    BlockApiLookup<ILumenHandler, @Nullable Direction> BLOCK =
+            BlockApiLookup.get(AstralSorcery.key("lumen_handler"), ILumenHandler.class, Direction.class);
+    EntityApiLookup<ILumenHandler, @Nullable Void> ENTITY =
+            EntityApiLookup.get(AstralSorcery.key("lumen_handler"), ILumenHandler.class, Void.class);
+    ItemApiLookup<ILumenHandler, @Nullable Void> ITEM =
+            ItemApiLookup.get(AstralSorcery.key("lumen_handler"), ILumenHandler.class, Void.class);
 
     enum Action {
 
@@ -93,7 +93,7 @@ public interface ILumenHandler {
     /**
      * Fill lumen into this lumen handler.
      *
-     * @param stack the lumen stack to fill into this handler
+     * @param stack  the lumen stack to fill into this handler
      * @param action the action to perform, either simulating the fill or executing it
      * @return the amount of lumen that was successfully filled into this handler, or simulated to be potentially filled
      */
@@ -102,7 +102,7 @@ public interface ILumenHandler {
     /**
      * Drains lumen from this handler.
      *
-     * @param lumen the type of lumen to drain from this handler
+     * @param lumen  the type of lumen to drain from this handler
      * @param amount the amount of lumen to drain
      * @param action the action to perform, either simulating the drain or executing it
      * @return a LumenStack representing the drained lumen, or an empty stack if none could be drained

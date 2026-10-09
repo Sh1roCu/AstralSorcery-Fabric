@@ -22,7 +22,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.ItemLike;
-import net.neoforged.neoforge.common.conditions.ICondition;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -59,11 +58,11 @@ public class GeneratedRecipeBuffer {
     }
 
     public static TomePageRecipe findRecipe(ResolvingRecipeTypeRegistryObject<?> type, ItemLike output) {
-        return findRecipe(type.holder(), new ItemStack(output));
+        return findRecipe(type.type(), new ItemStack(output));
     }
 
     public static TomePageRecipe findRecipe(ResolvingRecipeTypeRegistryObject<?> type, ItemStack output) {
-        return findRecipe(type.holder(), output);
+        return findRecipe(type.type(), output);
     }
 
     public static TomePageRecipe findRecipe(Holder<RecipeType<?>> type, ItemLike output) {
@@ -72,7 +71,7 @@ public class GeneratedRecipeBuffer {
 
     public static TomePageRecipe findRecipe(Holder<RecipeType<?>> type, ItemStack output) {
         return find(type.value(), output)
-                .map(ref -> TomePageRecipe.of(type.getKey(), ref.id()))
+                .map(ref -> TomePageRecipe.of(type.unwrapKey().orElseThrow(), ref.id()))
                 .orElseThrow();
     }
 
@@ -103,8 +102,8 @@ public class GeneratedRecipeBuffer {
         }
 
         @Override
-        public void accept(ResourceLocation id, Recipe<?> recipe, @Nullable AdvancementHolder advancement, ICondition... conditions) {
-            this.decorated.accept(id, recipe, advancement, conditions);
+        public void accept(ResourceLocation id, Recipe<?> recipe, @Nullable AdvancementHolder advancement) {
+            this.decorated.accept(id, recipe, advancement);
             if (recipe instanceof CustomRecipe customRecipe) {
                 addRecipe(customRecipe.getRecipeType(), id, recipe);
             } else if (recipe instanceof ShapedRecipe ||
@@ -116,5 +115,6 @@ public class GeneratedRecipeBuffer {
         }
     }
 
-    public record RecipeReference<T extends Recipe<?>>(ResourceLocation id, T recipe, ItemStack generatedOutput) {}
+    public record RecipeReference<T extends Recipe<?>>(ResourceLocation id, T recipe, ItemStack generatedOutput) {
+    }
 }

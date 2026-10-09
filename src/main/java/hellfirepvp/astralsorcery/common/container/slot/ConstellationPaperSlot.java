@@ -46,7 +46,7 @@ public class ConstellationPaperSlot extends Slot {
             this.constellationPaperSupplier = () -> {
                 BaseConstellation cst = cstSupplier.get();
                 if (cst == null) return ItemStack.EMPTY;
-                ItemStack paper = ItemsAS.CONSTELLATION_PAPER.toStack();
+                ItemStack paper = ItemsAS.CONSTELLATION_PAPER.getDefaultInstance();
                 paper.set(DataComponentsAS.CONSTELLATION_PAPER, new ConstellationPaperComponent(cst));
                 return paper;
             };

@@ -8,15 +8,15 @@
 
 package hellfirepvp.astralsorcery.common.perk.source;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.network.PacketDistributor;
 import hellfirepvp.astralsorcery.common.network.play.PktSyncModifierSource;
 import hellfirepvp.astralsorcery.common.perk.PerkApplicationManager;
 import hellfirepvp.astralsorcery.common.perk.PerkManager;
+import net.fabricmc.api.EnvType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -76,14 +76,14 @@ public abstract class ModifierSourceProvider<T extends ModifierSource> {
 
         if (needsRemoval) {
             if (needsAddition) {
-                PerkApplicationManager.updateSource(sPlayer, LogicalSide.SERVER, existing, source);
+                PerkApplicationManager.updateSource(sPlayer, EnvType.SERVER, existing, source);
                 PacketDistributor.sendToPlayer(sPlayer, PktSyncModifierSource.update(existing, source));
             } else {
-                PerkApplicationManager.modifySource(sPlayer, LogicalSide.SERVER, existing, PerkManager.Action.REMOVE);
+                PerkApplicationManager.modifySource(sPlayer, EnvType.SERVER, existing, PerkManager.Action.REMOVE);
                 PacketDistributor.sendToPlayer(sPlayer, PktSyncModifierSource.remove(existing));
             }
         } else if (needsAddition) {
-            PerkApplicationManager.modifySource(sPlayer, LogicalSide.SERVER, source, PerkManager.Action.ADD);
+            PerkApplicationManager.modifySource(sPlayer, EnvType.SERVER, source, PerkManager.Action.ADD);
             PacketDistributor.sendToPlayer(sPlayer, PktSyncModifierSource.add(source));
         }
         this.setCachedSource(sPlayer, sourceIdentifier, source);

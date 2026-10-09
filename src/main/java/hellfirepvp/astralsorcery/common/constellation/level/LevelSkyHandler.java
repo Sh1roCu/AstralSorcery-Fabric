@@ -8,21 +8,18 @@
 
 package hellfirepvp.astralsorcery.common.constellation.level;
 
+import cn.sh1rocu.astralsorcery.api.event.LevelEvent;
 import com.google.common.collect.Maps;
 import hellfirepvp.astralsorcery.common.util.level.LevelEffectSeedCache;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.event.level.LevelEvent;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Optional;
 
@@ -40,20 +37,22 @@ public class LevelSkyHandler {
     private final Map<ResourceKey<Level>, LevelSkyContext> worldHandlersServer = Maps.newHashMap();
     private final Map<ResourceKey<Level>, LevelSkyContext> worldHandlersClient = Maps.newHashMap();
 
-    private LevelSkyHandler() {}
+    private LevelSkyHandler() {
+    }
 
     public static LevelSkyHandler getInstance() {
         return INSTANCE;
     }
 
-    public void attachEventListeners(IEventBus bus) {
-        bus.addListener(this::onWorldTick);
-        bus.addListener(this::onClientTick);
-        bus.addListener(this::onWorldUnload);
+    public void attachEventListeners() {
+        ServerTickEvents.START_WORLD_TICK.register(this::onWorldTick);
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.START_CLIENT_TICK.register(client -> this.onClientTick());
+        }
+        LevelEvent.UNLOAD.register(this::onWorldUnload);
     }
 
-    private void onWorldTick(LevelTickEvent.Pre event) {
-        Level level = event.getLevel();
+    private void onWorldTick(Level level) {
         if (level instanceof ServerLevel) {
             ResourceKey<Level> dimKey = level.dimension();
 
@@ -63,11 +62,12 @@ public class LevelSkyHandler {
         }
     }
 
-    private void onClientTick(ClientTickEvent.Pre event) {
+    @Environment(EnvType.CLIENT)
+    public void onClientTick() {
         this.sidedClientTick();
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void sidedClientTick() {
         Level level = Minecraft.getInstance().level;
         if (level != null) {
@@ -101,13 +101,13 @@ public class LevelSkyHandler {
     }
 
     public static Optional<LevelSkyContext> getContext(Level level) {
-        return getContext(level, level.isClientSide() ? LogicalSide.CLIENT : LogicalSide.SERVER);
+        return getContext(level, level.isClientSide() ? EnvType.CLIENT : EnvType.SERVER);
     }
 
-    public static Optional<LevelSkyContext> getContext(Level level, LogicalSide dist) {
+    public static Optional<LevelSkyContext> getContext(Level level, EnvType dist) {
         if (level == null) return Optional.empty();
         ResourceKey<Level> dimKey = level.dimension();
-        if (dist.isClient()) {
+        if (dist == EnvType.CLIENT) {
             return Optional.ofNullable(getInstance().worldHandlersClient.get(dimKey));
         } else {
             return Optional.ofNullable(getInstance().worldHandlersServer.get(dimKey));

@@ -18,7 +18,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.function.Function;
 
@@ -49,15 +48,19 @@ public abstract class ArtifactEffect {
     public abstract DeferredType<?> getType();
 
     public Type<?> unwrapType() {
-        return this.getType().holder().get();
+        return this.getType().type();
     }
 
     public abstract void applyEffect(RandomSource rand, ServerLevel sLevel, ItemEntityArtifact artifact);
 
-    public record Type<T extends ArtifactEffect>(MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {}
+    public record Type<T extends ArtifactEffect>(MapCodec<T> codec,
+                                                 StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
+    }
 
-    public record DeferredType<T extends ArtifactEffect>(DeferredHolder<ArtifactEffect.Type<?>, ArtifactEffect.Type<T>> holder) {}
+    public record DeferredType<T extends ArtifactEffect>(ArtifactEffect.Type<T> type) {
+    }
 
     @FunctionalInterface
-    public interface Provider extends Function<ResourceLocation, ArtifactEffect> {}
+    public interface Provider extends Function<ResourceLocation, ArtifactEffect> {
+    }
 }

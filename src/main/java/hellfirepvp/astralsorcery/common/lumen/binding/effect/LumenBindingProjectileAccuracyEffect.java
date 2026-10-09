@@ -11,13 +11,12 @@ package hellfirepvp.astralsorcery.common.lumen.binding.effect;
 import com.mojang.serialization.MapCodec;
 import hellfirepvp.astralsorcery.common.event.ProjectileInaccuracyEvent;
 import hellfirepvp.astralsorcery.common.lib.types.LumenBindingEffectTypesAS;
+import net.fabricmc.api.EnvType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
 
 import java.util.List;
 
@@ -34,8 +33,8 @@ public class LumenBindingProjectileAccuracyEffect extends LumenBindingEffect {
     public static final MapCodec<LumenBindingProjectileAccuracyEffect> CODEC = MapCodec.unit(INSTANCE);
     public static final StreamCodec<RegistryFriendlyByteBuf, LumenBindingProjectileAccuracyEffect> STREAM_CODEC = StreamCodec.unit(INSTANCE);
 
-    public static void attachEventListeners(IEventBus bus) {
-        bus.addListener(LumenBindingProjectileAccuracyEffect::onProjectileAccuracy);
+    public static void attachEventListeners() {
+        ProjectileInaccuracyEvent.EVENT.register(LumenBindingProjectileAccuracyEffect::onProjectileAccuracy);
     }
 
     private static void onProjectileAccuracy(ProjectileInaccuracyEvent event) {
@@ -47,7 +46,7 @@ public class LumenBindingProjectileAccuracyEffect extends LumenBindingEffect {
     }
 
     @Override
-    public List<Component> getDisplayText(LogicalSide side, ItemStack stack) {
+    public List<Component> getDisplayText(EnvType side, ItemStack stack) {
         return List.of(Component.translatable("lumen.binding.astralsorcery.projectile_accuracy"));
     }
 

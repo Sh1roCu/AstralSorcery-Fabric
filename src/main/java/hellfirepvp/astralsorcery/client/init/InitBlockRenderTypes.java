@@ -8,8 +8,9 @@
 
 package hellfirepvp.astralsorcery.client.init;
 
+import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.FluidsAS;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.minecraft.client.renderer.RenderType;
 
 /**
@@ -22,8 +23,30 @@ import net.minecraft.client.renderer.RenderType;
 public class InitBlockRenderTypes {
 
     public static void init() {
-        ItemBlockRenderTypes.setRenderLayer(FluidsAS.LIQUID_STARLIGHT.getFlowing().get(), RenderType.translucent());
-        ItemBlockRenderTypes.setRenderLayer(FluidsAS.LIQUID_STARLIGHT.getSource().get(), RenderType.translucent());
+        BlockRenderLayerMap.INSTANCE.putFluid(FluidsAS.LIQUID_STARLIGHT_FLOWING, RenderType.translucent());
+        BlockRenderLayerMap.INSTANCE.putFluid(FluidsAS.LIQUID_STARLIGHT_SOURCE, RenderType.translucent());
+
+        BlockRenderLayerMap.INSTANCE.putBlock(BlocksAS.ALTAR_ILLUMINATION, RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(BlocksAS.ALTAR_LUMINANCE, RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(BlocksAS.ALTAR_RADIANCE, RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(BlocksAS.ALTAR_RESONANCE, RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(BlocksAS.CHALICE, RenderType.solid());
+        BlockRenderLayerMap.INSTANCE.putBlock(BlocksAS.GLIMMER_AMARANTH, RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(BlocksAS.HYACINTH, RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(BlocksAS.INFUSED_WOOD_COLUMN, RenderType.solid());
+        BlockRenderLayerMap.INSTANCE.putBlock(BlocksAS.IRIS, RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(BlocksAS.LUMEN_CRYSTALLIZER, RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(BlocksAS.MARBLE_PILLAR, RenderType.solid());
+        BlockRenderLayerMap.INSTANCE.putBlock(BlocksAS.ORCHID, RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(BlocksAS.POTTED_GLIMMER_AMARANTH, RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(BlocksAS.POTTED_HYACINTH, RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(BlocksAS.POTTED_IRIS, RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(BlocksAS.POTTED_ORCHID, RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(BlocksAS.POTTED_PROTEA, RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(BlocksAS.POTTED_THISTLE, RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(BlocksAS.PROTEA, RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(BlocksAS.SOOTY_MARBLE_PILLAR, RenderType.solid());
+        BlockRenderLayerMap.INSTANCE.putBlock(BlocksAS.THISTLE, RenderType.cutout());
     }
 
 }

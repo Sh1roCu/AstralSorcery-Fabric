@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.recipe.liquid;
 
+import cn.sh1rocu.astralsorcery.api.extension.IEntityPersistentData;
+import hellfirepvp.astralsorcery.common.event.RecipeEvent;
 import hellfirepvp.astralsorcery.common.util.RecipeFinder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -15,6 +17,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 
 /**
@@ -30,7 +33,8 @@ public class ActiveLiquidStarlightRecipe {
 
     //This is primarily just a helper class to do the on tick stuff for liquid starlight recipes
     //Cause we kinda don't have a state on the entity really, only a tick timer saved on the trigger entity
-    private ActiveLiquidStarlightRecipe() {}
+    private ActiveLiquidStarlightRecipe() {
+    }
 
     public static void tryProgressCraft(ItemEntity itemEntity) {
         if (!itemEntity.isAlive()) return;
@@ -38,33 +42,42 @@ public class ActiveLiquidStarlightRecipe {
         Level level = itemEntity.level();
 
         RecipeFinder.of(level).findLiquidStarlightRecipe(itemEntity).ifPresent(recipeHolder -> {
-            LiquidStarlightRecipe recipe = recipeHolder.value();
             LiquidStarlightRecipeInput input = LiquidStarlightRecipeInput.of(itemEntity);
-            if (!recipe.matches(input, level)) {
+            if (!recipeHolder.value().matches(input, level)) {
                 return;
             }
 
             RandomSource rand = RandomSource.create(pos.asLong() + itemEntity.getId() + itemEntity.getId() << 16);
+            if (getCraftingTick(itemEntity) == 0) {
+                var start = new RecipeEvent.LiquidStarlight.Start(recipeHolder);
+                RecipeEvent.LiquidStarlight.Start.EVENT.invoker().post(start);
+                if (start.isCanceled()) return;
+            }
+
             int craftTick = getAndIncrementCraftingTick(itemEntity);
             if (!level.isClientSide()) {
-                doServerCraftTick(itemEntity, level, rand, recipe, craftTick);
+                doServerCraftTick(itemEntity, level, rand, recipeHolder, craftTick);
             } else {
-                doClientCraftTick(itemEntity, level, rand, recipe, craftTick);
+                doClientCraftTick(itemEntity, level, rand, recipeHolder, craftTick);
             }
         });
     }
 
-    private static void doServerCraftTick(ItemEntity triggerEntity, Level level, RandomSource rand, LiquidStarlightRecipe recipe, int craftTick) {
+    private static void doServerCraftTick(ItemEntity triggerEntity, Level level, RandomSource rand, RecipeHolder<LiquidStarlightRecipe> recipeHolder, int craftTick) {
+        LiquidStarlightRecipe recipe = recipeHolder.value();
         int requiredTicks = recipe.getDuration() + rand.nextInt(Math.max(recipe.getRandomAdditionalDuration() + 1, 1));
         if (craftTick >= requiredTicks) {
             LiquidStarlightRecipeInput input = LiquidStarlightRecipeInput.of(triggerEntity);
             if (recipe.matches(input, level) && recipe.consumeInputs(input, level.registryAccess())) {
+                setCraftingTick(triggerEntity, 0);
                 recipe.createOutput(input, level.registryAccess());
+                RecipeEvent.LiquidStarlight.End.EVENT.invoker().post(new RecipeEvent.LiquidStarlight.End(recipeHolder));
             }
         }
     }
 
-    private static void doClientCraftTick(ItemEntity itemEntity, Level level, RandomSource rand, LiquidStarlightRecipe recipe, int craftTick) {
+    private static void doClientCraftTick(ItemEntity itemEntity, Level level, RandomSource rand, RecipeHolder<LiquidStarlightRecipe> recipeHolder, int craftTick) {
+        LiquidStarlightRecipe recipe = recipeHolder.value();
         RandomSource effectRand = RandomSource.create(rand.nextLong() ^ (long) craftTick << 32 ^ craftTick);
         LiquidStarlightRecipeInput input = LiquidStarlightRecipeInput.of(itemEntity);
         if (recipe.matches(input, level)) {
@@ -83,7 +96,7 @@ public class ActiveLiquidStarlightRecipe {
     private static void setCraftingTick(Entity e, int tick) {
         long wTick = e.getCommandSenderWorld().getGameTime();
 
-        CompoundTag tag = e.getPersistentData();
+        CompoundTag tag = ((IEntityPersistentData) e).as$getPersistentData();
         tag.putInt("liquidStarlight_craftTick", tick);
         tag.putLong("liquidStarlight_wCraftTick", wTick);
     }
@@ -91,7 +104,7 @@ public class ActiveLiquidStarlightRecipe {
     private static int getCraftingTick(Entity e) {
         long wTick = e.getCommandSenderWorld().getGameTime();
 
-        CompoundTag tag = e.getPersistentData();
+        CompoundTag tag = ((IEntityPersistentData) e).as$getPersistentData();
         if (!tag.contains("liquidStarlight_wCraftTick", Tag.TAG_LONG)) {
             return 0;
         }

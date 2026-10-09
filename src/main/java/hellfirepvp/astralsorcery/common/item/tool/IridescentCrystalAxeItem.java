@@ -8,8 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.item.tool;
 
+import cn.sh1rocu.astralsorcery.api.extension.INoRepairItem;
 import hellfirepvp.astralsorcery.common.component.DynamicModifiersComponent;
-import hellfirepvp.astralsorcery.common.visual.type.BlockBreakEffect;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.PerksAS;
@@ -17,6 +17,7 @@ import hellfirepvp.astralsorcery.common.perk.modifier.DynamicAttributeModifier;
 import hellfirepvp.astralsorcery.common.perk.type.base.ModifierType;
 import hellfirepvp.astralsorcery.common.util.FlagExecutor;
 import hellfirepvp.astralsorcery.common.util.TreeDiscoverer;
+import hellfirepvp.astralsorcery.common.visual.type.BlockBreakEffect;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -35,7 +36,7 @@ import java.util.UUID;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class IridescentCrystalAxeItem extends CrystalAxeItem {
+public class IridescentCrystalAxeItem extends CrystalAxeItem implements INoRepairItem {
 
     private static final UUID MODIFIER_ID = UUID.fromString("6b59ac1a-4f40-44e7-b8bc-c1197f7e4842");
     private static final DynamicAttributeModifier MINING_SPEED_MODIFIER =
@@ -43,7 +44,7 @@ public class IridescentCrystalAxeItem extends CrystalAxeItem {
 
     public IridescentCrystalAxeItem() {
         super(ItemsAS.CRYSTAL_TOOL_TIER, new Properties()
-                .setNoRepair()
+                // .setNoRepair() impl via mixin
                 .component(DataComponentsAS.DYNAMIC_MODIFIERS, new DynamicModifiersComponent(List.of(MINING_SPEED_MODIFIER)))
                 .attributes(axeAttributes()));
     }

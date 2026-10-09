@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.helper;
 
+import cn.sh1rocu.astralsorcery.api.event.BaseEvent;
+import cn.sh1rocu.astralsorcery.api.event.RenderTooltipEvent;
 import com.mojang.datafixers.util.Either;
 import hellfirepvp.astralsorcery.EnumExtensions;
 import hellfirepvp.astralsorcery.common.component.IdentifierComponent;
@@ -16,14 +18,6 @@ import hellfirepvp.astralsorcery.common.util.tooltip.ArtifactDecoratedTooltip;
 import net.minecraft.Util;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.RenderTooltipEvent;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -34,14 +28,14 @@ import java.util.UUID;
  */
 public class ArtifactTooltipHelper {
 
-    public static void attachEventListeners(IEventBus bus) {
-        bus.addListener(EventPriority.LOW, ArtifactTooltipHelper::onTooltipGather);
+    public static void attachEventListeners() {
+        RenderTooltipEvent.GATHER_COMPONENTS.register(BaseEvent.LOW, ArtifactTooltipHelper::onTooltipGather);
     }
 
-    private static void onTooltipGather(RenderTooltipEvent.GatherComponents event) {
+    public static void onTooltipGather(RenderTooltipEvent.GatherComponents event) {
         ItemStack stack = event.getItemStack();
         Rarity rarity = stack.getRarity();
-        if (rarity == EnumExtensions.RARITY_ARTIFACT.getValue() && stack.has(DataComponentsAS.IDENTIFIER)) {
+        if (rarity == EnumExtensions.RARITY_ARTIFACT && stack.has(DataComponentsAS.IDENTIFIER)) {
             IdentifierComponent idCmp = stack.getOrDefault(DataComponentsAS.IDENTIFIER, IdentifierComponent.NONE);
             if (idCmp.id().equals(Util.NIL_UUID)) return;
 

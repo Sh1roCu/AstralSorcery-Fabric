@@ -14,16 +14,15 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.util.data.MapStream;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -32,17 +31,21 @@ import java.util.stream.Collectors;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class PerkTreeLoader extends SimpleJsonResourceReloadListener {
+public class PerkTreeLoader extends SimpleJsonResourceReloadListener implements IdentifiableResourceReloadListener {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-    private static final PerkTreeLoader INSTANCE = new PerkTreeLoader();
 
-    private PerkTreeLoader() {
+    public static final ResourceLocation ID = AstralSorcery.key("perks");
+    public HolderLookup.Provider provider;
+
+    public PerkTreeLoader(HolderLookup.Provider provider) {
         super(GSON, "perks");
+        this.provider = provider;
     }
 
-    public static PerkTreeLoader getInstance() {
-        return INSTANCE;
+    @Override
+    public ResourceLocation getFabricId() {
+        return ID;
     }
 
     @Override
@@ -54,7 +57,7 @@ public class PerkTreeLoader extends SimpleJsonResourceReloadListener {
                 .toList();
 
         AstralSorcery.LOG.info("Loading perk tree with {} perks.", perkObjects.size());
-        PerkTreeData data = PerkTreeData.load(perkObjects, this.getRegistryLookup());
+        PerkTreeData data = PerkTreeData.load(perkObjects, this.provider);
         PerkTree.getInstance().updateOriginPerkTree(data);
     }
 }

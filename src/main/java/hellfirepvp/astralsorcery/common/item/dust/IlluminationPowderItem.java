@@ -20,8 +20,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.DirectionalBlock;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.util.BlockSnapshot;
-import net.neoforged.neoforge.event.EventHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -63,8 +61,8 @@ public class IlluminationPowderItem extends UsableDustItem {
             return false;
         }
 
-        if (sPlayer.mayUseItemAt(placePos, ctx.getClickedFace(), ctx.getItemInHand()) && !EventHooks.onBlockPlace(sPlayer, BlockSnapshot.create(sLevel.dimension(), sLevel, placePos), ctx.getClickedFace())) {
-            return sLevel.setBlockAndUpdate(placePos, BlocksAS.FLARE_LIGHT.get().defaultBlockState());
+        if (sPlayer.mayUseItemAt(placePos, ctx.getClickedFace(), ctx.getItemInHand()) /*&& !EventHooks.onBlockPlace(sPlayer, BlockSnapshot.create(sLevel.dimension(), sLevel, placePos), ctx.getClickedFace())*/) {
+            return sLevel.setBlockAndUpdate(placePos, BlocksAS.FLARE_LIGHT.defaultBlockState());
         }
         return false;
     }

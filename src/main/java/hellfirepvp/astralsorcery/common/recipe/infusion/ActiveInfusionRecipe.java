@@ -8,22 +8,16 @@
 
 package hellfirepvp.astralsorcery.common.recipe.infusion;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
 import hellfirepvp.astralsorcery.common.recipe.ActiveRecipe;
 import hellfirepvp.astralsorcery.common.tile.TileChalice;
 import hellfirepvp.astralsorcery.common.tile.TileInfuser;
-import hellfirepvp.astralsorcery.common.util.codec.SetCodec;
 import hellfirepvp.astralsorcery.common.util.data.LazyRecipeHolder;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -69,8 +63,8 @@ public class ActiveInfusionRecipe extends ActiveRecipe<InfusionRecipe> {
 
     public boolean isFinished(Level level) {
         return this.getRecipe(level).map(InfusionRecipe::getDuration)
-                        .map(duration -> this.getProgressTick() >= duration)
-                        .orElse(false);
+                .map(duration -> this.getProgressTick() >= duration)
+                .orElse(false);
     }
 
     public boolean matches(Level level, TileInfuser infuser) {

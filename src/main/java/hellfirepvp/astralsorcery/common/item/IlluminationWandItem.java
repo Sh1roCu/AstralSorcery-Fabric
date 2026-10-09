@@ -10,7 +10,6 @@ package hellfirepvp.astralsorcery.common.item;
 
 import hellfirepvp.astralsorcery.common.block.FlareLightBlock;
 import hellfirepvp.astralsorcery.common.component.ColorComponent;
-import hellfirepvp.astralsorcery.common.item.base.CreativeTabItem;
 import hellfirepvp.astralsorcery.common.item.base.ItemCustom;
 import hellfirepvp.astralsorcery.common.item.base.ItemDynamicColor;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
@@ -19,7 +18,6 @@ import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.SoundsAS;
 import hellfirepvp.astralsorcery.common.tile.TileTranslucentBlock;
 import hellfirepvp.astralsorcery.common.util.BlockUtil;
-import hellfirepvp.astralsorcery.common.util.ColorReference;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.ServerSoundHelper;
 import net.minecraft.core.BlockPos;
@@ -35,8 +33,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.neoforged.neoforge.common.util.BlockSnapshot;
-import net.neoforged.neoforge.event.EventHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -72,7 +68,7 @@ public class IlluminationWandItem extends ItemCustom implements ItemDynamicColor
             return this.tryPlaceTranslucentBlock(sLevel, pos, sPlayer, dir, stack);
         }
 
-        BlockState flareState = BlocksAS.FLARE_LIGHT.get()
+        BlockState flareState = BlocksAS.FLARE_LIGHT
                 .defaultBlockState()
                 .setValue(FlareLightBlock.COLOR, stack.getOrDefault(DataComponentsAS.COLOR, DEFAULT_COLOR).reference().asDyeColor().orElse(DyeColor.YELLOW));
         BlockPos placePos = pos;
@@ -83,7 +79,7 @@ public class IlluminationWandItem extends ItemCustom implements ItemDynamicColor
             return InteractionResult.SUCCESS;
         }
 
-        if (sPlayer.mayUseItemAt(placePos, dir, stack) && !EventHooks.onBlockPlace(sPlayer, BlockSnapshot.create(sLevel.dimension(), sLevel, placePos), dir)) {
+        if (sPlayer.mayUseItemAt(placePos, dir, stack) /*&& !EventHooks.onBlockPlace(sPlayer, BlockSnapshot.create(sLevel.dimension(), sLevel, placePos), dir)*/) {
             if (sLevel.getBlockState(placePos).equals(flareState)) {
                 if (sLevel.setBlockAndUpdate(placePos, Blocks.AIR.defaultBlockState())) {
                     ServerSoundHelper.playSoundAround(SoundsAS.ILLUMINATION_WAND_LIGHT, sLevel, placePos, 0.6F, 1F);
@@ -114,7 +110,7 @@ public class IlluminationWandItem extends ItemCustom implements ItemDynamicColor
             if (Block.isShapeFullBlock(state.getShape(sLevel, pos)) &&
                     sPlayer.mayUseItemAt(pos, facing, stack) &&
                     sLevel.getBlockEntity(pos) == null &&
-                    sLevel.setBlockAndUpdate(pos, BlocksAS.TRANSLUCENT_BLOCK.get().defaultBlockState())) {
+                    sLevel.setBlockAndUpdate(pos, BlocksAS.TRANSLUCENT_BLOCK.defaultBlockState())) {
                 //TODO lumen cost
                 MiscUtil.getTileAt(sLevel, pos, TileTranslucentBlock.class, true).ifPresent(tile -> {
                     tile.getTileData().setStoredState(state);

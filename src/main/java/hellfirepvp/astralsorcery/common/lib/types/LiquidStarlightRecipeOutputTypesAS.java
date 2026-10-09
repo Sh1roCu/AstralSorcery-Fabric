@@ -11,8 +11,9 @@ package hellfirepvp.astralsorcery.common.lib.types;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.recipe.liquid.output.*;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.Registry;
+
+import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -23,22 +24,26 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  */
 public class LiquidStarlightRecipeOutputTypesAS {
 
-    public static final DeferredRegister<LiquidStarlightRecipeOutputModifier.Type<?>> OUTPUT_MODIFIER_REGISTER =
-            DeferredRegister.create(RegistriesAS.KEY_LIQUID_STARLIGHT_OUTPUT_MODIFIER_TYPES, AstralSorcery.MODID);
+    public static void init() {
 
-    public static final DeferredHolder<LiquidStarlightRecipeOutputModifier.Type<?>, LiquidStarlightRecipeOutputModifier.Type<LiquidStarlightOutputDropItem>> DROP_ITEM =
-            OUTPUT_MODIFIER_REGISTER.register("drop_item", () -> LiquidStarlightOutputDropItem.TYPE);
-    public static final DeferredHolder<LiquidStarlightRecipeOutputModifier.Type<?>, LiquidStarlightRecipeOutputModifier.Type<LiquidStarlightOutputMergeCrystal>> MERGE_CRYSTAL =
-            OUTPUT_MODIFIER_REGISTER.register("merge_crystal", () -> LiquidStarlightOutputMergeCrystal.TYPE);
-    public static final DeferredHolder<LiquidStarlightRecipeOutputModifier.Type<?>, LiquidStarlightRecipeOutputModifier.Type<LiquidStarlightOutputFormCrystalCluster>> FORM_CRYSTAL_CLUSTER =
-            OUTPUT_MODIFIER_REGISTER.register("form_crystal_cluster", () -> LiquidStarlightOutputFormCrystalCluster.TYPE);
-    public static final DeferredHolder<LiquidStarlightRecipeOutputModifier.Type<?>, LiquidStarlightRecipeOutputModifier.Type<LiquidStarlightOutputFormGemCrystalCluster>> FORM_GEM_CRYSTAL_CLUSTER =
-            OUTPUT_MODIFIER_REGISTER.register("form_gem_crystal_cluster", () -> LiquidStarlightOutputFormGemCrystalCluster.TYPE);
-    public static final DeferredHolder<LiquidStarlightRecipeOutputModifier.Type<?>, LiquidStarlightRecipeOutputModifier.Type<LiquidStarlightOutputGrowSize>> GROW_SIZE =
-            OUTPUT_MODIFIER_REGISTER.register("grow_size", () -> LiquidStarlightOutputGrowSize.TYPE);
-    public static final DeferredHolder<LiquidStarlightRecipeOutputModifier.Type<?>, LiquidStarlightRecipeOutputModifier.Type<LiquidStarlightOutputBindLumen>> BIND_LUMEN =
-            OUTPUT_MODIFIER_REGISTER.register("bind_lumen", () -> LiquidStarlightOutputBindLumen.TYPE);
-    public static final DeferredHolder<LiquidStarlightRecipeOutputModifier.Type<?>, LiquidStarlightRecipeOutputModifier.Type<LiquidStarlightOutputFillLumen>> FILL_LUMEN =
-            OUTPUT_MODIFIER_REGISTER.register("fill_lumen", () -> LiquidStarlightOutputFillLumen.TYPE);
+    }
 
+    public static final LiquidStarlightRecipeOutputModifier.Type<LiquidStarlightOutputDropItem> DROP_ITEM =
+            register("drop_item", () -> LiquidStarlightOutputDropItem.TYPE);
+    public static final LiquidStarlightRecipeOutputModifier.Type<LiquidStarlightOutputMergeCrystal> MERGE_CRYSTAL =
+            register("merge_crystal", () -> LiquidStarlightOutputMergeCrystal.TYPE);
+    public static final LiquidStarlightRecipeOutputModifier.Type<LiquidStarlightOutputFormCrystalCluster> FORM_CRYSTAL_CLUSTER =
+            register("form_crystal_cluster", () -> LiquidStarlightOutputFormCrystalCluster.TYPE);
+    public static final LiquidStarlightRecipeOutputModifier.Type<LiquidStarlightOutputFormGemCrystalCluster> FORM_GEM_CRYSTAL_CLUSTER =
+            register("form_gem_crystal_cluster", () -> LiquidStarlightOutputFormGemCrystalCluster.TYPE);
+    public static final LiquidStarlightRecipeOutputModifier.Type<LiquidStarlightOutputGrowSize> GROW_SIZE =
+            register("grow_size", () -> LiquidStarlightOutputGrowSize.TYPE);
+    public static final LiquidStarlightRecipeOutputModifier.Type<LiquidStarlightOutputBindLumen> BIND_LUMEN =
+            register("bind_lumen", () -> LiquidStarlightOutputBindLumen.TYPE);
+    public static final LiquidStarlightRecipeOutputModifier.Type<LiquidStarlightOutputFillLumen> FILL_LUMEN =
+            register("fill_lumen", () -> LiquidStarlightOutputFillLumen.TYPE);
+
+    private static <T extends LiquidStarlightRecipeOutputModifier> LiquidStarlightRecipeOutputModifier.Type<T> register(String name, Supplier<LiquidStarlightRecipeOutputModifier.Type<T>> supplier) {
+        return Registry.register(RegistriesAS.REGISTRY_LIQUID_STARLIGHT_OUTPUT_MODIFIER_TYPES, AstralSorcery.key(name), supplier.get());
+    }
 }

@@ -27,6 +27,8 @@ import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponentMap;
@@ -35,8 +37,6 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -78,11 +78,9 @@ public class TileCaveIlluminator extends TileEntityTick<TileCaveIlluminator.Data
         }
 
         if (layerPositions == null) {
-            recalculate();
+            recalculate(level);
         }
 
-        placeFlare(level);
-        placeFlare(level);
         placeFlare(level);
         if (rand.nextInt(3) == 0 && placeFlare(level)) {
             doRecalculation = true;
@@ -98,13 +96,13 @@ public class TileCaveIlluminator extends TileEntityTick<TileCaveIlluminator.Data
             ticksUntilNextPlacement = data.getBoostedTicks() > 0 ? BOOSTED_TICK_INTERVAL : NORMAL_TICK_INTERVAL;
             if (doRecalculation) {
                 doRecalculation = false;
-                recalculate();
+                recalculate(level);
             }
         }
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void clientTick(Level level) {
         super.clientTick(level);
 
@@ -148,12 +146,13 @@ public class TileCaveIlluminator extends TileEntityTick<TileCaveIlluminator.Data
         }
     }
 
-    private void recalculate() {
-        int height = Math.max(0, this.getBlockPos().getY() - LAYER_HEIGHT);
+    private void recalculate(ServerLevel level) {
+        int yOffset = this.getBlockPos().getY() - level.getMinBuildHeight();
+        int height = Math.max(0, yOffset - LAYER_HEIGHT);
         int parts = height / LAYER_HEIGHT;
         layerPositions = new ArrayList<>(parts);
         for (int i = 0; i < parts; i++) {
-            int yPart = 3 + i * LAYER_HEIGHT;
+            int yPart = level.getMinBuildHeight() + 3 + i * LAYER_HEIGHT;
             BlockPos layerCenter = new BlockPos(this.getBlockPos().getX(), yPart, this.getBlockPos().getZ());
             layerPositions.add(generatePositions(layerCenter));
         }
@@ -206,7 +205,7 @@ public class TileCaveIlluminator extends TileEntityTick<TileCaveIlluminator.Data
             ChunkUtil.executeWithChunk(level, at, () -> {
                 if (this.doesSeeSky() && isValidLightPosition(level, finalAt)) {
                     DyeColor color = this.getTileData().getColor();
-                    BlockState toPlace = BlocksAS.FLARE_LIGHT.get().defaultBlockState()
+                    BlockState toPlace = BlocksAS.FLARE_LIGHT.defaultBlockState()
                             .setValue(FlareLightBlock.COLOR, color);
                     level.setBlockAndUpdate(finalAt, toPlace);
                 }

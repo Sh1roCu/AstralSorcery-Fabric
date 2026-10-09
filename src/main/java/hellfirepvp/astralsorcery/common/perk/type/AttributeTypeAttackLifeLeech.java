@@ -14,10 +14,11 @@ import hellfirepvp.astralsorcery.common.perk.type.base.PerkAttributeType;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.SidedHelper;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -33,14 +34,14 @@ public class AttributeTypeAttackLifeLeech extends PerkAttributeType {
     }
 
     @Override
-    protected void attachListeners(IEventBus eventBus) {
-        super.attachListeners(eventBus);
-        eventBus.addListener(this::onDamageDealt);
+    protected void attachListeners() {
+        super.attachListeners();
+        ServerLivingEntityEvents.AFTER_DAMAGE.register(this::onDamageDealt);
     }
 
-    private void onDamageDealt(LivingDamageEvent.Post event) {
-        if (event.getSource().isDirect() && event.getSource().getDirectEntity() instanceof Player player) {
-            LogicalSide side = SidedHelper.getSide(player);
+    private void onDamageDealt(LivingEntity entity, DamageSource source, float baseDamageTaken, float damageTaken, boolean blocked) {
+        if (source.isDirect() && source.getDirectEntity() instanceof Player player) {
+            EnvType side = SidedHelper.getSide(player);
             if (!this.hasTypeApplied(player, side)) return;
 
             PlayerProgress progress = ResearchManager.getProgress(player, side);
@@ -50,7 +51,7 @@ public class AttributeTypeAttackLifeLeech extends PerkAttributeType {
                     .modifyValue(player, progress, this, 0);
             leechPerc = AttributeEvent.postProcessModded(player, this, leechPerc);
             if (leechPerc > 0) {
-                float toLeech = event.getNewDamage() * leechPerc;
+                float toLeech = damageTaken * leechPerc;
                 if (toLeech > 0) {
                     player.heal(toLeech);
                 }

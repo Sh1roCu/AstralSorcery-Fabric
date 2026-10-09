@@ -8,6 +8,10 @@
 
 package hellfirepvp.astralsorcery.common.util;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
+import cn.sh1rocu.astralsorcery.util.neoforge.fluids.FluidUtil;
+import cn.sh1rocu.astralsorcery.util.neoforge.fluids.crafing.FluidIngredient;
+import cn.sh1rocu.astralsorcery.util.neoforge.fluids.crafing.SizedFluidIngredient;
 import hellfirepvp.astralsorcery.common.ingredient.IngredientBridge;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
@@ -18,10 +22,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.material.Fluid;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidUtil;
-import net.neoforged.neoforge.fluids.crafting.FluidIngredient;
-import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -41,7 +41,7 @@ public class IngredientUtil {
 
     @Nonnull
     public static ItemStack getRandomDisplayStack(IngredientBridge ingredient, long tick) {
-        return getRandomDisplayStack(ingredient.getItems().toList(), tick);
+        return getRandomDisplayStack(ingredient.getMatchingStacks(), tick);
     }
 
     @Nonnull

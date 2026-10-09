@@ -11,10 +11,12 @@ package hellfirepvp.astralsorcery.client.resource;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.sky.AstralSkyRenderer;
 import hellfirepvp.astralsorcery.common.util.data.CacheSupplier;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -30,8 +32,8 @@ import java.util.function.Supplier;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-@OnlyIn(Dist.CLIENT)
-public class AssetLibrary implements ResourceManagerReloadListener {
+@Environment(EnvType.CLIENT)
+public class AssetLibrary implements ResourceManagerReloadListener, IdentifiableResourceReloadListener {
 
     private static final AssetLibrary INSTANCE = new AssetLibrary();
     private static boolean reloading = false;
@@ -39,7 +41,10 @@ public class AssetLibrary implements ResourceManagerReloadListener {
     private static final Map<AssetLocation, Map<String, AbstractRenderTexture>> loadedTextures = new HashMap<>();
     private static final List<ReloadableResource> reloadableResources = new ArrayList<>();
 
-    private AssetLibrary() {}
+    public static final ResourceLocation ID = AstralSorcery.key("asset_library");
+
+    private AssetLibrary() {
+    }
 
     public static AssetLibrary getInstance() {
         return INSTANCE;
@@ -64,6 +69,11 @@ public class AssetLibrary implements ResourceManagerReloadListener {
                 .computeIfAbsent(name, str -> AssetLoader.loadTexture(location, str));
         reloadableResources.add(resource);
         return resource;
+    }
+
+    @Override
+    public ResourceLocation getFabricId() {
+        return ID;
     }
 
     @Override

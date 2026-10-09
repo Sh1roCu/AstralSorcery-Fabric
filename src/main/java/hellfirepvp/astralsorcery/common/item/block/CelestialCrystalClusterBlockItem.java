@@ -8,20 +8,18 @@
 
 package hellfirepvp.astralsorcery.common.item.block;
 
+import cn.sh1rocu.astralsorcery.api.extension.IMaxDamageItem;
+import cn.sh1rocu.astralsorcery.api.extension.INoRepairItem;
 import hellfirepvp.astralsorcery.common.block.tile.CelestialCrystalClusterBlock;
 import hellfirepvp.astralsorcery.common.component.CrystalAttributesComponent;
 import hellfirepvp.astralsorcery.common.item.base.BlockItemCustom;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -30,7 +28,7 @@ import java.util.stream.Collectors;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class CelestialCrystalClusterBlockItem extends BlockItemCustom {
+public class CelestialCrystalClusterBlockItem extends BlockItemCustom implements IMaxDamageItem, INoRepairItem {
 
     public CelestialCrystalClusterBlockItem(Block block) {
         super(block, new Properties()
@@ -44,16 +42,17 @@ public class CelestialCrystalClusterBlockItem extends BlockItemCustom {
 
     public static List<ItemStack> getVariants() {
         return CelestialCrystalClusterBlock.STAGE.getPossibleValues().stream().map(stage -> {
-            ItemStack stack = ItemsAS.BLOCK_CELESTIAL_CRYSTAL_CLUSTER.toStack();
+            ItemStack stack = ItemsAS.BLOCK_CELESTIAL_CRYSTAL_CLUSTER.getDefaultInstance();
             setStage(stack, stage);
             return stack;
         }).toList();
     }
 
-    @Override
-    public boolean isDamageable(ItemStack stack) {
-        return false;
-    }
+    // the same as INoRepairItem
+//    @Override
+//    public boolean isDamageable(ItemStack stack) {
+//        return false;
+//    }
 
     @Override
     public int getMaxDamage(ItemStack stack) {

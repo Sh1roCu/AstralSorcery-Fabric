@@ -16,11 +16,11 @@ import hellfirepvp.observerlib.api.ObserverProvider;
 import hellfirepvp.observerlib.api.structure.MatchableStructure;
 import hellfirepvp.observerlib.api.util.StructureBlockArray;
 import hellfirepvp.observerlib.common.change.ObserverProviderStructure;
+import hellfirepvp.observerlib.common.registry.RegistryProviders;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ import java.util.Optional;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public record ObserverRegistryObject(DeferredHolder<ObserverProvider<?>, ? extends ObserverProvider<?>> observer) {
+public record ObserverRegistryObject(ObserverProvider<?> observer) {
 
     public boolean isProviderFor(ChangeSubscriber<?> subscriber) {
         return this.isProviderFor(subscriber.getObserver());
@@ -44,15 +44,15 @@ public record ObserverRegistryObject(DeferredHolder<ObserverProvider<?>, ? exten
     }
 
     public boolean isProviderFor(ObserverProvider<?> provider) {
-        return this.observer().get() == provider;
+        return this.observer() == provider;
     }
 
     public Component getObserverName() {
-        return Component.translatable(Util.makeDescriptionId("observer_provider", this.observer().getId()));
+        return Component.translatable(Util.makeDescriptionId("observer_provider", RegistryProviders.getRegistry().getKey(this.observer())));
     }
 
     public ChangeSubscriber<?> createSubscriber(Level level, BlockPos pos) {
-        return ObserverHelper.getHelper().observeArea(level, pos, this.observer().get());
+        return ObserverHelper.getHelper().observeArea(level, pos, this.observer());
     }
 
     public static Optional<StructureBlockArray> extractRequiredStructure(ObserverProvider<?> observerProvider) {

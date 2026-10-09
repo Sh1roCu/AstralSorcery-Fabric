@@ -8,12 +8,15 @@
 
 package hellfirepvp.astralsorcery.common.linking.session;
 
+import cn.sh1rocu.astralsorcery.api.event.PlayerTickEvent;
+import cn.sh1rocu.astralsorcery.util.neoforge.network.PacketDistributor;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.linking.Linkable;
 import hellfirepvp.astralsorcery.common.network.play.PktUpdateLinkSession;
 import hellfirepvp.astralsorcery.common.starlight.StarlightNetworkLevelHelper;
 import hellfirepvp.astralsorcery.common.starlight.api.TransmissionNode;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -24,10 +27,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -43,13 +42,13 @@ public class LinkSessionHelper {
 
     private static final Map<UUID, ActiveLinkSession> ACTIVE_SESSIONS = new HashMap<>();
 
-    public static void attachEventListeners(IEventBus bus) {
-        bus.addListener(LinkSessionHelper::onPlayerLogout);
-        bus.addListener(LinkSessionHelper::onPlayerTick);
+    public static void attachEventListeners() {
+        ServerPlayerEvents.LEAVE.register(LinkSessionHelper::onPlayerLogout);
+        PlayerTickEvent.PRE.register(LinkSessionHelper::onPlayerTick);
     }
 
-    private static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        if (event.getEntity() instanceof ServerPlayer sPlayer) {
+    private static void onPlayerLogout(Player player) {
+        if (player instanceof ServerPlayer sPlayer) {
             stopSession(sPlayer, false);
         }
     }

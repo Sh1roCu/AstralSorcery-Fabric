@@ -19,11 +19,11 @@ import hellfirepvp.astralsorcery.common.recipe.altar.ActiveAltarRecipe;
 import hellfirepvp.astralsorcery.common.tile.TileAltar;
 import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -35,7 +35,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 public class DefaultAltarEffectLumenInput extends AltarEffect {
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void tick(Level level, TileAltar altar, RandomSource rand, ActiveAltarRecipe activeRecipe, int progressTick, int tick, ActiveAltarRecipe.State state, CompoundTag effectData) {
         activeRecipe.getRecipe(level).ifPresent(recipe -> {
             activeRecipe.getDrawnLumen().forEach(lumen -> {

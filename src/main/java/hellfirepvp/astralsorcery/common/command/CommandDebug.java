@@ -50,7 +50,7 @@ public class CommandDebug {
     private static int debug(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerPlayer player = (ServerPlayer) context.getArgument("player", EntitySelector.class).findSingleEntity(context.getSource());
 
-        //EntityFlare flare = EntitiesAS.FLARE.get().create(player.serverLevel());
+        //EntityFlare flare = EntitiesAS.FLARE.create(player.serverLevel());
         //flare.setPos(player.getX(), player.getY(), player.getZ());
         //player.serverLevel().addFreshEntity(flare);
 
@@ -65,9 +65,9 @@ public class CommandDebug {
 
         //player.teleportTo(pos.getX(), pos.getY() + 2, pos.getZ());
 
-        //ResearchManager.getProgress(player, LogicalSide.SERVER);
+        //ResearchManager.getProgress(player, EnvType.SERVER);
         //ResearchHelper.removeAttunedConstellation(player);
-        //ResearchHelper.attuneConstellation(player, ConstellationsAS.AEVITAS.get());
+        //ResearchHelper.attuneConstellation(player, ConstellationsAS.AEVITAS);
         //for (BaseConstellation cst : RegistriesAS.REGISTRY_CONSTELLATIONS) {
         //    ResearchHelper.discoverConstellation(player, cst);
         //}

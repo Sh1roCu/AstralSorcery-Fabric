@@ -12,10 +12,8 @@ import hellfirepvp.astralsorcery.common.perk.PerkAttributeMap;
 import hellfirepvp.astralsorcery.common.perk.type.base.ModifierType;
 import hellfirepvp.astralsorcery.common.perk.type.base.PerkAttributeType;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
+import net.fabricmc.api.EnvType;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
-
-import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -26,17 +24,17 @@ import java.util.function.Supplier;
  */
 public class ReaderPercentageAttribute extends PerkAttributeTypeReader {
 
-    public ReaderPercentageAttribute(Supplier<? extends PerkAttributeType> type) {
+    public ReaderPercentageAttribute(PerkAttributeType type) {
         super(type);
     }
 
     @Override
-    public double getDefaultValue(PerkAttributeMap statMap, Player player, LogicalSide side) {
+    public double getDefaultValue(PerkAttributeMap statMap, Player player, EnvType side) {
         return this.getType().isMultiplicative() ? 1 : 0;
     }
 
     @Override
-    public double getModifierValueForMode(PerkAttributeMap statMap, Player player, LogicalSide side, ModifierType mode) {
+    public double getModifierValueForMode(PerkAttributeMap statMap, Player player, EnvType side, ModifierType mode) {
         return statMap.getModifier(player, ResearchManager.getProgress(player, side), this.getType(), mode);
     }
 

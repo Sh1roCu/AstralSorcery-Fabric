@@ -14,8 +14,9 @@ import hellfirepvp.astralsorcery.common.tile.network.provider.FocusCrystalSource
 import hellfirepvp.astralsorcery.common.tile.network.provider.ForwardingStarlightReceiverNodeProvider;
 import hellfirepvp.astralsorcery.common.tile.network.provider.SimpleSingleTransmissionNodeProvider;
 import hellfirepvp.astralsorcery.common.tile.network.provider.SimpleTransmissionNodeProvider;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.Registry;
+
+import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -26,16 +27,17 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  */
 public class StarlightNetworkNodesAS {
 
-    public static final DeferredRegister<TransmissionNodeProvider<?>> NODE_REGISTER =
-            DeferredRegister.create(RegistriesAS.KEY_TRANSMISSION_NODES, AstralSorcery.MODID);
+    public static void init() {
 
-    public static final DeferredHolder<TransmissionNodeProvider<?>, SimpleTransmissionNodeProvider> SIMPLE_NODE =
-            NODE_REGISTER.register("simple", SimpleTransmissionNodeProvider::new);
-    public static final DeferredHolder<TransmissionNodeProvider<?>, SimpleSingleTransmissionNodeProvider> SIMPLE_SINGLE_NODE =
-            NODE_REGISTER.register("simple_single", SimpleSingleTransmissionNodeProvider::new);
-    public static final DeferredHolder<TransmissionNodeProvider<?>, ForwardingStarlightReceiverNodeProvider> FORWARDING_RECEIVER_NODE =
-            NODE_REGISTER.register("forwarding_receiver", ForwardingStarlightReceiverNodeProvider::new);
+    }
 
-    public static final DeferredHolder<TransmissionNodeProvider<?>, FocusCrystalSourceNodeProvider> FOCUS_CRYSTAL_SOURCE_NODE =
-            NODE_REGISTER.register("source_focus_crystal", FocusCrystalSourceNodeProvider::new);
+    public static final SimpleTransmissionNodeProvider SIMPLE_NODE = register("simple", SimpleTransmissionNodeProvider::new);
+    public static final SimpleSingleTransmissionNodeProvider SIMPLE_SINGLE_NODE = register("simple_single", SimpleSingleTransmissionNodeProvider::new);
+    public static final ForwardingStarlightReceiverNodeProvider FORWARDING_RECEIVER_NODE = register("forwarding_receiver", ForwardingStarlightReceiverNodeProvider::new);
+
+    public static final FocusCrystalSourceNodeProvider FOCUS_CRYSTAL_SOURCE_NODE = register("source_focus_crystal", FocusCrystalSourceNodeProvider::new);
+
+    private static <T extends TransmissionNodeProvider<?>> T register(String name, Supplier<T> supplier) {
+        return Registry.register(RegistriesAS.REGISTRY_TRANSMISSION_NODES, AstralSorcery.key(name), supplier.get());
+    }
 }

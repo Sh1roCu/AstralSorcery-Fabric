@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen.tome.page;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
+import cn.sh1rocu.astralsorcery.util.neoforge.common.crafting.SizedIngredient;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -24,7 +26,6 @@ import hellfirepvp.astralsorcery.client.resource.UVFrame;
 import hellfirepvp.astralsorcery.client.screen.effect.ticket.StaticIdentifierTicket;
 import hellfirepvp.astralsorcery.client.util.*;
 import hellfirepvp.astralsorcery.common.constellation.BaseConstellation;
-import hellfirepvp.astralsorcery.common.constellation.DebugConstellation;
 import hellfirepvp.astralsorcery.common.ingredient.IngredientBridge;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
 import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
@@ -32,18 +33,17 @@ import hellfirepvp.astralsorcery.common.lumen.LumenStack;
 import hellfirepvp.astralsorcery.common.recipe.altar.AltarCraftingInput;
 import hellfirepvp.astralsorcery.common.recipe.altar.AltarRecipe;
 import hellfirepvp.astralsorcery.common.recipe.altar.AltarRecipeGrid;
-import hellfirepvp.astralsorcery.common.recipe.altar.output.AltarOutputReplaceWithInput;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.research.ResearchNode;
 import hellfirepvp.astralsorcery.common.research.tome.TomePage;
 import hellfirepvp.astralsorcery.common.tile.TileAltar;
-import hellfirepvp.astralsorcery.common.util.ColorUtil;
 import hellfirepvp.astralsorcery.common.util.IngredientUtil;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.IntRectangle;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -59,19 +59,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.common.crafting.SizedIngredient;
-import net.neoforged.neoforge.fluids.FluidStack;
 import org.joml.Vector2f;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -436,7 +431,7 @@ public class RenderPageAltar extends RenderPageRecipe<AltarRecipe> {
 
     protected void renderLiquidInputExact(GuiGraphics graphics, float offsetX, float offsetY, FluidStack fluidStack) {
         TextureAtlasSprite sprite = RenderSpriteUtil.getTexture(fluidStack);
-        int tint = IClientFluidTypeExtensions.of(fluidStack.getFluid()).getTintColor(fluidStack);
+        int tint = FluidVariantRendering.getColor(fluidStack.getFluidVariant());
         ColorWrapper color = ColorWrapper.opaque(tint);
         PoseStack pose = graphics.pose();
 

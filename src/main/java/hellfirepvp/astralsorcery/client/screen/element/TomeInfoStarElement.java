@@ -8,6 +8,9 @@
 
 package hellfirepvp.astralsorcery.client.screen.element;
 
+import cn.sh1rocu.astralsorcery.api.extension.client.IGuiGraphics;
+import cn.sh1rocu.astralsorcery.mixin.accessor.client.GuiGraphicsAccessor;
+import cn.sh1rocu.astralsorcery.util.neoforge.client.ClientHooks;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -25,6 +28,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.FormattedText;
@@ -88,7 +93,11 @@ public class TomeInfoStarElement extends AbstractWidget {
         if (this.isHovered()) {
             DeferredTooltipUtil.drawTooltip(guiGraphics, graphics -> {
                 TooltipUtil.blueColor(() -> {
-                    graphics.renderComponentTooltipFromElements(Minecraft.getInstance().font, this.hoverText.get(), this.getX() + 8, this.getY(), ItemStack.EMPTY);
+                    ((IGuiGraphics) graphics).as$setTooltipItemStack(ItemStack.EMPTY);
+                    List<ClientTooltipComponent> components = ClientHooks.gatherTooltipComponentsFromElements(
+                            ItemStack.EMPTY, this.hoverText.get(), mouseX, guiGraphics.guiWidth(), guiGraphics.guiHeight(), Minecraft.getInstance().font);
+                    ((GuiGraphicsAccessor) graphics).as$renderTooltipInternal(
+                            Minecraft.getInstance().font, components, this.getX() + 8, this.getY(), DefaultTooltipPositioner.INSTANCE);
                 });
             });
         }
@@ -97,14 +106,14 @@ public class TomeInfoStarElement extends AbstractWidget {
 
     private static void drawInfoStarSingle(PoseStack renderStack, VertexConsumer vb, float widthHeight, double deg) {
         Vector3 offset = new Vector3(-widthHeight / 2D, -widthHeight / 2D, 0).rotate(deg, Vector3.RotAxis.Z_AXIS);
-        Vector3 uv01   = new Vector3(-widthHeight / 2D,  widthHeight / 2D, 0).rotate(deg, Vector3.RotAxis.Z_AXIS);
-        Vector3 uv11   = new Vector3( widthHeight / 2D,  widthHeight / 2D, 0).rotate(deg, Vector3.RotAxis.Z_AXIS);
-        Vector3 uv10   = new Vector3( widthHeight / 2D, -widthHeight / 2D, 0).rotate(deg, Vector3.RotAxis.Z_AXIS);
+        Vector3 uv01 = new Vector3(-widthHeight / 2D, widthHeight / 2D, 0).rotate(deg, Vector3.RotAxis.Z_AXIS);
+        Vector3 uv11 = new Vector3(widthHeight / 2D, widthHeight / 2D, 0).rotate(deg, Vector3.RotAxis.Z_AXIS);
+        Vector3 uv10 = new Vector3(widthHeight / 2D, -widthHeight / 2D, 0).rotate(deg, Vector3.RotAxis.Z_AXIS);
 
         Matrix4f matr = renderStack.last().pose();
-        vb.addVertex(matr, (float) uv01.getX(),   (float) uv01.getY(),   0).setUv(0, 1);
-        vb.addVertex(matr, (float) uv11.getX(),   (float) uv11.getY(),   0).setUv(1, 1);
-        vb.addVertex(matr, (float) uv10.getX(),   (float) uv10.getY(),   0).setUv(1, 0);
+        vb.addVertex(matr, (float) uv01.getX(), (float) uv01.getY(), 0).setUv(0, 1);
+        vb.addVertex(matr, (float) uv11.getX(), (float) uv11.getY(), 0).setUv(1, 1);
+        vb.addVertex(matr, (float) uv10.getX(), (float) uv10.getY(), 0).setUv(1, 0);
         vb.addVertex(matr, (float) offset.getX(), (float) offset.getY(), 0).setUv(0, 0);
     }
 
@@ -114,5 +123,6 @@ public class TomeInfoStarElement extends AbstractWidget {
     }
 
     @Override
-    protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {}
+    protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
+    }
 }

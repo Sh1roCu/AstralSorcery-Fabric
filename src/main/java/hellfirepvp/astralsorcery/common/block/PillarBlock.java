@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.block;
 
+import cn.sh1rocu.astralsorcery.api.extension.IPathTypeBlock;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -27,7 +28,6 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.pathfinder.PathType;
-import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -43,7 +43,7 @@ import java.util.function.Supplier;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class PillarBlock extends Block implements SimpleWaterloggedBlock {
+public class PillarBlock extends Block implements SimpleWaterloggedBlock, IPathTypeBlock {
 
     public static final MapCodec<PillarBlock> CODEC = simpleCodec(PillarBlock::new);
 
@@ -56,7 +56,7 @@ public class PillarBlock extends Block implements SimpleWaterloggedBlock {
         super(prop);
         this.registerDefaultState(this.getStateDefinition().any().setValue(PILLAR_TYPE, PillarType.MIDDLE).setValue(WATERLOGGED, false));
         this.middleShape = createPillarShape();
-        this.topShape    = createPillarTopShape();
+        this.topShape = createPillarTopShape();
         this.bottomShape = createPillarBottomShape();
     }
 
@@ -120,7 +120,7 @@ public class PillarBlock extends Block implements SimpleWaterloggedBlock {
     }
 
     private BlockState getThisState(BlockGetter world, BlockPos pos) {
-        boolean hasUp   = world.getBlockState(pos.above()).getBlock() == this;
+        boolean hasUp = world.getBlockState(pos.above()).getBlock() == this;
         boolean hasDown = world.getBlockState(pos.below()).getBlock() == this;
         if (hasUp) {
             if (hasDown) {

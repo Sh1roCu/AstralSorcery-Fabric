@@ -18,7 +18,6 @@ import hellfirepvp.astralsorcery.common.block.tile.CelestialCrystalClusterBlock;
 import hellfirepvp.astralsorcery.common.component.CrystalAttributesComponent;
 import hellfirepvp.astralsorcery.common.lib.*;
 import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
-import hellfirepvp.astralsorcery.common.starlight.api.provider.TransmissionNodeProvider;
 import hellfirepvp.astralsorcery.common.starlight.transmission.StarlightTransmissionPacket;
 import hellfirepvp.astralsorcery.common.tile.base.TileDataCrystalAttributeContainer;
 import hellfirepvp.astralsorcery.common.tile.base.TileEntityNetwork;
@@ -28,6 +27,8 @@ import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
 import hellfirepvp.astralsorcery.common.util.data.TileRegistryObject;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.level.DayTimeHelper;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
@@ -35,9 +36,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.registries.DeferredHolder;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
@@ -73,7 +71,7 @@ public class TileCelestialCrystalCluster extends TileEntityNetwork<ForwardingSta
     }
 
     @Override
-    public DeferredHolder<TransmissionNodeProvider<?>, ForwardingStarlightReceiverNodeProvider> getNodeProvider() {
+    public ForwardingStarlightReceiverNodeProvider getNodeProvider() {
         return StarlightNetworkNodesAS.FORWARDING_RECEIVER_NODE;
     }
 
@@ -105,7 +103,7 @@ public class TileCelestialCrystalCluster extends TileEntityNetwork<ForwardingSta
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void clientTick(Level level) {
         super.clientTick(level);
 
@@ -140,7 +138,7 @@ public class TileCelestialCrystalCluster extends TileEntityNetwork<ForwardingSta
     }
 
     public void setGrowth(Level level, int stage) {
-        BlockState next = BlocksAS.CELESTIAL_CRYSTAL_CLUSTER.get().defaultBlockState().setValue(CelestialCrystalClusterBlock.STAGE, stage);
+        BlockState next = BlocksAS.CELESTIAL_CRYSTAL_CLUSTER.defaultBlockState().setValue(CelestialCrystalClusterBlock.STAGE, stage);
         level.setBlockAndUpdate(getBlockPos(), next);
     }
 
@@ -153,7 +151,7 @@ public class TileCelestialCrystalCluster extends TileEntityNetwork<ForwardingSta
 
         public static final Codec<Data> CODEC = RecordCodecBuilder.create(inst -> netFields(inst).and(
                 CodecUtil.defaulted(CrystalAttributesComponent.CODEC, "crystalAttributes", CrystalAttributesComponent::defaultEmpty, Data::getCrystalAttributes)
-        ).apply(inst , Data::new));
+        ).apply(inst, Data::new));
 
         protected CrystalAttributesComponent crystalAttributes;
 
@@ -176,7 +174,7 @@ public class TileCelestialCrystalCluster extends TileEntityNetwork<ForwardingSta
         @Override
         public CrystalAttributesComponent getEmptyCrystalAttributes() {
             return ItemsAS.CELESTIAL_CRYSTAL.asItem().components()
-                    .getOrDefault(DataComponentsAS.CRYSTAL_ATTRIBUTES.get(), CrystalAttributesComponent.defaultEmpty());
+                    .getOrDefault(DataComponentsAS.CRYSTAL_ATTRIBUTES, CrystalAttributesComponent.defaultEmpty());
         }
     }
 

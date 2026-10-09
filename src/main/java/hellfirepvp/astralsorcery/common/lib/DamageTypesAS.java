@@ -9,14 +9,11 @@
 package hellfirepvp.astralsorcery.common.lib;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
-import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.data.DamageTypeRegistryObject;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.damagesource.DamageScaling;
 import net.minecraft.world.damagesource.DamageType;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.function.Supplier;
 
@@ -28,6 +25,10 @@ import java.util.function.Supplier;
  * Date: 07.09.2026 / 10:00
  */
 public class DamageTypesAS {
+
+    public static void init() {
+
+    }
 
     public static final DamageTypeRegistryObject STELLAR =
             register("stellar", () -> new DamageType("astralsorcery.stellar", DamageScaling.ALWAYS, 0F));

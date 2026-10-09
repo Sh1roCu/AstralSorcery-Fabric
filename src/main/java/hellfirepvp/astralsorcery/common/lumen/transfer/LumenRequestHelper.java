@@ -162,11 +162,12 @@ public class LumenRequestHelper {
 
     private static boolean canProvideLumen(Level level, LumenNode node, LumenStack lumenStack) {
         if (!node.getProvidedLumenTypes().contains(lumenStack.getLumen())) return false;
-        ILumenHandler handler = level.getCapability(ILumenHandler.BLOCK, node.getPos(), null);
+        ILumenHandler handler = ILumenHandler.BLOCK.find(level, node.getPos(), null);
         return handler != null && !handler.drain(lumenStack, ILumenHandler.Action.SIMULATE).isEmpty();
     }
 
-    private record StepChain(LumenNode node, List<LumenNode> chain) {}
+    private record StepChain(LumenNode node, List<LumenNode> chain) {
+    }
 
     private static class TraversalContext {
 

@@ -13,17 +13,17 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.lib.types.LumenBindingEffectTypesAS;
 import hellfirepvp.astralsorcery.common.util.FlagExecutor;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 
 import java.util.List;
 
@@ -59,15 +59,14 @@ public class LumenBindingDamageBurstEffect extends LumenBindingEffect {
         return new LumenBindingDamageBurstEffect(radiusBlocks, damageMultiplier);
     }
 
-    public static void attachEventListeners(IEventBus bus) {
-        bus.addListener(LumenBindingDamageBurstEffect::onDamagePost);
+    public static void attachEventListeners() {
+        ServerLivingEntityEvents.AFTER_DAMAGE.register(LumenBindingDamageBurstEffect::onDamagePost);
     }
 
-    private static void onDamagePost(LivingDamageEvent.Post event) {
+    private static void onDamagePost(LivingEntity victim, DamageSource source, float baseDamageTaken, float damageTaken, boolean blocked) {
         if (FlagExecutor.isFlagSet(FlagExecutor.Flag.AOE_DAMAGE_BURST)) return;
 
-        if (!(event.getSource().getDirectEntity() instanceof ServerPlayer attackerSPlayer)) return;
-        LivingEntity victim = event.getEntity();
+        if (!(source.getDirectEntity() instanceof ServerPlayer attackerSPlayer)) return;
         if (victim.getHealth() > 0) return;
 
         forEachEffect(attackerSPlayer, LumenBindingDamageBurstEffect.class, (stack, effect) -> {
@@ -76,10 +75,10 @@ public class LumenBindingDamageBurstEffect extends LumenBindingEffect {
 
             AABB searchBox = victim.getBoundingBox().inflate(effect.getRadiusBlocks());
             FlagExecutor.run(FlagExecutor.Flag.AOE_DAMAGE_BURST, () ->
-                victim.level().<LivingEntity>getEntitiesOfClass(LivingEntity.class, searchBox)
-                        .stream()
-                        .filter(e -> e != attackerSPlayer && e != victim)
-                        .forEach(e -> e.hurt(event.getSource(), burstDamage))
+                    victim.level().<LivingEntity>getEntitiesOfClass(LivingEntity.class, searchBox)
+                            .stream()
+                            .filter(e -> e != attackerSPlayer && e != victim)
+                            .forEach(e -> e.hurt(source, burstDamage))
             );
         });
     }
@@ -93,7 +92,7 @@ public class LumenBindingDamageBurstEffect extends LumenBindingEffect {
     }
 
     @Override
-    public List<Component> getDisplayText(LogicalSide side, ItemStack stack) {
+    public List<Component> getDisplayText(EnvType side, ItemStack stack) {
         return List.of(Component.translatable("lumen.binding.astralsorcery.damage_burst", Math.round(this.damageMultiplier * 100)));
     }
 

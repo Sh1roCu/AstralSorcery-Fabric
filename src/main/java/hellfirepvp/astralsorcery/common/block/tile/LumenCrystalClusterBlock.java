@@ -19,6 +19,7 @@ import hellfirepvp.astralsorcery.common.lumen.Lumen;
 import hellfirepvp.astralsorcery.common.tile.TileLumenCrystalCluster;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import net.minecraft.client.color.block.BlockColor;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -66,7 +67,7 @@ public class LumenCrystalClusterBlock extends BaseTickTileBlock<TileLumenCrystal
     private static final VoxelShape GROWTH_STAGE_4    = Block.box(1, 0, 1, 15, 14.5,   15);
 
     public LumenCrystalClusterBlock(Properties properties) {
-        super(properties, TileEntitiesAS.LUMEN_CRYSTAL_CLUSTER);
+        super(properties, () -> TileEntitiesAS.LUMEN_CRYSTAL_CLUSTER);
     }
 
     @Override
@@ -125,8 +126,8 @@ public class LumenCrystalClusterBlock extends BaseTickTileBlock<TileLumenCrystal
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
-        ItemStack stack = super.getCloneItemStack(state, target, level, pos, player);
+    public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+        ItemStack stack = super.getCloneItemStack(level, pos, state);
         LumenCrystalClusterBlockItem.setStage(stack, state.getValue(STAGE));
         MiscUtil.getTileAt(level, pos, TileLumenCrystalCluster.class, true).ifPresent(cluster -> {
             LumenComponent.of(cluster.getTileData().getLumen()).ifPresent(lumenCmp -> {
@@ -149,14 +150,19 @@ public class LumenCrystalClusterBlock extends BaseTickTileBlock<TileLumenCrystal
         return canSupportRigidBlock(level, pos.below());
     }
 
-    @Override
-    public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
+    // impl via mixin
+    // @Override
+    public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, /*boolean willHarvest,*/ FluidState fluid) {
         int stage = state.getValue(STAGE);
         if (stage > 0 && !player.isCreative()) {
             BlockState newState = state.setValue(STAGE, stage - 1);
             return level.setBlock(pos, newState, Block.UPDATE_ALL);
         } else {
-            return super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid);
+            if (level.isClientSide()) {
+                return level.setBlock(pos, fluid.createLegacyBlock(), 11);
+            } else {
+                return level.removeBlock(pos, false);
+            }
         }
     }
 

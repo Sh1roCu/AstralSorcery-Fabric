@@ -13,9 +13,9 @@ import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.artifact.ArtifactCondition;
 import hellfirepvp.astralsorcery.common.artifact.condition.*;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
+import net.minecraft.core.Registry;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -26,8 +26,9 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  */
 public class ArtifactConditionTypesAS {
 
-    public static final DeferredRegister<ArtifactCondition.Type<?>> ARTIFACT_CONDITION_TYPES_REGISTER =
-            DeferredRegister.create(RegistriesAS.KEY_ARTIFACT_CONDITION_TYPES, AstralSorcery.MODID);
+    public static void init() {
+
+    }
 
     public static final ArtifactCondition.DeferredType<ArtifactConditionNearBlock> NEAR_BLOCK =
             register("near_block", ArtifactConditionNearBlock.CODEC, ArtifactConditionNearBlock.STREAM_CODEC);
@@ -45,7 +46,8 @@ public class ArtifactConditionTypesAS {
     private static <T extends ArtifactCondition> ArtifactCondition.DeferredType<T> register(String name,
                                                                                             MapCodec<T> codec,
                                                                                             StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
-        return new ArtifactCondition.DeferredType<>(ARTIFACT_CONDITION_TYPES_REGISTER.register(name,
-                () -> new ArtifactCondition.Type<>(codec, streamCodec)));
+        var condition = Registry.register(RegistriesAS.REGISTRY_ARTIFACT_CONDITION_TYPES, AstralSorcery.key(name),
+                new ArtifactCondition.Type<>(codec, streamCodec));
+        return new ArtifactCondition.DeferredType<>(condition);
     }
 }

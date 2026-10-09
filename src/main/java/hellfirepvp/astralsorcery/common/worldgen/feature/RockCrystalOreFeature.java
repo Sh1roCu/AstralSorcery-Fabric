@@ -47,7 +47,7 @@ public class RockCrystalOreFeature extends Feature<RockCrystalOreFeatureConfigur
                     int relativeY = SectionPos.sectionRelative(blockpos.getY());
                     int relativeZ = SectionPos.sectionRelative(blockpos.getZ());
                     if (cfg.getReplaceCondition().test(worldgenlevel, blockpos) && !isAdjacentToAir(access::getBlockState, blockpos)) {
-                        section.setBlockState(relativeX, relativeY, relativeZ, BlocksAS.ROCK_CRYSTAL_ORE.get().defaultBlockState(), false);
+                        section.setBlockState(relativeX, relativeY, relativeZ, BlocksAS.ROCK_CRYSTAL_ORE.defaultBlockState(), false);
                         context.level().getLevel().getServer().tell(new TickTask(0, () -> {
                             DataAS.DOMAIN_AS.getData(worldgenlevel.getLevel(), DataAS.KEY_ROCK_CRYSTAL_DATA).addOre(blockpos);
                         }));

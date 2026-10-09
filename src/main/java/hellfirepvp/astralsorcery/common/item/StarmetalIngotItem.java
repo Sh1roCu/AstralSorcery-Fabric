@@ -8,15 +8,12 @@
 
 package hellfirepvp.astralsorcery.common.item;
 
+import cn.sh1rocu.astralsorcery.api.extension.ICustomEntityItem;
 import hellfirepvp.astralsorcery.common.entity.ItemEntityReplacement;
-import hellfirepvp.astralsorcery.common.entity.item.ItemEntityStarmetal;
 import hellfirepvp.astralsorcery.common.item.base.ItemCustom;
 import hellfirepvp.astralsorcery.common.lib.EntitiesAS;
-import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
@@ -29,7 +26,7 @@ import javax.annotation.Nullable;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class StarmetalIngotItem extends ItemCustom {
+public class StarmetalIngotItem extends ItemCustom implements ICustomEntityItem {
 
     public StarmetalIngotItem() {
         super(new Properties());
@@ -44,8 +41,8 @@ public class StarmetalIngotItem extends ItemCustom {
     @Nullable
     public Entity createEntity(Level level, Entity location, ItemStack stack) {
         if (location instanceof ItemEntity itemEntity) {
-            return ItemEntityReplacement.replace(EntitiesAS.ITEM_STARMETAL.get(), itemEntity);
+            return ItemEntityReplacement.replace(EntitiesAS.ITEM_STARMETAL, itemEntity);
         }
-        return super.createEntity(level, location, stack);
+        return null;
     }
 }

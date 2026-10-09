@@ -36,7 +36,7 @@ public class AttunementAltarBlock extends BaseTickTileBlock<TileAttunementAltar>
     private static final VoxelShape COLLISION_SHAPE = Block.box(0, 0, 0, 16, 6, 16);
 
     public AttunementAltarBlock(Properties properties) {
-        super(properties, TileEntitiesAS.ATTUNEMENT_ALTAR);
+        super(properties, () -> TileEntitiesAS.ATTUNEMENT_ALTAR);
     }
 
     @Override

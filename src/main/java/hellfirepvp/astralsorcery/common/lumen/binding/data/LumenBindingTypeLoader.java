@@ -18,14 +18,15 @@ import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.lumen.Lumen;
 import hellfirepvp.astralsorcery.common.lumen.binding.LumenBindingType;
 import hellfirepvp.astralsorcery.common.util.data.MapStream;
-import net.minecraft.core.Holder;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.neoforged.fml.LogicalSide;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +39,7 @@ import java.util.Optional;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class LumenBindingTypeLoader extends SimpleJsonResourceReloadListener {
+public class LumenBindingTypeLoader extends SimpleJsonResourceReloadListener implements IdentifiableResourceReloadListener {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     private static final LumenBindingTypeLoader INSTANCE = new LumenBindingTypeLoader();
@@ -49,6 +50,9 @@ public class LumenBindingTypeLoader extends SimpleJsonResourceReloadListener {
     private final Map<ResourceLocation, LumenBindingType> clientBindings = new HashMap<>();
     private final Map<ResourceKey<Lumen>, ResourceLocation> clientLumenApplicationMapping = new HashMap<>();
 
+    public static final ResourceLocation ID = AstralSorcery.key("lumen_binding");
+    public HolderLookup.Provider provider;
+
     private LumenBindingTypeLoader() {
         super(GSON, "lumen_binding");
     }
@@ -57,26 +61,31 @@ public class LumenBindingTypeLoader extends SimpleJsonResourceReloadListener {
         return INSTANCE;
     }
 
-    public Optional<ResourceLocation> getLumenBindingType(LogicalSide side, ResourceLocation lumenKey) {
+    @Override
+    public ResourceLocation getFabricId() {
+        return ID;
+    }
+
+    public Optional<ResourceLocation> getLumenBindingType(EnvType side, ResourceLocation lumenKey) {
         return this.getLumenBindingType(side, ResourceKey.create(RegistriesAS.KEY_LUMEN, lumenKey));
     }
 
-    public Optional<ResourceLocation> getLumenBindingType(LogicalSide side, ResourceKey<Lumen> lumenKey) {
+    public Optional<ResourceLocation> getLumenBindingType(EnvType side, ResourceKey<Lumen> lumenKey) {
         return Optional.ofNullable(this.getLumenApplicationMapping(side).get(lumenKey));
     }
 
-    public Optional<LumenBindingType> getBindingType(LogicalSide side, ResourceLocation bindingKey) {
+    public Optional<LumenBindingType> getBindingType(EnvType side, ResourceLocation bindingKey) {
         return Optional.ofNullable(this.getBindings(side).get(bindingKey));
     }
 
-    public Map<ResourceLocation, LumenBindingType> getBindings(LogicalSide side) {
+    public Map<ResourceLocation, LumenBindingType> getBindings(EnvType side) {
         return switch (side) {
             case CLIENT -> Map.copyOf(this.clientBindings);
             case SERVER -> Map.copyOf(this.bindings);
         };
     }
 
-    public Map<ResourceKey<Lumen>, ResourceLocation> getLumenApplicationMapping(LogicalSide side) {
+    public Map<ResourceKey<Lumen>, ResourceLocation> getLumenApplicationMapping(EnvType side) {
         return switch (side) {
             case CLIENT -> Map.copyOf(this.clientLumenApplicationMapping);
             case SERVER -> Map.copyOf(this.lumenApplicationMapping);
@@ -112,7 +121,7 @@ public class LumenBindingTypeLoader extends SimpleJsonResourceReloadListener {
 
         this.bindings.clear();
         this.lumenApplicationMapping.clear();
-        RegistryOps<JsonElement> ops = this.getRegistryLookup().createSerializationContext(JsonOps.INSTANCE);
+        RegistryOps<JsonElement> ops = this.provider.createSerializationContext(JsonOps.INSTANCE);
         mappings.forEach((key, obj) -> {
             LumenBindingTypeMapping.CODEC.parse(ops, obj)
                     .ifError(error -> AstralSorcery.LOG.warn("Failed to load lumen binding type mapping {}: {}", key, error.message()))

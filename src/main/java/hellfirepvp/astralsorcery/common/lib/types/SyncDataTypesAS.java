@@ -9,6 +9,9 @@
 package hellfirepvp.astralsorcery.common.lib.types;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
+import hellfirepvp.astralsorcery.common.data.sync.ClientData;
+import hellfirepvp.astralsorcery.common.data.sync.ClientSyncData;
+import hellfirepvp.astralsorcery.common.data.sync.ClientSyncDiffData;
 import hellfirepvp.astralsorcery.common.data.sync.SyncData;
 import hellfirepvp.astralsorcery.common.data.sync.client.CelestialGatewayClientData;
 import hellfirepvp.astralsorcery.common.data.sync.client.FocalPointClientData;
@@ -19,8 +22,9 @@ import hellfirepvp.astralsorcery.common.data.sync.server.FocalPointSyncData;
 import hellfirepvp.astralsorcery.common.data.sync.server.LightConnectionSyncData;
 import hellfirepvp.astralsorcery.common.data.sync.server.PatreonEntitySyncData;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.Registry;
+
+import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -31,24 +35,29 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  */
 public class SyncDataTypesAS {
 
-    public static final DeferredRegister<SyncData.Type<?, ?, ?, ?>> SYNC_DATA_REGISTER =
-            DeferredRegister.create(RegistriesAS.KEY_SYNC_DATA_TYPES, AstralSorcery.MODID);
+    public static void init() {
 
-    public static final DeferredHolder<SyncData.Type<?, ?, ?, ?>, SyncData.Type<FocalPointSyncData, FocalPointSyncData.ClientSync, FocalPointSyncData.ClientDiffSync, FocalPointClientData>> FOCAL_POINT =
-            SYNC_DATA_REGISTER.register("focal_point", () ->
+    }
+
+    public static final SyncData.Type<FocalPointSyncData, FocalPointSyncData.ClientSync, FocalPointSyncData.ClientDiffSync, FocalPointClientData> FOCAL_POINT =
+            register("focal_point", () ->
                     new SyncData.Type<>(FocalPointSyncData::new, FocalPointClientData::new,
                             FocalPointSyncData.ClientSync.STREAM_CODEC, FocalPointSyncData.ClientDiffSync.STREAM_CODEC));
-    public static final DeferredHolder<SyncData.Type<?, ?, ?, ?>, SyncData.Type<LightConnectionSyncData, LightConnectionSyncData.ClientSync, LightConnectionSyncData.ClientDiffSync, LightConnectionClientData>> LIGHT_CONNECTION =
-            SYNC_DATA_REGISTER.register("light_connection", () ->
+    public static final SyncData.Type<LightConnectionSyncData, LightConnectionSyncData.ClientSync, LightConnectionSyncData.ClientDiffSync, LightConnectionClientData> LIGHT_CONNECTION =
+            register("light_connection", () ->
                     new SyncData.Type<>(LightConnectionSyncData::new, LightConnectionClientData::new,
                             LightConnectionSyncData.ClientSync.STREAM_CODEC, LightConnectionSyncData.ClientDiffSync.STREAM_CODEC));
-    public static final DeferredHolder<SyncData.Type<?, ?, ?, ?>, SyncData.Type<CelestialGatewaySyncData, CelestialGatewaySyncData.ClientSync, CelestialGatewaySyncData.ClientDiffSync, CelestialGatewayClientData>> CELESTIAL_GATEWAY =
-            SYNC_DATA_REGISTER.register("celestial_gateway", () ->
+    public static final SyncData.Type<CelestialGatewaySyncData, CelestialGatewaySyncData.ClientSync, CelestialGatewaySyncData.ClientDiffSync, CelestialGatewayClientData> CELESTIAL_GATEWAY =
+            register("celestial_gateway", () ->
                     new SyncData.Type<>(CelestialGatewaySyncData::new, CelestialGatewayClientData::new,
                             CelestialGatewaySyncData.ClientSync.STREAM_CODEC, CelestialGatewaySyncData.ClientDiffSync.STREAM_CODEC));
-    public static final DeferredHolder<SyncData.Type<?, ?, ?, ?>, SyncData.Type<PatreonEntitySyncData, PatreonEntitySyncData.ClientSync, PatreonEntitySyncData.ClientDiffSync, PatreonEntityClientData>> PATREON_ENTITY =
-            SYNC_DATA_REGISTER.register("patreon_entity", () ->
+    public static final SyncData.Type<PatreonEntitySyncData, PatreonEntitySyncData.ClientSync, PatreonEntitySyncData.ClientDiffSync, PatreonEntityClientData> PATREON_ENTITY =
+            register("patreon_entity", () ->
                     new SyncData.Type<>(PatreonEntitySyncData::new, PatreonEntityClientData::new,
                             PatreonEntitySyncData.ClientSync.STREAM_CODEC, PatreonEntitySyncData.ClientDiffSync.STREAM_CODEC));
 
+    private static <D extends SyncData<SA, SD, C>, SA extends ClientSyncData<C>, SD extends ClientSyncDiffData<C>, C extends ClientData>
+    SyncData.Type<D, SA, SD, C> register(String name, Supplier<SyncData.Type<D, SA, SD, C>> supplier) {
+        return Registry.register(RegistriesAS.REGISTRY_SYNC_DATA_TYPES, AstralSorcery.key(name), supplier.get());
+    }
 }

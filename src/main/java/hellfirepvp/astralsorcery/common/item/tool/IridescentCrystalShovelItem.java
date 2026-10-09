@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.item.tool;
 
+import cn.sh1rocu.astralsorcery.api.extension.INoRepairItem;
 import hellfirepvp.astralsorcery.common.component.DynamicModifiersComponent;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
@@ -15,7 +16,6 @@ import hellfirepvp.astralsorcery.common.lib.PerksAS;
 import hellfirepvp.astralsorcery.common.perk.modifier.DynamicAttributeModifier;
 import hellfirepvp.astralsorcery.common.perk.type.base.ModifierType;
 import hellfirepvp.astralsorcery.common.util.BlockFinder;
-import hellfirepvp.astralsorcery.common.util.BlockUtil;
 import hellfirepvp.astralsorcery.common.util.FlagExecutor;
 import hellfirepvp.astralsorcery.common.visual.type.BlockBreakEffect;
 import net.minecraft.core.BlockPos;
@@ -36,7 +36,7 @@ import java.util.UUID;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class IridescentCrystalShovelItem extends CrystalShovelItem {
+public class IridescentCrystalShovelItem extends CrystalShovelItem implements INoRepairItem {
 
     private static final UUID MODIFIER_ID = UUID.fromString("21bfcfb8-3ed9-4543-8cc3-bf4da4277267");
     private static final DynamicAttributeModifier MINING_SIZE_MODIFIER =
@@ -44,7 +44,7 @@ public class IridescentCrystalShovelItem extends CrystalShovelItem {
 
     public IridescentCrystalShovelItem() {
         super(ItemsAS.CRYSTAL_TOOL_TIER, new Properties()
-                .setNoRepair()
+                // .setNoRepair() impl via mixin
                 .component(DataComponentsAS.DYNAMIC_MODIFIERS, new DynamicModifiersComponent(List.of(MINING_SIZE_MODIFIER)))
                 .attributes(shovelAttributes()));
     }

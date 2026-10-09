@@ -24,6 +24,7 @@ import hellfirepvp.astralsorcery.common.constellation.level.ConstellationHandler
 import hellfirepvp.astralsorcery.common.constellation.level.LevelSkyHandler;
 import hellfirepvp.astralsorcery.common.constellation.star.StarConnection;
 import hellfirepvp.astralsorcery.common.constellation.star.StarLocation;
+import hellfirepvp.astralsorcery.common.event.RecipeEvent;
 import hellfirepvp.astralsorcery.common.lib.*;
 import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
 import hellfirepvp.astralsorcery.common.recipe.attunement.AttunementRecipe;
@@ -36,6 +37,8 @@ import hellfirepvp.astralsorcery.common.util.data.ObserverRegistryObject;
 import hellfirepvp.astralsorcery.common.util.data.TileRegistryObject;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.level.DayTimeHelper;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -47,9 +50,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -106,7 +106,7 @@ public class TileAttunementAltar extends TileEntityTick<TileAttunementAltar.Data
             this.searchActiveRecipe();
         } else {
             this.getTileData().getActiveRecipe().ifPresent(active -> {
-                active.tick(LogicalSide.SERVER, this);
+                active.tick(EnvType.SERVER, this);
                 if (!active.matches(this)) {
                     this.getTileData().setActiveRecipe(null);
                     this.getTileData().markForUpdate();
@@ -123,6 +123,10 @@ public class TileAttunementAltar extends TileEntityTick<TileAttunementAltar.Data
         for (AttunementRecipe<?> recipe : AttunementRecipe.getAllRecipes()) {
             if (recipe.canStartCrafting(this)) {
                 AttunementRecipe.Active<?, ?> active = recipe.createActiveRecipe(this);
+                var start = new RecipeEvent.Attunement.Start(recipe, active);
+                RecipeEvent.Attunement.Start.EVENT.invoker().post(start);
+                if (start.isCanceled()) return;
+
                 this.getTileData().setActiveRecipe(active);
                 this.getTileData().markForUpdate();
                 return;
@@ -134,6 +138,8 @@ public class TileAttunementAltar extends TileEntityTick<TileAttunementAltar.Data
         this.getTileData().getActiveRecipe().ifPresent(active -> {
             active.finishRecipe(this);
             active.stopCrafting(this);
+            RecipeEvent.Attunement.End.EVENT.invoker().post(new RecipeEvent.Attunement.End(active.getRecipe(), active));
+
             this.getTileData().setActiveRecipe(null);
             this.getTileData().markForUpdate();
         });
@@ -151,11 +157,11 @@ public class TileAttunementAltar extends TileEntityTick<TileAttunementAltar.Data
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void clientTick(Level level) {
         super.clientTick(level);
         this.getTileData().getActiveRecipe().ifPresent(active -> {
-            active.tick(LogicalSide.CLIENT, this);
+            active.tick(EnvType.CLIENT, this);
         });
 
         if (!this.hasStructure() || !this.doesSeeSky()) {
@@ -207,7 +213,7 @@ public class TileAttunementAltar extends TileEntityTick<TileAttunementAltar.Data
         }).orElse(false);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void spawnStructureEffects() {
         if (rand.nextBoolean()) return;
 
@@ -224,7 +230,7 @@ public class TileAttunementAltar extends TileEntityTick<TileAttunementAltar.Data
                 .setScale(0.3F + rand.nextFloat() * 0.1F);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void spawnActiveConstellationEffects(Level level) {
         BaseConstellation cst = this.getTileData().getActiveConstellation().orElse(null);
         if (cst == null) {
@@ -288,7 +294,7 @@ public class TileAttunementAltar extends TileEntityTick<TileAttunementAltar.Data
                 .setMotion(Vector3.random(rand).addY(3).normalize().multiply(0.03 + rand.nextFloat() * 0.015));
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void spawnActiveConstellationLightBeamEffects(Level level) {
         AttunementConstellationFinder finder = new AttunementConstellationFinder(level, this.getBlockPos());
         FXColorFunction<?> beamColor;
@@ -297,14 +303,14 @@ public class TileAttunementAltar extends TileEntityTick<TileAttunementAltar.Data
                     .<FXColorFunction<?>>map(cst -> FXColorFunction.constant(cst.getConstellationColor()))
                     .orElse(FXColorFunction.constant(ColorsAS.ATTUNEMENT_ALTAR_BEAM));
         } else {
-             beamColor = FXColorFunction.constant(ColorsAS.ATTUNEMENT_ALTAR_BEAM);
+            beamColor = FXColorFunction.constant(ColorsAS.ATTUNEMENT_ALTAR_BEAM);
         }
         float beamSize = 0.8F;
 
         this.getTileData().getActiveConstellation().ifPresent(cst -> {
             finder.getConstellationConnectionPositions(cst).forEach(conn -> {
                 Vector3 from = Vector3.atCenter(conn.getA());
-                Vector3 to   = Vector3.atCenter(conn.getB());
+                Vector3 to = Vector3.atCenter(conn.getB());
 
                 if (this.getTileData().getTicksExisted() % 50 == 0) {
                     EffectHelper.of(EffectTemplatesAS.LIGHT_BEAM)
@@ -335,9 +341,9 @@ public class TileAttunementAltar extends TileEntityTick<TileAttunementAltar.Data
         });
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void spawnConstellationPaperHighlightEffects(Level level) {
-        LevelSkyHandler.getContext(level, LogicalSide.CLIENT).ifPresent(ctx -> {
+        LevelSkyHandler.getContext(level, EnvType.CLIENT).ifPresent(ctx -> {
             Player player = Minecraft.getInstance().player;
             if (player == null || player.distanceToSqr(Vec3.atCenterOf(this.getBlockPos())) >= 256) {
                 return;
@@ -346,7 +352,7 @@ public class TileAttunementAltar extends TileEntityTick<TileAttunementAltar.Data
             MiscUtil.getMainOrOffHand(player, stack -> stack.has(DataComponentsAS.CONSTELLATION_PAPER)).ifPresent(tpl -> {
                 ItemStack held = tpl.getB();
                 held.get(DataComponentsAS.CONSTELLATION_PAPER).getConstellation().ifPresent(cst -> {
-                    PlayerProgress progress = ResearchManager.getProgress(player, LogicalSide.CLIENT);
+                    PlayerProgress progress = ResearchManager.getProgress(player, EnvType.CLIENT);
                     if (progress.hasDiscoveredConstellation(cst)) {
                         float night = DayTimeHelper.getCurrentDaytimeDistribution(level);
                         if (night >= 0.1F) {
@@ -362,7 +368,7 @@ public class TileAttunementAltar extends TileEntityTick<TileAttunementAltar.Data
         });
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void spawnConstellationHighlightEffects(BaseConstellation cst, BlockPos pos, float alpha) {
         Vector3 at = Vector3.atBottomCenter(pos);
         Vector3 offset = Vector3.random(rand).multiply(0.5F).setY(0);
@@ -389,7 +395,7 @@ public class TileAttunementAltar extends TileEntityTick<TileAttunementAltar.Data
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void tickPlaySoundIdle() {
         if (SoundUtil.getSoundVolume(SoundSource.BLOCKS) <= 0) {
             this.idleSoundLoop.set(null);
@@ -447,7 +453,7 @@ public class TileAttunementAltar extends TileEntityTick<TileAttunementAltar.Data
 
     public static class Data extends TileEntityTick.Data {
 
-        public static final Codec<Data> CODEC = RecordCodecBuilder.create(inst -> attunementFields(inst).apply(inst , Data::new));
+        public static final Codec<Data> CODEC = RecordCodecBuilder.create(inst -> attunementFields(inst).apply(inst, Data::new));
 
         protected static <T extends TileAttunementAltar.Data> Products.P5<RecordCodecBuilder.Mu<T>, Long, Boolean, Map<BlockPos, Boolean>, Optional<AttunementRecipe.Active<?, ?>>, Optional<BaseConstellation>> attunementFields(RecordCodecBuilder.Instance<T> inst) {
             return tickFields(inst).and(inst.group(

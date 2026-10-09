@@ -51,18 +51,18 @@ public class RenderPageLumenCrystallization extends RenderPageRecipe<LumenCrysta
 
             ItemStack cluster = lumen.getHolder()
                     .map(lumenRef -> LumenCrystalClusterBlockItem.getCluster(lumenRef, 4))
-                    .orElse(ItemsAS.BLOCK_LUMEN_CRYSTAL_CLUSTER.toStack());
+                    .orElse(ItemsAS.BLOCK_LUMEN_CRYSTAL_CLUSTER.getDefaultInstance());
 
             int midX = x + TomePage.DEFAULT_WIDTH / 2;
             int resultY = y + 18 + 60 / 2;
             this.renderOutput(guiGraphics, midX - 8, resultY - 8, 16, 16, cluster);
 
             this.renderInput(guiGraphics, midX - 8, y + yOffset, recipe.getInput());
-            this.renderScaledItem(guiGraphics, midX - 8, y + yOffset + 16, ItemsAS.BLOCK_LUMEN_CRYSTALLIZER.toStack(), 1.5F);
+            this.renderScaledItem(guiGraphics, midX - 8, y + yOffset + 16, ItemsAS.BLOCK_LUMEN_CRYSTALLIZER.getDefaultInstance(), 1.5F);
 
             int lumenOffsetY = y + yOffset + 60;
             this.renderLumen(midX, lumenOffsetY, lumen);
-            this.renderScaledItem(guiGraphics, midX - 8, lumenOffsetY + 16 - 8, ItemsAS.BLOCK_LUMEN_ARRAY.toStack(), 1.5F);
+            this.renderScaledItem(guiGraphics, midX - 8, lumenOffsetY + 16 - 8, ItemsAS.BLOCK_LUMEN_ARRAY.getDefaultInstance(), 1.5F);
 
             StaticIdentifierTicket.Container container = this.getEffectContainer();
             if (container.canAddEffects()) {

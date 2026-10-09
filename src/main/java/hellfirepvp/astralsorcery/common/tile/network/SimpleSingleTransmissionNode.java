@@ -43,7 +43,7 @@ public class SimpleSingleTransmissionNode extends SimpleTransmissionNode {
 
     @Override
     public TransmissionNodeProvider<?> getProvider() {
-        return StarlightNetworkNodesAS.SIMPLE_SINGLE_NODE.value();
+        return StarlightNetworkNodesAS.SIMPLE_SINGLE_NODE;
     }
 
     @Override

@@ -13,14 +13,13 @@ import hellfirepvp.astralsorcery.common.perk.tree.AbstractPerk;
 import hellfirepvp.astralsorcery.common.util.EntityUtil;
 import hellfirepvp.astralsorcery.common.util.data.SidedReference;
 import hellfirepvp.astralsorcery.common.util.tick.TimeoutListContainer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
 
 import java.util.UUID;
-import java.util.function.Consumer;
 
 import static hellfirepvp.astralsorcery.common.util.SidedHelper.getSide;
 
@@ -35,21 +34,25 @@ public class PerkCooldownHelper {
 
     private static final SidedReference<TimeoutListContainer<UUID, ResourceLocation>> perkCooldowns = new SidedReference<>() {
         {
-            setData(LogicalSide.CLIENT, new TimeoutListContainer<>(new PerkTimeoutHandler(LogicalSide.CLIENT)));
-            setData(LogicalSide.SERVER, new TimeoutListContainer<>(new PerkTimeoutHandler(LogicalSide.SERVER)));
+            setData(EnvType.CLIENT, new TimeoutListContainer<>(new PerkTimeoutHandler(EnvType.CLIENT)));
+            setData(EnvType.SERVER, new TimeoutListContainer<>(new PerkTimeoutHandler(EnvType.SERVER)));
         }
     };
 
-    public static void attachEventListeners(IEventBus bus) {
-        perkCooldowns.getData(LogicalSide.CLIENT).ifPresent(ct -> bus.addListener(ct::onClientTick));
-        perkCooldowns.getData(LogicalSide.SERVER).ifPresent(st -> bus.addListener(st::onServerTick));
+    public static void attachEventListeners() {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            perkCooldowns.getData(EnvType.CLIENT).ifPresent(ct ->
+                    net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(client -> ct.onClientTick()));
+        }
+        perkCooldowns.getData(EnvType.SERVER).ifPresent(st ->
+                ServerTickEvents.END_SERVER_TICK.register(st::onServerTick));
     }
 
-    public static void clearCache(LogicalSide side) {
+    public static void clearCache(EnvType side) {
         perkCooldowns.getData(side).ifPresent(TimeoutListContainer::clear);
     }
 
-    public static void removeAllCooldowns(Player player, LogicalSide side) {
+    public static void removeAllCooldowns(Player player, EnvType side) {
         UUID playerUUID = player.getUUID();
         perkCooldowns.getData(side).ifPresent(ct -> {
             if (ct.hasList(playerUUID)) {
@@ -58,7 +61,7 @@ public class PerkCooldownHelper {
         });
     }
 
-    public static void removePerkCooldowns(LogicalSide side, AbstractPerk<?> perk) {
+    public static void removePerkCooldowns(EnvType side, AbstractPerk<?> perk) {
         perkCooldowns.getData(side).ifPresent(ct -> {
             ct.removeAnyListEntry(key -> key.equals(perk.getKey()));
         });
@@ -108,9 +111,9 @@ public class PerkCooldownHelper {
 
     public static class PerkTimeoutHandler implements TimeoutListContainer.ContainerTimeoutDelegate<UUID, ResourceLocation> {
 
-        private final LogicalSide side;
+        private final EnvType side;
 
-        public PerkTimeoutHandler(LogicalSide side) {
+        public PerkTimeoutHandler(EnvType side) {
             this.side = side;
         }
 

@@ -9,18 +9,17 @@
 package hellfirepvp.astralsorcery.common.perk.source.provider.lumen;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
-import hellfirepvp.astralsorcery.common.component.IdentifierComponent;
 import hellfirepvp.astralsorcery.common.lib.PerksAS;
 import hellfirepvp.astralsorcery.common.perk.source.ModifierSourceProvider;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
 
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -40,16 +39,16 @@ public class LumenBindingSourceProvider extends ModifierSourceProvider<LumenBind
         }
     };
 
-    public static void attachEventListeners(IEventBus bus) {
-        bus.addListener(LumenBindingSourceProvider::onEquipmentChange);
+    public static void attachEventListeners() {
+        ServerEntityEvents.EQUIPMENT_CHANGE.register(LumenBindingSourceProvider::onEquipmentChange);
     }
 
-    private static void onEquipmentChange(LivingEquipmentChangeEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer sPlayer)) return;
-        if (event.getEntity().level().isClientSide()) return;
-        LumenBindingSourceProvider provider = PerksAS.Sources.LUMEN_BINDING.get();
+    private static void onEquipmentChange(LivingEntity livingEntity, EquipmentSlot equipmentSlot, ItemStack previousStack, ItemStack currentStack) {
+        if (!(livingEntity instanceof ServerPlayer sPlayer)) return;
+        if (livingEntity.level().isClientSide()) return;
+        LumenBindingSourceProvider provider = PerksAS.Sources.LUMEN_BINDING;
 
-        provider.updateSource(sPlayer, event.getSlot(), event.getTo());
+        provider.updateSource(sPlayer, equipmentSlot, currentStack);
     }
 
     @Override
@@ -65,7 +64,7 @@ public class LumenBindingSourceProvider extends ModifierSourceProvider<LumenBind
         ItemStack newStack = stack.copy();
         LumenBindingSource slotSource = new LumenBindingSource(slot, newStack);
         if (!newStack.isEmpty()) {
-            slotSource.snapshotModifiers(player, LogicalSide.SERVER, false);
+            slotSource.snapshotModifiers(player, EnvType.SERVER, false);
 
             this.updateSource(player, SLOT_IDS.get(slot), slotSource);
         } else {

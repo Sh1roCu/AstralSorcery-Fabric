@@ -33,6 +33,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
@@ -69,7 +70,7 @@ public abstract class ScreenContainerAltar<T extends ContainerAltar> extends Scr
                 float flickerSpeed = 0.04F + rand.nextFloat() * 0.04F;
                 float brightness = 0.3F + EffectUtil.flicker(flickerSpeed, partialTick) * 0.4F;
 
-                RenderQuadUtil.rect(buf, guiGraphics.pose(), this.getGuiLeft() + xx, this.getGuiTop() + yy, 5, 5)
+                RenderQuadUtil.rect(buf, guiGraphics.pose(), this.leftPos + xx, this.topPos + yy, 5, 5)
                         .color(brightness, brightness, brightness, brightness)
                         .draw();
             }
@@ -83,7 +84,7 @@ public abstract class ScreenContainerAltar<T extends ContainerAltar> extends Scr
                         if (!ResearchManager.getClientProgress().hasDiscoveredConstellation(cst)) return;
 
                         RenderConstellationUtil.drawConstellationUI(cst.getConstellationColor(), cst, guiGraphics.pose(),
-                                this.getGuiLeft() + x + 2, this.getGuiTop() + y + 2, 58, 58, 2F,
+                                this.leftPos + x + 2, this.topPos + y + 2, 58, 58, 2F,
                                 () -> 0.4F + 0.6F * EffectUtil.flicker(0.03F + rand.nextFloat() * 0.03F, partialTick),
                                 true, false);
                     });
@@ -94,10 +95,11 @@ public abstract class ScreenContainerAltar<T extends ContainerAltar> extends Scr
 
     protected void renderAltarOutput(GuiGraphics guiGraphics, int x, int y, float partialTick) {
         Level level = Minecraft.getInstance().level;
-        if (level == null) return;
+        Player player = Minecraft.getInstance().player;
+        if (level == null || player == null) return;
         long tick = ClientProxy.getClientTick();
-        AltarCraftingInput input = this.getMenu().getTile().createInput(level, null);
-        this.getMenu().getTile().findMatchingRecipe(level)
+        AltarCraftingInput input = this.getMenu().getTile().createInput(level, player.getUUID());
+        this.getMenu().getTile().findMatchingRecipe(level, player.getUUID())
                 .map(RecipeHolder::value)
                 .map(recipe -> recipe.getOutputsForDisplay(input, level.registryAccess()))
                 .filter(outputs -> !outputs.isEmpty())
@@ -117,7 +119,7 @@ public abstract class ScreenContainerAltar<T extends ContainerAltar> extends Scr
         ColorWrapper result = ColorUtil.blendColors(c1, c2, colorPhase);
         result = result.copyWithAlpha(0x99);
 
-        RenderScreenUtil.renderTranslucentItem(guiGraphics, output, this.getGuiLeft() + x, this.getGuiTop() + y,
+        RenderScreenUtil.renderTranslucentItem(guiGraphics, output, this.leftPos + x, this.topPos + y,
                 partialTick, result, 2F);
     }
 }

@@ -24,6 +24,8 @@ import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import java.util.function.Supplier;
+
 /**
  * This class is part of the Astral Sorcery Mod
  * The complete source code for this mod can be found on GitHub.
@@ -37,10 +39,10 @@ public class LumenFilamentBlock extends BaseTickTileBlock<TileLumenFilament> {
     private static final VoxelShape SHAPE = Block.box(2, 0, 2, 14, 4, 14);
 
     public LumenFilamentBlock(Properties properties) {
-        this(properties, TileEntitiesAS.LUMEN_FILAMENT);
+        this(properties, () -> TileEntitiesAS.LUMEN_FILAMENT);
     }
 
-    protected LumenFilamentBlock(Properties properties, TileRegistryObject<TileLumenFilament> tileType) {
+    protected LumenFilamentBlock(Properties properties, Supplier<TileRegistryObject<TileLumenFilament>> tileType) {
         super(properties, tileType);
     }
 

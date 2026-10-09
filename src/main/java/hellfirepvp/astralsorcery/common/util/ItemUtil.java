@@ -8,6 +8,9 @@
 
 package hellfirepvp.astralsorcery.common.util;
 
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -20,7 +23,6 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -32,16 +34,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -68,32 +63,43 @@ public class ItemUtil {
         return changes.value();
     }
 
-    public static NonNullList<ItemStack> listContents(IItemHandler handler) {
-        NonNullList<ItemStack> stacks = NonNullList.withSize(handler.getSlots(), ItemStack.EMPTY);
-        for (int i = 0; i < handler.getSlots(); i++) {
-            stacks.set(i, handler.getStackInSlot(i));
+    public static NonNullList<ItemStack> listContents(Storage<ItemVariant> handler) {
+        NonNullList<ItemStack> stacks = NonNullList.create();
+        for (var view : handler) {
+            var resource = view.getResource();
+            stacks.add(resource.isBlank() ? ItemStack.EMPTY : resource.toStack((int) view.getAmount()));
         }
         return stacks;
     }
 
     public static Map<Integer, ItemStack> findItemsInInventory(Player player, Predicate<ItemStack> match) {
-        IItemHandler inv = player.getCapability(Capabilities.ItemHandler.ENTITY);
+        var inv = PlayerInventoryStorage.of(player);
         if (inv == null) return Map.of();
         return findItemsInInventory(inv, match);
     }
 
-    public static Map<Integer, ItemStack> findItemsInInventory(IItemHandler inv, ItemStack match, boolean strict) {
+    public static Map<Integer, ItemStack> findItemsInInventory(Storage<ItemVariant> inv, ItemStack match, boolean strict) {
         Predicate<ItemStack> matchPredicate = strict
                 ? stack -> ItemStack.isSameItem(stack, match)
                 : stack -> ItemStack.isSameItemSameComponents(stack, match);
         return findItemsInInventory(inv, matchPredicate);
     }
 
-    public static Map<Integer, ItemStack> findItemsInInventory(IItemHandler inv, Predicate<ItemStack> match) {
-        return IntStream.range(0, inv.getSlots())
-                .mapToObj(slot -> new Tuple<>(slot, inv.getStackInSlot(slot)))
-                .filter(stack -> match.test(stack.getB()))
-                .collect(Collectors.toMap(Tuple::getA, Tuple::getB));
+    public static Map<Integer, ItemStack> findItemsInInventory(Storage<ItemVariant> inv, Predicate<ItemStack> match) {
+        Map<Integer, ItemStack> map = new HashMap<>();
+        int slot = 0;
+        for (var view : inv) {
+            ItemStack stack = ItemStack.EMPTY;
+            var resource = view.getResource();
+            if (!resource.isBlank()) {
+                stack = resource.toStack((int) view.getAmount());
+            }
+            if (match.test(stack)) {
+                map.put(slot, stack);
+            }
+            slot++;
+        }
+        return map;
     }
 
     public static Optional<ItemEntity> dropItemNaturally(Level level, BlockPos pos, ItemStack stack) {

@@ -8,15 +8,13 @@
 
 package hellfirepvp.astralsorcery.common.loot.global;
 
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.perk.tree.perk.key.KeyPerkTeleportDrops;
-import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.ItemUtil;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.SidedHelper;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.fabricmc.api.EnvType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -24,11 +22,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
-import net.neoforged.neoforge.common.loot.LootModifier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -37,31 +31,18 @@ import net.neoforged.neoforge.common.loot.LootModifier;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class TeleportDropsFunction extends LootModifier {
+public class TeleportDropsFunction {
 
-    public static final MapCodec<TeleportDropsFunction> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            IGlobalLootModifier.LOOT_CONDITIONS_CODEC.fieldOf("conditions").forGetter(glm -> glm.conditions)
-    ).apply(instance, TeleportDropsFunction::new));
-
-    protected TeleportDropsFunction(LootItemCondition[] conditionsIn) {
-        super(conditionsIn);
-    }
-
-    public static TeleportDropsFunction of(LootItemCondition... conditions) {
-        return new TeleportDropsFunction(conditions);
-    }
-
-    @Override
-    public ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
+    public static ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
         Player player = MiscUtil.firstNonNull(
-                () -> this.getLootingPlayer(context, LootContextParams.LAST_DAMAGE_PLAYER),
-                () -> this.getLootingPlayer(context, LootContextParams.ATTACKING_ENTITY),
-                () -> this.getLootingPlayer(context, LootContextParams.DIRECT_ATTACKING_ENTITY),
-                () -> this.getLootingPlayer(context, LootContextParams.THIS_ENTITY)
+                () -> getLootingPlayer(context, LootContextParams.LAST_DAMAGE_PLAYER),
+                () -> getLootingPlayer(context, LootContextParams.ATTACKING_ENTITY),
+                () -> getLootingPlayer(context, LootContextParams.DIRECT_ATTACKING_ENTITY),
+                () -> getLootingPlayer(context, LootContextParams.THIS_ENTITY)
         ).orElse(null);
 
         if (player != null) {
-            LogicalSide side = SidedHelper.getSide(player);
+            EnvType side = SidedHelper.getSide(player);
             if (ResearchManager.getProgress(player, side).getPerkData().hasPerkEffect(perk -> perk instanceof KeyPerkTeleportDrops)) {
                 Level level = player.level();
                 Vec3 pos = player.position();
@@ -77,16 +58,11 @@ public class TeleportDropsFunction extends LootModifier {
         return generatedLoot;
     }
 
-    private Player getLootingPlayer(LootContext ctx, LootContextParam<? extends Entity> param) {
+    private static Player getLootingPlayer(LootContext ctx, LootContextParam<? extends Entity> param) {
         if (ctx.hasParam(param)) {
             Entity e = ctx.getParam(param);
             if (e instanceof Player player) return player;
         }
         return null;
-    }
-
-    @Override
-    public MapCodec<? extends IGlobalLootModifier> codec() {
-        return CODEC;
     }
 }

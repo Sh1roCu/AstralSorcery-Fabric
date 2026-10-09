@@ -17,16 +17,14 @@ import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.lib.types.LumenBindingEffectTypesAS;
 import hellfirepvp.astralsorcery.common.lumen.Lumen;
 import hellfirepvp.astralsorcery.common.lumen.binding.LumenBinding;
-import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.SidedHelper;
+import net.fabricmc.api.EnvType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.registries.DeferredHolder;
 import org.apache.commons.lang3.stream.Streams;
 
 import java.util.ArrayList;
@@ -55,11 +53,11 @@ public abstract class LumenBindingEffect {
         }
     };
 
-    public List<Component> getDisplayText(LogicalSide side, ItemStack stack) {
+    public List<Component> getDisplayText(EnvType side, ItemStack stack) {
         return List.of();
     }
 
-    protected float getEffectMultiplier(ItemStack stack, LogicalSide side) {
+    protected float getEffectMultiplier(ItemStack stack, EnvType side) {
         StoredLumenComponent storedLumenCmp = stack.getOrDefault(DataComponentsAS.STORED_LUMEN, StoredLumenComponent.EMPTY);
         return 1F + storedLumenCmp.getBinding(side, LumenAS.PRISMATIC)
                 .flatMap(type -> type.getBinding(stack))
@@ -105,7 +103,7 @@ public abstract class LumenBindingEffect {
     private static <R> List<R> forEachEffectTypes(LivingEntity entity, ItemStack stack, BiFunction<Lumen, LumenBinding, List<R>> consumeFn) {
         StoredLumenComponent storedLumenCmp = stack.getOrDefault(DataComponentsAS.STORED_LUMEN, StoredLumenComponent.EMPTY);
         if (storedLumenCmp.isEmpty()) return List.of();
-        LogicalSide side = SidedHelper.getSide(entity);
+        EnvType side = SidedHelper.getSide(entity);
 
         List<R> results = new ArrayList<>();
         for (Lumen bound : storedLumenCmp.getActiveBindings()) {
@@ -120,11 +118,13 @@ public abstract class LumenBindingEffect {
     public abstract DeferredType<?> getType();
 
     public Type<?> unwrapType() {
-        return this.getType().holder().get();
+        return this.getType().type();
     }
 
-    public record Type<T extends LumenBindingEffect>(MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {}
+    public record Type<T extends LumenBindingEffect>(MapCodec<T> codec,
+                                                     StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
+    }
 
-    public record DeferredType<T extends LumenBindingEffect>(
-            DeferredHolder<LumenBindingEffect.Type<?>, LumenBindingEffect.Type<T>> holder) {}
+    public record DeferredType<T extends LumenBindingEffect>(LumenBindingEffect.Type<T> type) {
+    }
 }

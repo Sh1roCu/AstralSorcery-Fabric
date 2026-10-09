@@ -8,39 +8,29 @@
 
 package hellfirepvp.astralsorcery.common.container;
 
-import com.google.common.collect.Iterables;
-import hellfirepvp.astralsorcery.common.component.AttunedConstellationComponent;
+import cn.sh1rocu.astralsorcery.util.transfer.SlotItemHandler;
 import hellfirepvp.astralsorcery.common.container.base.ContainerTileEntity;
 import hellfirepvp.astralsorcery.common.container.base.PlayerInventorySlots;
-import hellfirepvp.astralsorcery.common.container.provider.ContainerAltarProvider;
 import hellfirepvp.astralsorcery.common.container.slot.CustomItemSlot;
 import hellfirepvp.astralsorcery.common.container.slot.TileDisplaySlot;
 import hellfirepvp.astralsorcery.common.container.transfer.DefaultQuickMoveTransfer;
-import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
-import hellfirepvp.astralsorcery.common.lib.constants.TagsAS;
 import hellfirepvp.astralsorcery.common.tile.TileAltar;
 import hellfirepvp.astralsorcery.common.tile.TileFocusRelay;
-import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.data.IntPoint;
 import hellfirepvp.astralsorcery.common.util.data.MenuTypeRegistryObject;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.SlotItemHandler;
 
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -59,7 +49,7 @@ public abstract class ContainerAltar extends ContainerTileEntity<TileAltar> impl
 
     protected void addAltarGridSlots() {
         IntPoint offset = this.getAltarGridOffset();
-        IItemHandler inv = this.getTile().getTileData().getAltarInventory();
+        var inv = this.getTile().getTileData().getAltarInventory();
         for (int yy = 0; yy < 3; yy++) {
             for (int xx = 0; xx < 3; xx++) {
                 int index = xx + yy * 3;
@@ -161,42 +151,28 @@ public abstract class ContainerAltar extends ContainerTileEntity<TileAltar> impl
         return this;
     }
 
-    public void writeClientData(RegistryFriendlyByteBuf buf) {}
-
     public static class Type {
 
-        private final MenuTypeRegistryObject<? extends ContainerAltar> menuType;
+        private final Supplier<MenuTypeRegistryObject<? extends ContainerAltar>> menuType;
         private final Provider containerProvider;
-        private final ClientProvider clientContainerProvider;
 
-        public Type(MenuTypeRegistryObject<? extends ContainerAltar> menuType, Provider containerProvider, ClientProvider clientContainerProvider) {
+        public Type(Supplier<MenuTypeRegistryObject<? extends ContainerAltar>> menuType, Provider containerProvider) {
             this.menuType = menuType;
             this.containerProvider = containerProvider;
-            this.clientContainerProvider = clientContainerProvider;
         }
 
         public MenuTypeRegistryObject<? extends ContainerAltar> getMenuType() {
-            return this.menuType;
+            return this.menuType.get();
         }
 
         public ContainerAltar provideServerContainer(int containerId, Inventory playerInv, TileAltar tile) {
-            return this.containerProvider.createContainer(this.menuType.type(), tile, playerInv, containerId);
-        }
-
-        public ContainerAltar provideClientContainer(TileAltar tile, Inventory playerInv, int containerId, RegistryFriendlyByteBuf byteBuf) {
-            return this.clientContainerProvider.createContainer(this.menuType.type(), tile, playerInv, containerId, byteBuf);
+            return this.containerProvider.createContainer(this.menuType.get().type(), tile, playerInv, containerId);
         }
     }
 
     public interface Provider {
 
         ContainerAltar createContainer(MenuType<? extends ContainerAltar> menuType, TileAltar tile, Inventory playerInv, int containerId);
-
-    }
-
-    public interface ClientProvider {
-
-        ContainerAltar createContainer(MenuType<? extends ContainerAltar> menuType, TileAltar tile, Inventory playerInv, int containerId, RegistryFriendlyByteBuf byteBuf);
 
     }
 }

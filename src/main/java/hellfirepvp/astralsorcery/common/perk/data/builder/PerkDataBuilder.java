@@ -44,7 +44,7 @@ public class PerkDataBuilder<T extends AbstractPerk<?>> {
     }
 
     public static <T extends AbstractPerk<?>> PerkBuilder<T> builder(PerkTypeRegistryObject<T> type) {
-        return builder(() -> type.type().value());
+        return builder(type::type);
     }
 
     public static <T extends AbstractPerk<?>> PerkBuilder<T> builder(Supplier<PerkType<T>> type) {

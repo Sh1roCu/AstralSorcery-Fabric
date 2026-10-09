@@ -22,7 +22,7 @@ import hellfirepvp.astralsorcery.common.component.AstrolabeAngleComponent;
 import hellfirepvp.astralsorcery.common.constellation.BaseConstellation;
 import hellfirepvp.astralsorcery.common.constellation.level.LevelSkyContext;
 import hellfirepvp.astralsorcery.common.constellation.level.LevelSkyHandler;
-import hellfirepvp.astralsorcery.common.visual.type.FocalPointCombineSparkle;
+import hellfirepvp.astralsorcery.common.event.RecipeEvent;
 import hellfirepvp.astralsorcery.common.item.AstrolabeItem;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
@@ -40,6 +40,10 @@ import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.ColumnPos;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.level.DayTimeHelper;
+import hellfirepvp.astralsorcery.common.visual.type.FocalPointCombineSparkle;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -53,18 +57,14 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.BushBlock;
-import net.minecraft.world.level.block.SaplingBlock;
-import net.minecraft.world.level.block.VineBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.common.util.TriState;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiFunction;
 
 /**
@@ -164,7 +164,7 @@ public class BasicFocalPointNode extends FocalPointNode {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void tickEffects(ClientLevel level) {
         super.tickEffects(level);
         if (DayTimeHelper.isDay(level)) return;
@@ -234,7 +234,7 @@ public class BasicFocalPointNode extends FocalPointNode {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void playEffectBeams(Vector3 offset, boolean hasDiscovered, int randomOffset, FXAlphaFunction<?> alphaFn, FXScaleFunction<?> scaleFn, boolean display) {
         Vector3 up = VectorUtil.withRandomOffset(offset, rand, 0.4F).addY(75 + rand.nextInt(20) + randomOffset);
         float size = 5 + rand.nextFloat() * 3F;
@@ -264,6 +264,10 @@ public class BasicFocalPointNode extends FocalPointNode {
         if (this.activeCombineRecipe == null && sLevel.getGameTime() % 100 == 0) {
             int range = BiasedSuppliers.getLowest(2, () -> rand.nextInt(3) + 1).get();
             ActiveFocalCombineRecipe.tryFindAtOpenSky(sLevel, this.getConstellation(), this.getPos(), range).ifPresent(recipe -> {
+                var start = new RecipeEvent.FocalCombine.Start(recipe);
+                RecipeEvent.FocalCombine.Start.EVENT.invoker().post(start);
+                if (start.isCanceled()) return;
+
                 this.activeCombineRecipe = recipe;
             });
         }
@@ -278,6 +282,7 @@ public class BasicFocalPointNode extends FocalPointNode {
                 FocalPointCombineSparkle.at(new Vector3(usedInput.getCenter()), this.activeCombineRecipe.getRecipe().getColor()).sendToNearby(sLevel);
                 if (this.activeCombineRecipe.isFinished()) {
                     this.activeCombineRecipe.finish(usedInput, sLevel);
+                    RecipeEvent.FocalCombine.End.EVENT.invoker().post(new RecipeEvent.FocalCombine.End(this.activeCombineRecipe));
                     this.activeCombineRecipe = null;
                 }
             });
@@ -306,6 +311,6 @@ public class BasicFocalPointNode extends FocalPointNode {
 
     @Override
     public Type<?> getType() {
-        return FocalNodeTypesAS.BASIC.get();
+        return FocalNodeTypesAS.BASIC;
     }
 }

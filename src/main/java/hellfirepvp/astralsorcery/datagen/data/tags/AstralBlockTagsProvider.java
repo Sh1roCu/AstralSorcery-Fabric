@@ -8,17 +8,14 @@
 
 package hellfirepvp.astralsorcery.datagen.data.tags;
 
-import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.constants.TagsAS;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.common.Tags;
-import net.neoforged.neoforge.common.data.BlockTagsProvider;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -29,235 +26,242 @@ import java.util.concurrent.CompletableFuture;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class AstralBlockTagsProvider extends BlockTagsProvider {
+public class AstralBlockTagsProvider extends FabricTagProvider.BlockTagProvider {
 
-    public AstralBlockTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, @Nullable ExistingFileHelper existingFileHelper) {
-        super(output, lookupProvider, AstralSorcery.MODID, existingFileHelper);
+    private static AstralBlockTagsProvider INSTANCE;
+
+    public AstralBlockTagsProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
+        super(output, registriesFuture);
+        INSTANCE = this;
+    }
+
+    public static AstralBlockTagsProvider getInstance() {
+        return INSTANCE;
     }
 
     @Override
     protected void addTags(HolderLookup.Provider provider) {
         this.addMiningTags();
 
-        this.tag(TagsAS.Blocks.MARBLE)
+        this.getOrCreateTagBuilder(TagsAS.Blocks.MARBLE)
                 .add(
-                        BlocksAS.MARBLE_ARCH.get(),
-                        BlocksAS.MARBLE_BRICKS.get(),
-                        BlocksAS.MARBLE_CHISELED.get(),
-                        BlocksAS.MARBLE_ENGRAVED.get(),
-                        BlocksAS.MARBLE_PILLAR.get(),
-                        BlocksAS.MARBLE_RAW.get(),
-                        BlocksAS.MARBLE_RUNED.get()
+                        BlocksAS.MARBLE_ARCH,
+                        BlocksAS.MARBLE_BRICKS,
+                        BlocksAS.MARBLE_CHISELED,
+                        BlocksAS.MARBLE_ENGRAVED,
+                        BlocksAS.MARBLE_PILLAR,
+                        BlocksAS.MARBLE_RAW,
+                        BlocksAS.MARBLE_RUNED
                 );
-        this.tag(Tags.Blocks.ORES)
+        this.getOrCreateTagBuilder(ConventionalBlockTags.ORES)
                 .add(
-                        BlocksAS.ROCK_CRYSTAL_ORE.get(),
-                        BlocksAS.AQUAMARINE_SHALE.get(),
-                        BlocksAS.STARMETAL_ORE.get()
+                        BlocksAS.ROCK_CRYSTAL_ORE,
+                        BlocksAS.AQUAMARINE_SHALE,
+                        BlocksAS.STARMETAL_ORE
                 );
-        this.tag(TagsAS.Blocks.SOOTY_MARBLE)
+        this.getOrCreateTagBuilder(TagsAS.Blocks.SOOTY_MARBLE)
                 .add(
-                        BlocksAS.SOOTY_MARBLE_ARCH.get(),
-                        BlocksAS.SOOTY_MARBLE_BRICKS.get(),
-                        BlocksAS.SOOTY_MARBLE_CHISELED.get(),
-                        BlocksAS.SOOTY_MARBLE_ENGRAVED.get(),
-                        BlocksAS.SOOTY_MARBLE_PILLAR.get(),
-                        BlocksAS.SOOTY_MARBLE_RAW.get(),
-                        BlocksAS.SOOTY_MARBLE_RUNED.get()
+                        BlocksAS.SOOTY_MARBLE_ARCH,
+                        BlocksAS.SOOTY_MARBLE_BRICKS,
+                        BlocksAS.SOOTY_MARBLE_CHISELED,
+                        BlocksAS.SOOTY_MARBLE_ENGRAVED,
+                        BlocksAS.SOOTY_MARBLE_PILLAR,
+                        BlocksAS.SOOTY_MARBLE_RAW,
+                        BlocksAS.SOOTY_MARBLE_RUNED
                 );
-        this.tag(TagsAS.Blocks.INFUSED_WOOD)
+        this.getOrCreateTagBuilder(TagsAS.Blocks.INFUSED_WOOD)
                 .add(
-                        BlocksAS.INFUSED_WOOD_RAW.get(),
-                        BlocksAS.INFUSED_WOOD_ARCH.get(),
-                        BlocksAS.INFUSED_WOOD_COLUMN.get(),
-                        BlocksAS.INFUSED_WOOD_ENGRAVED.get(),
-                        BlocksAS.INFUSED_WOOD_ENRICHED.get(),
-                        BlocksAS.INFUSED_WOOD_INFUSED.get(),
-                        BlocksAS.INFUSED_WOOD_PLANKS.get()
-                );
-
-        this.tag(BlockTags.SMALL_FLOWERS)
-                .add(
-                        BlocksAS.GLIMMER_AMARANTH.get(),
-                        BlocksAS.HYACINTH.get(),
-                        BlocksAS.IRIS.get(),
-                        BlocksAS.ORCHID.get(),
-                        BlocksAS.PROTEA.get(),
-                        BlocksAS.THISTLE.get()
-                );
-        this.tag(BlockTags.FLOWER_POTS)
-                .add(
-                        BlocksAS.POTTED_GLIMMER_AMARANTH.get(),
-                        BlocksAS.POTTED_HYACINTH.get(),
-                        BlocksAS.POTTED_IRIS.get(),
-                        BlocksAS.POTTED_ORCHID.get(),
-                        BlocksAS.POTTED_PROTEA.get(),
-                        BlocksAS.POTTED_THISTLE.get()
+                        BlocksAS.INFUSED_WOOD_RAW,
+                        BlocksAS.INFUSED_WOOD_ARCH,
+                        BlocksAS.INFUSED_WOOD_COLUMN,
+                        BlocksAS.INFUSED_WOOD_ENGRAVED,
+                        BlocksAS.INFUSED_WOOD_ENRICHED,
+                        BlocksAS.INFUSED_WOOD_INFUSED,
+                        BlocksAS.INFUSED_WOOD_PLANKS
                 );
 
-        this.tag(TagsAS.Blocks.VALID_TREE_BEACON_BLOCK)
-                .addTag(BlockTags.LEAVES)
-                .addTag(BlockTags.LOGS)
+        this.getOrCreateTagBuilder(BlockTags.SMALL_FLOWERS)
+                .add(
+                        BlocksAS.GLIMMER_AMARANTH,
+                        BlocksAS.HYACINTH,
+                        BlocksAS.IRIS,
+                        BlocksAS.ORCHID,
+                        BlocksAS.PROTEA,
+                        BlocksAS.THISTLE
+                );
+        this.getOrCreateTagBuilder(BlockTags.FLOWER_POTS)
+                .add(
+                        BlocksAS.POTTED_GLIMMER_AMARANTH,
+                        BlocksAS.POTTED_HYACINTH,
+                        BlocksAS.POTTED_IRIS,
+                        BlocksAS.POTTED_ORCHID,
+                        BlocksAS.POTTED_PROTEA,
+                        BlocksAS.POTTED_THISTLE
+                );
+
+        this.getOrCreateTagBuilder(TagsAS.Blocks.VALID_TREE_BEACON_BLOCK)
+                .forceAddTag(BlockTags.LEAVES)
+                .forceAddTag(BlockTags.LOGS)
                 .add(
                         Blocks.VINE,
                         Blocks.MANGROVE_ROOTS,
                         Blocks.MUDDY_MANGROVE_ROOTS
                 );
 
-        this.tag(Tags.Blocks.RELOCATION_NOT_SUPPORTED)
+        this.getOrCreateTagBuilder(ConventionalBlockTags.RELOCATION_NOT_SUPPORTED)
                 .add(
-                        BlocksAS.LUMEN_ARRAY.get(),
-                        BlocksAS.LUMEN_ALCHEMY_ARRAY.get(),
-                        BlocksAS.LUMEN_FILAMENT.get(),
-                        BlocksAS.LUMEN_CRYSTALLIZER.get(),
-                        BlocksAS.LENS.get(),
-                        BlocksAS.PRISM.get(),
-                        BlocksAS.STARLIGHT_FOCUS_ROCK_CRYSTAL.get(),
-                        BlocksAS.STARLIGHT_FOCUS_CELESTIAL_CRYSTAL.get(),
-                        BlocksAS.STELLAR_FILAMENT.get(),
-                        BlocksAS.INFUSER.get(),
-                        BlocksAS.ATTUNEMENT_ALTAR.get(),
-                        BlocksAS.TREE_BEACON.get(),
-                        BlocksAS.CELESTIAL_GATEWAY.get(),
-                        BlocksAS.ALTAR_ILLUMINATION.get(),
-                        BlocksAS.ALTAR_RESONANCE.get(),
-                        BlocksAS.ALTAR_LUMINANCE.get(),
-                        BlocksAS.ALTAR_RADIANCE.get()
+                        BlocksAS.LUMEN_ARRAY,
+                        BlocksAS.LUMEN_ALCHEMY_ARRAY,
+                        BlocksAS.LUMEN_FILAMENT,
+                        BlocksAS.LUMEN_CRYSTALLIZER,
+                        BlocksAS.LENS,
+                        BlocksAS.PRISM,
+                        BlocksAS.STARLIGHT_FOCUS_ROCK_CRYSTAL,
+                        BlocksAS.STARLIGHT_FOCUS_CELESTIAL_CRYSTAL,
+                        BlocksAS.STELLAR_FILAMENT,
+                        BlocksAS.INFUSER,
+                        BlocksAS.ATTUNEMENT_ALTAR,
+                        BlocksAS.TREE_BEACON,
+                        BlocksAS.CELESTIAL_GATEWAY,
+                        BlocksAS.ALTAR_ILLUMINATION,
+                        BlocksAS.ALTAR_RESONANCE,
+                        BlocksAS.ALTAR_LUMINANCE,
+                        BlocksAS.ALTAR_RADIANCE
                 );
-        this.tag(TagsAS.Blocks.SIMULATED_NON_MOVEABLE)
+        this.getOrCreateTagBuilder(TagsAS.Blocks.SIMULATED_NON_MOVEABLE)
                 .add(
-                        BlocksAS.LUMEN_ARRAY.get(),
-                        BlocksAS.LUMEN_ALCHEMY_ARRAY.get(),
-                        BlocksAS.LUMEN_FILAMENT.get(),
-                        BlocksAS.LUMEN_CRYSTALLIZER.get(),
-                        BlocksAS.LENS.get(),
-                        BlocksAS.PRISM.get(),
-                        BlocksAS.STARLIGHT_FOCUS_ROCK_CRYSTAL.get(),
-                        BlocksAS.STARLIGHT_FOCUS_CELESTIAL_CRYSTAL.get(),
-                        BlocksAS.STELLAR_FILAMENT.get(),
-                        BlocksAS.INFUSER.get(),
-                        BlocksAS.ATTUNEMENT_ALTAR.get(),
-                        BlocksAS.TREE_BEACON.get(),
-                        BlocksAS.CELESTIAL_GATEWAY.get(),
-                        BlocksAS.ALTAR_ILLUMINATION.get(),
-                        BlocksAS.ALTAR_RESONANCE.get(),
-                        BlocksAS.ALTAR_LUMINANCE.get(),
-                        BlocksAS.ALTAR_RADIANCE.get()
+                        BlocksAS.LUMEN_ARRAY,
+                        BlocksAS.LUMEN_ALCHEMY_ARRAY,
+                        BlocksAS.LUMEN_FILAMENT,
+                        BlocksAS.LUMEN_CRYSTALLIZER,
+                        BlocksAS.LENS,
+                        BlocksAS.PRISM,
+                        BlocksAS.STARLIGHT_FOCUS_ROCK_CRYSTAL,
+                        BlocksAS.STARLIGHT_FOCUS_CELESTIAL_CRYSTAL,
+                        BlocksAS.STELLAR_FILAMENT,
+                        BlocksAS.INFUSER,
+                        BlocksAS.ATTUNEMENT_ALTAR,
+                        BlocksAS.TREE_BEACON,
+                        BlocksAS.CELESTIAL_GATEWAY,
+                        BlocksAS.ALTAR_ILLUMINATION,
+                        BlocksAS.ALTAR_RESONANCE,
+                        BlocksAS.ALTAR_LUMINANCE,
+                        BlocksAS.ALTAR_RADIANCE
                 );
     }
 
     private void addMiningTags() {
-        this.tag(BlockTags.MINEABLE_WITH_PICKAXE)
+        this.getOrCreateTagBuilder(BlockTags.MINEABLE_WITH_PICKAXE)
                 .add(
-                        BlocksAS.MARBLE_ARCH.get(),
-                        BlocksAS.MARBLE_BRICKS.get(),
-                        BlocksAS.MARBLE_CHISELED.get(),
-                        BlocksAS.MARBLE_ENGRAVED.get(),
-                        BlocksAS.MARBLE_PILLAR.get(),
-                        BlocksAS.MARBLE_RAW.get(),
-                        BlocksAS.MARBLE_RUNED.get(),
-                        BlocksAS.MARBLE_SLAB.get(),
-                        BlocksAS.MARBLE_STAIRS.get(),
-                        BlocksAS.SOOTY_MARBLE_ARCH.get(),
-                        BlocksAS.SOOTY_MARBLE_BRICKS.get(),
-                        BlocksAS.SOOTY_MARBLE_CHISELED.get(),
-                        BlocksAS.SOOTY_MARBLE_ENGRAVED.get(),
-                        BlocksAS.SOOTY_MARBLE_PILLAR.get(),
-                        BlocksAS.SOOTY_MARBLE_RAW.get(),
-                        BlocksAS.SOOTY_MARBLE_RUNED.get(),
-                        BlocksAS.SOOTY_MARBLE_SLAB.get(),
-                        BlocksAS.SOOTY_MARBLE_STAIRS.get(),
+                        BlocksAS.MARBLE_ARCH,
+                        BlocksAS.MARBLE_BRICKS,
+                        BlocksAS.MARBLE_CHISELED,
+                        BlocksAS.MARBLE_ENGRAVED,
+                        BlocksAS.MARBLE_PILLAR,
+                        BlocksAS.MARBLE_RAW,
+                        BlocksAS.MARBLE_RUNED,
+                        BlocksAS.MARBLE_SLAB,
+                        BlocksAS.MARBLE_STAIRS,
+                        BlocksAS.SOOTY_MARBLE_ARCH,
+                        BlocksAS.SOOTY_MARBLE_BRICKS,
+                        BlocksAS.SOOTY_MARBLE_CHISELED,
+                        BlocksAS.SOOTY_MARBLE_ENGRAVED,
+                        BlocksAS.SOOTY_MARBLE_PILLAR,
+                        BlocksAS.SOOTY_MARBLE_RAW,
+                        BlocksAS.SOOTY_MARBLE_RUNED,
+                        BlocksAS.SOOTY_MARBLE_SLAB,
+                        BlocksAS.SOOTY_MARBLE_STAIRS,
 
-                        BlocksAS.ROCK_CRYSTAL_ORE.get(),
-                        BlocksAS.STARMETAL_ORE.get(),
-                        BlocksAS.RAW_STARMETAL_BLOCK.get(),
+                        BlocksAS.ROCK_CRYSTAL_ORE,
+                        BlocksAS.STARMETAL_ORE,
+                        BlocksAS.RAW_STARMETAL_BLOCK,
 
-                        BlocksAS.ALTAR_ILLUMINATION.get(),
-                        BlocksAS.ALTAR_RESONANCE.get(),
-                        BlocksAS.ALTAR_LUMINANCE.get(),
-                        BlocksAS.ALTAR_RADIANCE.get(),
-                        BlocksAS.FOCUS_RELAY.get(),
-                        BlocksAS.CELESTIAL_CRYSTAL_CLUSTER.get(),
-                        BlocksAS.GEM_CRYSTAL_CLUSTER.get(),
-                        BlocksAS.LUMEN_CRYSTAL_CLUSTER.get(),
-                        BlocksAS.LUMEN_ARRAY.get(),
-                        BlocksAS.LUMEN_ALCHEMY_ARRAY.get(),
-                        BlocksAS.LUMEN_CRYSTALLIZER.get(),
-                        BlocksAS.LIGHTWELL.get(),
-                        BlocksAS.INFUSER.get(),
-                        BlocksAS.CHALICE.get(),
-                        BlocksAS.ATTUNEMENT_ALTAR.get(),
-                        BlocksAS.STELLAR_FILAMENT.get(),
-                        BlocksAS.CELESTIAL_GATEWAY.get(),
-                        BlocksAS.CAVE_ILLUMINATOR.get()
+                        BlocksAS.ALTAR_ILLUMINATION,
+                        BlocksAS.ALTAR_RESONANCE,
+                        BlocksAS.ALTAR_LUMINANCE,
+                        BlocksAS.ALTAR_RADIANCE,
+                        BlocksAS.FOCUS_RELAY,
+                        BlocksAS.CELESTIAL_CRYSTAL_CLUSTER,
+                        BlocksAS.GEM_CRYSTAL_CLUSTER,
+                        BlocksAS.LUMEN_CRYSTAL_CLUSTER,
+                        BlocksAS.LUMEN_ARRAY,
+                        BlocksAS.LUMEN_ALCHEMY_ARRAY,
+                        BlocksAS.LUMEN_CRYSTALLIZER,
+                        BlocksAS.LIGHTWELL,
+                        BlocksAS.INFUSER,
+                        BlocksAS.CHALICE,
+                        BlocksAS.ATTUNEMENT_ALTAR,
+                        BlocksAS.STELLAR_FILAMENT,
+                        BlocksAS.CELESTIAL_GATEWAY,
+                        BlocksAS.CAVE_ILLUMINATOR
                 );
-        this.tag(BlockTags.MINEABLE_WITH_AXE)
+        this.getOrCreateTagBuilder(BlockTags.MINEABLE_WITH_AXE)
                 .add(
-                        BlocksAS.INFUSED_WOOD_RAW.get(),
-                        BlocksAS.INFUSED_WOOD_ARCH.get(),
-                        BlocksAS.INFUSED_WOOD_COLUMN.get(),
-                        BlocksAS.INFUSED_WOOD_ENGRAVED.get(),
-                        BlocksAS.INFUSED_WOOD_ENRICHED.get(),
-                        BlocksAS.INFUSED_WOOD_INFUSED.get(),
-                        BlocksAS.INFUSED_WOOD_PLANKS.get(),
-                        BlocksAS.INFUSED_WOOD_SLAB.get(),
-                        BlocksAS.INFUSED_WOOD_STAIRS.get(),
+                        BlocksAS.INFUSED_WOOD_RAW,
+                        BlocksAS.INFUSED_WOOD_ARCH,
+                        BlocksAS.INFUSED_WOOD_COLUMN,
+                        BlocksAS.INFUSED_WOOD_ENGRAVED,
+                        BlocksAS.INFUSED_WOOD_ENRICHED,
+                        BlocksAS.INFUSED_WOOD_INFUSED,
+                        BlocksAS.INFUSED_WOOD_PLANKS,
+                        BlocksAS.INFUSED_WOOD_SLAB,
+                        BlocksAS.INFUSED_WOOD_STAIRS,
 
-                        BlocksAS.TREE_BEACON.get()
+                        BlocksAS.TREE_BEACON
                 );
-        this.tag(BlockTags.MINEABLE_WITH_SHOVEL)
+        this.getOrCreateTagBuilder(BlockTags.MINEABLE_WITH_SHOVEL)
                 .add(
-                        BlocksAS.AQUAMARINE_SHALE.get()
+                        BlocksAS.AQUAMARINE_SHALE
                 );
 
-        this.tag(BlockTags.NEEDS_STONE_TOOL)
+        this.getOrCreateTagBuilder(BlockTags.NEEDS_STONE_TOOL)
                 .add(
-                        BlocksAS.MARBLE_ARCH.get(),
-                        BlocksAS.MARBLE_BRICKS.get(),
-                        BlocksAS.MARBLE_CHISELED.get(),
-                        BlocksAS.MARBLE_ENGRAVED.get(),
-                        BlocksAS.MARBLE_PILLAR.get(),
-                        BlocksAS.MARBLE_RAW.get(),
-                        BlocksAS.MARBLE_RUNED.get(),
-                        BlocksAS.MARBLE_SLAB.get(),
-                        BlocksAS.MARBLE_STAIRS.get(),
-                        BlocksAS.SOOTY_MARBLE_ARCH.get(),
-                        BlocksAS.SOOTY_MARBLE_BRICKS.get(),
-                        BlocksAS.SOOTY_MARBLE_CHISELED.get(),
-                        BlocksAS.SOOTY_MARBLE_ENGRAVED.get(),
-                        BlocksAS.SOOTY_MARBLE_PILLAR.get(),
-                        BlocksAS.SOOTY_MARBLE_RAW.get(),
-                        BlocksAS.SOOTY_MARBLE_RUNED.get(),
-                        BlocksAS.SOOTY_MARBLE_SLAB.get(),
-                        BlocksAS.SOOTY_MARBLE_STAIRS.get(),
+                        BlocksAS.MARBLE_ARCH,
+                        BlocksAS.MARBLE_BRICKS,
+                        BlocksAS.MARBLE_CHISELED,
+                        BlocksAS.MARBLE_ENGRAVED,
+                        BlocksAS.MARBLE_PILLAR,
+                        BlocksAS.MARBLE_RAW,
+                        BlocksAS.MARBLE_RUNED,
+                        BlocksAS.MARBLE_SLAB,
+                        BlocksAS.MARBLE_STAIRS,
+                        BlocksAS.SOOTY_MARBLE_ARCH,
+                        BlocksAS.SOOTY_MARBLE_BRICKS,
+                        BlocksAS.SOOTY_MARBLE_CHISELED,
+                        BlocksAS.SOOTY_MARBLE_ENGRAVED,
+                        BlocksAS.SOOTY_MARBLE_PILLAR,
+                        BlocksAS.SOOTY_MARBLE_RAW,
+                        BlocksAS.SOOTY_MARBLE_RUNED,
+                        BlocksAS.SOOTY_MARBLE_SLAB,
+                        BlocksAS.SOOTY_MARBLE_STAIRS,
 
-                        BlocksAS.AQUAMARINE_SHALE.get(),
-                        BlocksAS.FOCUS_RELAY.get(),
-                        BlocksAS.STELLAR_FILAMENT.get(),
-                        BlocksAS.CAVE_ILLUMINATOR.get()
+                        BlocksAS.AQUAMARINE_SHALE,
+                        BlocksAS.FOCUS_RELAY,
+                        BlocksAS.STELLAR_FILAMENT,
+                        BlocksAS.CAVE_ILLUMINATOR
                 );
-        this.tag(BlockTags.NEEDS_IRON_TOOL)
+        this.getOrCreateTagBuilder(BlockTags.NEEDS_IRON_TOOL)
                 .add(
-                        BlocksAS.ROCK_CRYSTAL_ORE.get(),
-                        BlocksAS.STARMETAL_ORE.get(),
-                        BlocksAS.RAW_STARMETAL_BLOCK.get(),
+                        BlocksAS.ROCK_CRYSTAL_ORE,
+                        BlocksAS.STARMETAL_ORE,
+                        BlocksAS.RAW_STARMETAL_BLOCK,
 
-                        BlocksAS.CELESTIAL_CRYSTAL_CLUSTER.get(),
-                        BlocksAS.GEM_CRYSTAL_CLUSTER.get(),
-                        BlocksAS.LUMEN_CRYSTAL_CLUSTER.get(),
-                        BlocksAS.ALTAR_ILLUMINATION.get(),
-                        BlocksAS.ALTAR_RESONANCE.get(),
-                        BlocksAS.ALTAR_LUMINANCE.get(),
-                        BlocksAS.ALTAR_RADIANCE.get(),
-                        BlocksAS.LUMEN_ARRAY.get(),
-                        BlocksAS.LUMEN_ALCHEMY_ARRAY.get(),
-                        BlocksAS.LUMEN_CRYSTALLIZER.get(),
-                        BlocksAS.LIGHTWELL.get(),
-                        BlocksAS.INFUSER.get(),
-                        BlocksAS.CHALICE.get(),
-                        BlocksAS.ATTUNEMENT_ALTAR.get(),
-                        BlocksAS.TREE_BEACON.get(),
-                        BlocksAS.CELESTIAL_GATEWAY.get()
+                        BlocksAS.CELESTIAL_CRYSTAL_CLUSTER,
+                        BlocksAS.GEM_CRYSTAL_CLUSTER,
+                        BlocksAS.LUMEN_CRYSTAL_CLUSTER,
+                        BlocksAS.ALTAR_ILLUMINATION,
+                        BlocksAS.ALTAR_RESONANCE,
+                        BlocksAS.ALTAR_LUMINANCE,
+                        BlocksAS.ALTAR_RADIANCE,
+                        BlocksAS.LUMEN_ARRAY,
+                        BlocksAS.LUMEN_ALCHEMY_ARRAY,
+                        BlocksAS.LUMEN_CRYSTALLIZER,
+                        BlocksAS.LIGHTWELL,
+                        BlocksAS.INFUSER,
+                        BlocksAS.CHALICE,
+                        BlocksAS.ATTUNEMENT_ALTAR,
+                        BlocksAS.TREE_BEACON,
+                        BlocksAS.CELESTIAL_GATEWAY
                 );
     }
 }

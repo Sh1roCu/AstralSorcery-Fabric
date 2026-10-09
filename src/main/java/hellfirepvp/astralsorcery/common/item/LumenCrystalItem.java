@@ -37,19 +37,23 @@ public class LumenCrystalItem extends ItemCustom implements ItemDynamicColor {
 
     @Override
     public CreativeModeTab getCreativeTab() {
-        return CreativeTabsAS.CREATIVE_TAB_AS_LUMEN.get();
+        return CreativeTabsAS.CREATIVE_TAB_AS_LUMEN;
     }
 
     @Override
     public void fillCreativeTab(Consumer<ItemStack> tabItems) {
         RegistriesAS.REGISTRY_LUMEN.holders().forEach(lumenRef -> {
-            if (lumenRef.is(LumenAS.NONE)) return;
+            if (lumenRef.is(LumenAS.NONE.getKey())) return;
             tabItems.accept(getCrystal(lumenRef));
         });
     }
 
+    public static ItemStack getCrystal(LumenAS.DeferredLumen lumen) {
+        return getCrystal(lumen.holder());
+    }
+
     public static ItemStack getCrystal(Holder<Lumen> lumen) {
-        ItemStack stack = ItemsAS.LUMEN_CRYSTAL.toStack();
+        ItemStack stack = ItemsAS.LUMEN_CRYSTAL.getDefaultInstance();
         stack.set(DataComponentsAS.LUMEN, new LumenComponent(lumen));
         return stack;
     }

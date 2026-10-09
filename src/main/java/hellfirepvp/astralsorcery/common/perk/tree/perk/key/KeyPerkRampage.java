@@ -21,13 +21,14 @@ import hellfirepvp.astralsorcery.common.perk.tree.requirement.PerkRequirement;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.MobEffectUtil;
-import hellfirepvp.astralsorcery.common.util.event.SidedEventBus;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.minecraft.world.entity.LivingEntity;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -54,16 +55,16 @@ public class KeyPerkRampage extends KeyPerk {
     }
 
     @Override
-    protected void attachEventListeners(SidedEventBus sidedEventBus) {
-        super.attachEventListeners(sidedEventBus);
-        sidedEventBus.addListener(LivingDamageEvent.Post.class, SidedEventBus.entityEvent(), this::onPostHit);
+    protected void attachEventListeners() {
+        super.attachEventListeners();
+        ServerLivingEntityEvents.AFTER_DAMAGE.register(this::onPostHit);
     }
 
-    private void onPostHit(LivingDamageEvent.Post event) {
-        Entity source = event.getSource().getEntity();
+    private void onPostHit(LivingEntity entity, DamageSource damageSource, float baseDamageTaken, float damageTaken, boolean blocked) {
+        Entity source = damageSource.getEntity();
         if (!(source instanceof ServerPlayer sPlayer)) return;
-        LogicalSide side = this.getSide(sPlayer);
-        if (!side.isServer()) return;
+        EnvType side = this.getSide(sPlayer);
+        if (side != EnvType.SERVER) return;
         PlayerProgress progress = ResearchManager.getProgress(sPlayer, side);
         if (!progress.getPerkData().hasPerkEffect(this)) return;
 

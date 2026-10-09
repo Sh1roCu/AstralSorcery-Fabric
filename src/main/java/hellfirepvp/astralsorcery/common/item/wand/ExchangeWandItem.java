@@ -38,8 +38,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.neoforged.neoforge.common.util.BlockSnapshot;
-import net.neoforged.neoforge.event.EventHooks;
 
 import java.util.List;
 import java.util.Map;
@@ -94,7 +92,8 @@ public class ExchangeWandItem extends ItemCustom {
         BlockPos pos = context.getClickedPos();
 
         if (player == null || level.isClientSide()) return InteractionResult.SUCCESS;
-        if (!(level instanceof ServerLevel sLevel) || !(player instanceof ServerPlayer sPlayer)) return InteractionResult.SUCCESS;
+        if (!(level instanceof ServerLevel sLevel) || !(player instanceof ServerPlayer sPlayer))
+            return InteractionResult.SUCCESS;
 
         if (player.isShiftKeyDown()) {
             WandBlockStorageHelper.tryStoreBlock(stack, level, pos, player);
@@ -167,7 +166,7 @@ public class ExchangeWandItem extends ItemCustom {
 
             if (!player.gameMode.destroyBlock(exchangePos)) continue;
 
-            if (EventHooks.onBlockPlace(player, BlockSnapshot.create(level.dimension(), level, exchangePos), Direction.UP)) continue;
+            // if (EventHooks.onBlockPlace(player, BlockSnapshot.create(level.dimension(), level, exchangePos), Direction.UP)) continue;
 
             level.setBlockAndUpdate(exchangePos, replacementState);
             exchanged++;

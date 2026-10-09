@@ -37,7 +37,7 @@ public class AttunedRockCrystalItem extends RockCrystalItem {
 
     @Override
     public CreativeModeTab getCreativeTab() {
-        return CreativeTabsAS.CREATIVE_TAB_AS_ATTUNED_CRYSTALS.get();
+        return CreativeTabsAS.CREATIVE_TAB_AS_ATTUNED_CRYSTALS;
     }
 
     @Override
@@ -52,6 +52,6 @@ public class AttunedRockCrystalItem extends RockCrystalItem {
     @Nonnull
     @Override
     public RockCrystalItem getCrystalSplitItem() {
-        return ItemsAS.ROCK_CRYSTAL.get();
+        return ItemsAS.ROCK_CRYSTAL;
     }
 }

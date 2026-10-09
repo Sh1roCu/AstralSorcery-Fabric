@@ -13,16 +13,13 @@ import hellfirepvp.astralsorcery.client.effect.EffectTemplate;
 import hellfirepvp.astralsorcery.client.effect.EntityFX;
 import hellfirepvp.astralsorcery.client.effect.EntityVisualFX;
 import hellfirepvp.astralsorcery.client.effect.function.FXPositionFunction;
-import hellfirepvp.astralsorcery.client.lib.SpritesAS;
 import hellfirepvp.astralsorcery.client.resource.SpriteSheet;
 import hellfirepvp.astralsorcery.client.resource.UVFrame;
 import hellfirepvp.astralsorcery.client.util.RenderVectorUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.client.Camera;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
-import org.checkerframework.checker.units.qual.A;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -112,7 +109,7 @@ public class VFXLightBeam extends EntityVisualFX {
 
         UVFrame uv = this.lightBeamSprite.getUV(this.getAge());
 
-        this.renderLightBeamRay(vb, relativeFromPos, relativeToPos, beamDirection, beamNormal, Math.toRadians(  0F), scale, color, uv);
+        this.renderLightBeamRay(vb, relativeFromPos, relativeToPos, beamDirection, beamNormal, Math.toRadians(0F), scale, color, uv);
         this.renderLightBeamRay(vb, relativeFromPos, relativeToPos, beamDirection, beamNormal, Math.toRadians(120F), scale, color, uv);
         this.renderLightBeamRay(vb, relativeFromPos, relativeToPos, beamDirection, beamNormal, Math.toRadians(240F), scale, color, uv);
     }

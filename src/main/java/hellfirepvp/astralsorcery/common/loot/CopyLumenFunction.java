@@ -66,6 +66,6 @@ public class CopyLumenFunction extends LootItemConditionalFunction {
 
     @Override
     public LootItemFunctionType<? extends LootItemConditionalFunction> getType() {
-        return LootAS.COPY_LUMEN_FUNCTION.get();
+        return LootAS.COPY_LUMEN_FUNCTION;
     }
 }

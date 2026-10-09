@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.component;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.common.util.AttributeTooltipContext;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.constellation.BaseConstellation;
@@ -23,7 +24,6 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.util.AttributeTooltipContext;
 
 import javax.annotation.Nullable;
 import java.util.Objects;

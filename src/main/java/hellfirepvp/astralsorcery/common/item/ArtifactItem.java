@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.item;
 
+import cn.sh1rocu.astralsorcery.api.extension.ICustomEntityItem;
 import hellfirepvp.astralsorcery.EnumExtensions;
 import hellfirepvp.astralsorcery.common.artifact.ArtifactType;
 import hellfirepvp.astralsorcery.common.component.ArtifactComponent;
@@ -15,16 +16,17 @@ import hellfirepvp.astralsorcery.common.component.ArtifactTypeComponent;
 import hellfirepvp.astralsorcery.common.entity.ItemEntityReplacement;
 import hellfirepvp.astralsorcery.common.item.base.ItemCustom;
 import hellfirepvp.astralsorcery.common.lib.*;
-import hellfirepvp.astralsorcery.common.research.*;
+import hellfirepvp.astralsorcery.common.research.ResearchFlag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -37,17 +39,17 @@ import java.util.function.Consumer;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class ArtifactItem extends ItemCustom {
+public class ArtifactItem extends ItemCustom implements ICustomEntityItem {
 
     public ArtifactItem() {
         super(new Properties()
-                .rarity(EnumExtensions.RARITY_RELIC.getValue())
+                .rarity(EnumExtensions.RARITY_RELIC)
                 .stacksTo(1));
     }
 
     @Override
     public CreativeModeTab getCreativeTab() {
-        return CreativeTabsAS.CREATIVE_TAB_AS_ARTIFACTS.get();
+        return CreativeTabsAS.CREATIVE_TAB_AS_ARTIFACTS;
     }
 
     @Override
@@ -74,13 +76,13 @@ public class ArtifactItem extends ItemCustom {
     }
 
     public static ItemStack create(ArtifactType type) {
-        ItemStack stack = ItemsAS.ARTIFACT.toStack();
+        ItemStack stack = ItemsAS.ARTIFACT.getDefaultInstance();
         stack.set(DataComponentsAS.ARTIFACT, ArtifactComponent.initialize(type));
         return stack;
     }
 
     public static ItemStack createForDisplay(ArtifactType type) {
-        ItemStack stack = ItemsAS.ARTIFACT.toStack();
+        ItemStack stack = ItemsAS.ARTIFACT.getDefaultInstance();
         stack.set(DataComponentsAS.ARTIFACT, ArtifactComponent.initializeBlank(type));
         return stack;
     }
@@ -88,7 +90,7 @@ public class ArtifactItem extends ItemCustom {
     public Optional<ItemStack> createShard(ItemStack stack) {
         if (stack.has(DataComponentsAS.ARTIFACT)) {
             ArtifactType type = stack.get(DataComponentsAS.ARTIFACT).artifactType();
-            ItemStack shard = ItemsAS.ARTIFACT_SHARD.toStack();
+            ItemStack shard = ItemsAS.ARTIFACT_SHARD.getDefaultInstance();
             shard.set(DataComponentsAS.ARTIFACT_TYPE, new ArtifactTypeComponent(type));
             return Optional.of(shard);
         }
@@ -105,7 +107,7 @@ public class ArtifactItem extends ItemCustom {
     }
 
     @Override
-    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+    public boolean allowComponentsUpdateAnimation(Player player, InteractionHand hand, ItemStack oldStack, ItemStack newStack) {
         return !oldStack.is(newStack.getItem());
     }
 
@@ -118,8 +120,8 @@ public class ArtifactItem extends ItemCustom {
     @Nullable
     public Entity createEntity(Level level, Entity location, ItemStack stack) {
         if (location instanceof ItemEntity itemEntity) {
-            return ItemEntityReplacement.replace(EntitiesAS.ITEM_ARTIFACT.get(), itemEntity);
+            return ItemEntityReplacement.replace(EntitiesAS.ITEM_ARTIFACT, itemEntity);
         }
-        return super.createEntity(level, location, stack);
+        return null;
     }
 }

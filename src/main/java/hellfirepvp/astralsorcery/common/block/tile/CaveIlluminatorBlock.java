@@ -55,7 +55,7 @@ public class CaveIlluminatorBlock extends BaseTickTileBlock<TileCaveIlluminator>
     private static final VoxelShape SHAPE = createShape();
 
     public CaveIlluminatorBlock(Properties properties) {
-        super(properties, TileEntitiesAS.CAVE_ILLUMINATOR);
+        super(properties, () -> TileEntitiesAS.CAVE_ILLUMINATOR);
     }
 
     private static VoxelShape createShape() {

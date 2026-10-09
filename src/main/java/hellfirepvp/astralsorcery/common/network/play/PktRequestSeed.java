@@ -10,6 +10,10 @@ package hellfirepvp.astralsorcery.common.network.play;
 
 import hellfirepvp.astralsorcery.common.network.PlayPacketHandler;
 import hellfirepvp.astralsorcery.common.util.level.LevelEffectSeedCache;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -17,7 +21,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -54,14 +57,15 @@ public class PktRequestSeed extends PlayPacketHandler.BiDirectional<PktRequestSe
         return CODEC;
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
-    public void handleClient(Request payload, IPayloadContext context) {
-        context.enqueueWork(() -> LevelEffectSeedCache.updateClientSeedCache(payload.dimKey(), payload.session(), payload.seed()));
+    public void handleClient(Request payload, ClientPlayNetworking.Context context) {
+        context.client().execute(() -> LevelEffectSeedCache.updateClientSeedCache(payload.dimKey(), payload.session(), payload.seed()));
     }
 
     @Override
-    public void handleServer(Request payload, IPayloadContext context) {
-        context.enqueueWork(() -> context.reply(payload.response(LevelEffectSeedCache.getServerWorldSeed(payload.dimKey()))));
+    public void handleServer(Request payload, ServerPlayNetworking.Context context) {
+        context.server().execute(() -> context.responseSender().sendPacket(payload.response(LevelEffectSeedCache.getServerWorldSeed(payload.dimKey()))));
     }
 
     public static record Request(ResourceKey<Level> dimKey, int session, long seed) implements CustomPacketPayload {

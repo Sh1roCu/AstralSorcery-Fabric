@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.perk.tree.perk.key;
 
+import cn.sh1rocu.astralsorcery.api.event.PlayerEvent;
+import cn.sh1rocu.astralsorcery.api.event.SimpleIncomingDamageCallback;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.config.ConfigEntry;
@@ -22,16 +24,14 @@ import hellfirepvp.astralsorcery.common.perk.tree.perk.KeyPerk;
 import hellfirepvp.astralsorcery.common.perk.tree.requirement.PerkRequirement;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
-import hellfirepvp.astralsorcery.common.util.event.SidedEventBus;
+import net.fabricmc.api.EnvType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -59,30 +59,34 @@ public class KeyPerkLastBreath extends KeyPerk {
     }
 
     @Override
-    protected void attachEventListeners(SidedEventBus sidedEventBus) {
-        super.attachEventListeners(sidedEventBus);
-        sidedEventBus.addListener(LivingIncomingDamageEvent.class, SidedEventBus.entityEvent(), this::onAttack);
-        sidedEventBus.addListener(PlayerEvent.BreakSpeed.class, SidedEventBus.entityEvent(), this::onBreakSpeed);
+    protected void attachEventListeners() {
+        super.attachEventListeners();
+        SimpleIncomingDamageCallback.MODIFY_DAMAGE.register(this::onAttack);
+        PlayerEvent.BreakSpeed.EVENT.register(this::onBreakSpeed);
     }
 
-    private void onAttack(LivingIncomingDamageEvent event) {
-        Entity source = event.getSource().getEntity();
-        if (!(source instanceof ServerPlayer sPlayer)) return;
-        LogicalSide side = this.getSide(sPlayer);
-        if (!side.isServer()) return;
+    private float onAttack(LivingEntity entity, DamageSource damageSource, float amount) {
+        Entity source = damageSource.getEntity();
+        if (!(source instanceof ServerPlayer sPlayer)) return amount;
+        EnvType side = this.getSide(sPlayer);
+        if (side != EnvType.SERVER) return amount;
         PlayerProgress progress = ResearchManager.getProgress(sPlayer, side);
-        if (!progress.getPerkData().hasPerkEffect(this)) return;
+        if (!progress.getPerkData().hasPerkEffect(this)) return amount;
+
+        float result = amount;
 
         float perc = PerkManager.getOrCreateAttributes(sPlayer)
                 .modifyValue(sPlayer, progress, PerksAS.AttributeTypes.PERK_EFFECT, CONFIG.damageMultiplier.get().floatValue());
         float healthPerc = 1F - (sPlayer.getHealth() / sPlayer.getMaxHealth());
-        event.setAmount(event.getAmount() * (1F + (healthPerc * perc)));
+        result = amount * (1F + (healthPerc * perc));
+
+        return result;
     }
 
     private void onBreakSpeed(PlayerEvent.BreakSpeed event) {
         Player player = event.getEntity();
-        LogicalSide side = this.getSide(player);
-        if (!side.isServer()) return;
+        EnvType side = this.getSide(player);
+        if (side != EnvType.SERVER) return;
         PlayerProgress progress = ResearchManager.getProgress(player, side);
         if (!progress.getPerkData().hasPerkEffect(this)) return;
 

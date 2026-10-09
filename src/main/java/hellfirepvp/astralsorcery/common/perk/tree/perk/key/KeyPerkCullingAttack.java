@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.perk.tree.perk.key;
 
+import cn.sh1rocu.astralsorcery.api.event.BaseEvent;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.config.ConfigEntry;
@@ -22,15 +23,14 @@ import hellfirepvp.astralsorcery.common.perk.tree.perk.KeyPerk;
 import hellfirepvp.astralsorcery.common.perk.tree.requirement.PerkRequirement;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
-import hellfirepvp.astralsorcery.common.util.event.SidedEventBus;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.fml.LogicalSide;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -58,19 +58,18 @@ public class KeyPerkCullingAttack extends KeyPerk {
     }
 
     @Override
-    protected void attachEventListeners(SidedEventBus sidedEventBus) {
-        super.attachEventListeners(sidedEventBus);
-        sidedEventBus.addListener(EventPriority.LOW, LivingIncomingDamageEvent.class, SidedEventBus.entityEvent(), this::onDamage);
+    protected void attachEventListeners() {
+        super.attachEventListeners();
+        ServerLivingEntityEvents.ALLOW_DAMAGE.register(BaseEvent.LOW, this::onDamage);
     }
 
-    private void onDamage(LivingIncomingDamageEvent event) {
-        Entity source = event.getSource().getEntity();
-        if (!(source instanceof ServerPlayer sPlayer)) return;
-        LogicalSide side = this.getSide(sPlayer);
-        if (!side.isServer()) return;
+    private boolean onDamage(LivingEntity target, DamageSource damageSource, float amount) {
+        Entity source = damageSource.getEntity();
+        if (!(source instanceof ServerPlayer sPlayer)) return true;
+        EnvType side = this.getSide(sPlayer);
+        if (side != EnvType.SERVER) return true;
         PlayerProgress progress = ResearchManager.getProgress(sPlayer, side);
-        if (!progress.getPerkData().hasPerkEffect(this)) return;
-        LivingEntity target = event.getEntity();
+        if (!progress.getPerkData().hasPerkEffect(this)) return true;
 
         float actualCullHealth = PerkManager.getOrCreateAttributes(sPlayer)
                 .modifyValue(sPlayer, progress, PerksAS.AttributeTypes.PERK_EFFECT, CONFIG.cullHealthPercentage.get().floatValue());
@@ -79,6 +78,7 @@ public class KeyPerkCullingAttack extends KeyPerk {
             target.setHealth(0);
             target.getEntityData().set(LivingEntity.DATA_HEALTH_ID, 0F);
         }
+        return true;
     }
 
     @Override

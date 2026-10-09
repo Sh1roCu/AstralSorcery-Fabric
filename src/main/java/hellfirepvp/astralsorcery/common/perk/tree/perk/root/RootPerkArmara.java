@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.perk.tree.perk.root;
 
+import cn.sh1rocu.astralsorcery.api.event.SimpleIncomingDamageCallback;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.constellation.BaseConstellation;
@@ -28,13 +29,13 @@ import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.DiminishingMultiplier;
-import hellfirepvp.astralsorcery.common.util.event.SidedEventBus;
+import net.fabricmc.api.EnvType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.CombatTracker;
-import net.neoforged.fml.LogicalSide;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -54,7 +55,7 @@ public class RootPerkArmara extends RootPerk<AbstractPerk.Data> {
     public static final Config CONFIG = new Config("root.armara");
 
     private RootPerkArmara(ResourceLocation key, float x, float y) {
-        this(key, defaultNameKey(key), x, y, PerkCategory.ROOT, Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), ConstellationsAS.ARMARA.get());
+        this(key, defaultNameKey(key), x, y, PerkCategory.ROOT, Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), ConstellationsAS.ARMARA);
     }
 
     protected RootPerkArmara(ResourceLocation key, String nameKey, float x, float y, PerkCategory category, Collection<PerkRequirement> requirements, Collection<PerkAttributeConverter> converters, Collection<PerkAttributeModifier> modifiers, BaseConstellation constellation) {
@@ -76,22 +77,22 @@ public class RootPerkArmara extends RootPerk<AbstractPerk.Data> {
     }
 
     @Override
-    protected void attachEventListeners(SidedEventBus sidedEventBus) {
-        super.attachEventListeners(sidedEventBus);
-        sidedEventBus.addListener(LivingIncomingDamageEvent.class, SidedEventBus.entityEvent(), this::onHurt);
+    protected void attachEventListeners() {
+        super.attachEventListeners();
+        SimpleIncomingDamageCallback.MODIFY_DAMAGE.register(this::onHurt);
     }
 
-    private void onHurt(LivingIncomingDamageEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer sPlayer)) return;
+    private float onHurt(LivingEntity entity, DamageSource damageSource, float amount) {
+        if (!(entity instanceof ServerPlayer sPlayer)) return amount;
 
-        LogicalSide side = this.getSide(sPlayer);
-        if (!side.isServer()) return;
+        EnvType side = this.getSide(sPlayer);
+        if (side != EnvType.SERVER) return amount;
         PlayerProgress progress = ResearchManager.getProgress(sPlayer, side);
-        if (!progress.getPerkData().hasPerkEffect(this)) return;
+        if (!progress.getPerkData().hasPerkEffect(this)) return amount;
         PerkAttributeMap perkMap = PerkManager.getOrCreateAttributes(sPlayer);
 
         float effectMultiplier = 5F;
-        if (event.getSource().getEntity() == null) {
+        if (damageSource.getEntity() == null) {
             effectMultiplier *= 0.25F;
         }
 
@@ -102,7 +103,7 @@ public class RootPerkArmara extends RootPerk<AbstractPerk.Data> {
             }
         }
 
-        float xp = Math.min(event.getAmount(), 8F);
+        float xp = Math.min(amount, 8F);
         xp *= effectMultiplier;
         xp *= this.getExpMultiplier();
         xp *= this.getDiminishingMultiplier(sPlayer);
@@ -112,6 +113,8 @@ public class RootPerkArmara extends RootPerk<AbstractPerk.Data> {
         xp = AttributeEvent.postProcessModded(sPlayer, PerksAS.AttributeTypes.PERK_EXPERIENCE, xp);
 
         ResearchHelper.addPerkExp(sPlayer, xp);
+
+        return amount;
     }
 
     @Override

@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.util.codec;
 
+import cn.sh1rocu.astralsorcery.api.mixin.IRegistry;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -20,7 +21,9 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.core.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
@@ -45,7 +48,8 @@ public class CodecUtil {
 
     private static final Gson GSON = new GsonBuilder().create();
 
-    private CodecUtil() {}
+    private CodecUtil() {
+    }
 
     public static <E extends Enum<E>> Codec<E> enumCodec(Class<E> enumClass) {
         return Codec.INT.xmap(ordinal -> MiscUtil.getEnumEntry(enumClass, ordinal), Enum::ordinal);
@@ -171,15 +175,16 @@ public class CodecUtil {
         return codec.optionalFieldOf(field).forGetter(dataObj -> Optional.ofNullable(getter.apply(dataObj)));
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T> Codec<T> registryOr(Registry<T> registry, Codec<T> nonRegistryCodec) {
         return Codec.either(registry.byNameCodec(), nonRegistryCodec)
                 .xmap(either -> either.left().orElse(either.right().orElseThrow()),
-                      value -> {
-                          if (registry.containsValue(value)) {
-                              return Either.left(value);
-                          }
-                          return Either.right(value);
-                      });
+                        value -> {
+                            if (((IRegistry) registry).as$containsValue(value)) {
+                                return Either.left(value);
+                            }
+                            return Either.right(value);
+                        });
     }
 
     public static <B, C, T1, T2, T3, T4, T5, T6, T7> StreamCodec<B, C> streamComposite(

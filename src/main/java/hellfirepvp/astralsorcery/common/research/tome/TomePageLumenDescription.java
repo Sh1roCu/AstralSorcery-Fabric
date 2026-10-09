@@ -18,12 +18,12 @@ import hellfirepvp.astralsorcery.common.lumen.Lumen;
 import hellfirepvp.astralsorcery.common.lumen.binding.LumenBindingType;
 import hellfirepvp.astralsorcery.common.research.ResearchNode;
 import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -49,13 +49,13 @@ public record TomePageLumenDescription(Lumen lumen, List<LumenBindingType.SlotTy
             TomePageLumenDescription::new);
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public RenderPage createPage(@Nullable ResearchNode node, int page) {
         return new RenderPageLumenDescription(node, page, this.lumen(), this.slots());
     }
 
     @Override
     public TomePageType<?> getType() {
-        return TomePageTypesAS.LUMEN_DESCRIPTION_PAGE.get();
+        return TomePageTypesAS.LUMEN_DESCRIPTION_PAGE;
     }
 }

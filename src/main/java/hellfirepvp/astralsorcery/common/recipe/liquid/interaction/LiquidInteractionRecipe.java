@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.recipe.liquid.interaction;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
+import cn.sh1rocu.astralsorcery.util.neoforge.fluids.crafing.SizedFluidIngredient;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -15,6 +17,10 @@ import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
 import hellfirepvp.astralsorcery.common.recipe.CustomRecipe;
 import hellfirepvp.astralsorcery.common.recipe.liquid.interaction.result.LiquidInteractionResult;
 import hellfirepvp.astralsorcery.common.util.data.ResolvingRecipeTypeRegistryObject;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -22,17 +28,12 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -118,7 +119,7 @@ public class LiquidInteractionRecipe extends CustomRecipe<LiquidInteractionRecip
         return required.ingredient().test(contained) && contained.getAmount() >= required.amount();
     }
 
-    public boolean consumeInputs(RandomSource random, IFluidHandler handlerA, IFluidHandler handlerB) {
+    public boolean consumeInputs(RandomSource random, Storage<FluidVariant> handlerA, Storage<FluidVariant> handlerB) {
         if (tryConsumeOriented(random, handlerA, handlerB, this.reactantA, this.reactantB, this.chanceConsumeA, this.chanceConsumeB)) {
             return true;
         }
@@ -126,7 +127,7 @@ public class LiquidInteractionRecipe extends CustomRecipe<LiquidInteractionRecip
     }
 
     private static boolean tryConsumeOriented(RandomSource random,
-                                              IFluidHandler handlerA, IFluidHandler handlerB,
+                                              Storage<FluidVariant> handlerA, Storage<FluidVariant> handlerB,
                                               SizedFluidIngredient requiredA, SizedFluidIngredient requiredB,
                                               float chanceA, float chanceB) {
         FluidStack matchA = findMatching(handlerA, requiredA);
@@ -138,22 +139,28 @@ public class LiquidInteractionRecipe extends CustomRecipe<LiquidInteractionRecip
             return false;
         }
         if (random.nextFloat() < chanceA) {
-            handlerA.drain(matchA.copyWithAmount(requiredA.amount()), IFluidHandler.FluidAction.EXECUTE);
+            try (Transaction tx = Transaction.openOuter()) {
+                StorageUtil.extractAny(handlerA, requiredA.amount(), tx);
+                tx.commit();
+            }
         }
         if (random.nextFloat() < chanceB) {
-            handlerB.drain(matchB.copyWithAmount(requiredB.amount()), IFluidHandler.FluidAction.EXECUTE);
+            try (Transaction tx = Transaction.openOuter()) {
+                StorageUtil.extractAny(handlerB, requiredB.amount(), tx);
+                tx.commit();
+            }
         }
         return true;
     }
 
-    private static FluidStack findMatching(IFluidHandler handler, SizedFluidIngredient required) {
-        for (int i = 0; i < handler.getTanks(); i++) {
-            FluidStack contained = handler.getFluidInTank(i);
+    private static FluidStack findMatching(Storage<FluidVariant> handler, SizedFluidIngredient required) {
+        for (var view : handler.nonEmptyViews()) {
+            FluidStack contained = new FluidStack(view.getResource(), view.getAmount());
             if (contained.isEmpty() || !required.ingredient().test(contained) || contained.getAmount() < required.amount()) {
                 continue;
             }
-            FluidStack drainable = handler.drain(contained.copyWithAmount(required.amount()), IFluidHandler.FluidAction.SIMULATE);
-            if (!drainable.isEmpty() && drainable.getAmount() >= required.amount()) {
+            long drainable = StorageUtil.simulateExtract(view, contained.getFluidVariant(), required.amount(), null);
+            if (drainable >= required.amount()) {
                 return contained;
             }
         }
@@ -175,14 +182,14 @@ public class LiquidInteractionRecipe extends CustomRecipe<LiquidInteractionRecip
     }
 
     @Override
-    public Supplier<? extends RecipeSerializer<LiquidInteractionRecipe>> getRecipeSerializer() {
+    public RecipeSerializer<LiquidInteractionRecipe> getRecipeSerializer() {
         return RecipeTypesAS.LIQUID_INTERACTION_SERIALIZER;
     }
 
     public static List<LiquidInteractionRecipe> findMatching(Level level, FluidStack fluidA, FluidStack fluidB) {
         List<LiquidInteractionRecipe> matches = new ArrayList<>();
         for (RecipeHolder<LiquidInteractionRecipe> holder :
-                level.getRecipeManager().getAllRecipesFor(RecipeTypesAS.LIQUID_INTERACTION_TYPE.get())) {
+                level.getRecipeManager().getAllRecipesFor(RecipeTypesAS.LIQUID_INTERACTION_TYPE.type())) {
             if (holder.value().matches(fluidA, fluidB)) {
                 matches.add(holder.value());
             }

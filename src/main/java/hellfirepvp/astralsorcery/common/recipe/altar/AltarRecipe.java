@@ -8,12 +8,12 @@
 
 package hellfirepvp.astralsorcery.common.recipe.altar;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
+import cn.sh1rocu.astralsorcery.util.neoforge.common.crafting.SizedIngredient;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.constellation.BaseConstellation;
-import hellfirepvp.astralsorcery.common.constellation.DebugConstellation;
-import hellfirepvp.astralsorcery.common.ingredient.IngredientBridge;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.lumen.LumenStack;
@@ -34,14 +34,10 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.crafting.SizedIngredient;
-import net.neoforged.neoforge.fluids.FluidStack;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -243,7 +239,7 @@ public class AltarRecipe extends CustomRecipe<AltarRecipe, AltarCraftingInput> {
     }
 
     @Override
-    public Supplier<? extends RecipeSerializer<AltarRecipe>> getRecipeSerializer() {
+    public RecipeSerializer<AltarRecipe> getRecipeSerializer() {
         return RecipeTypesAS.ALTAR_CRAFTING_SERIALIZER;
     }
 

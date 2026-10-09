@@ -13,9 +13,9 @@ import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.artifact.ArtifactEffect;
 import hellfirepvp.astralsorcery.common.artifact.effect.*;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
+import net.minecraft.core.Registry;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -26,8 +26,9 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  */
 public class ArtifactEffectTypesAS {
 
-    public static final DeferredRegister<ArtifactEffect.Type<?>> ARTIFACT_EFFECT_TYPES_REGISTER =
-            DeferredRegister.create(RegistriesAS.KEY_ARTIFACT_EFFECT_TYPES, AstralSorcery.MODID);
+    public static void init() {
+
+    }
 
     public static final ArtifactEffect.DeferredType<ArtifactEffectEffects> EFFECTS =
             register("effects", ArtifactEffectEffects.CODEC, ArtifactEffectEffects.STREAM_CODEC);
@@ -47,7 +48,8 @@ public class ArtifactEffectTypesAS {
     private static <T extends ArtifactEffect> ArtifactEffect.DeferredType<T> register(String name,
                                                                                       MapCodec<T> codec,
                                                                                       StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
-        return new ArtifactEffect.DeferredType<>(ARTIFACT_EFFECT_TYPES_REGISTER.register(name,
-                () -> new ArtifactEffect.Type<>(codec, streamCodec)));
+        var effect = Registry.register(RegistriesAS.REGISTRY_ARTIFACT_EFFECT_TYPES, AstralSorcery.key(name),
+                new ArtifactEffect.Type<>(codec, streamCodec));
+        return new ArtifactEffect.DeferredType<>(effect);
     }
 }

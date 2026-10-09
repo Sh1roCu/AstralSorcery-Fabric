@@ -13,15 +13,16 @@ import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
 import hellfirepvp.astralsorcery.common.lib.constants.TagsAS;
 import hellfirepvp.astralsorcery.common.recipe.RecipeChangeColor;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.data.PackOutput;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.*;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.common.Tags;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.Objects;
+
+import static net.minecraft.data.recipes.RecipeProvider.*;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -30,11 +31,7 @@ import java.util.concurrent.CompletableFuture;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class VanillaRecipeProvider extends RecipeProvider {
-
-    private VanillaRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-        super(output, registries);
-    }
+public class VanillaRecipeProvider {
 
     public static void registerCraftingRecipes(RecipeOutput recipeOutput) {
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ItemsAS.TOME)
@@ -49,8 +46,8 @@ public class VanillaRecipeProvider extends RecipeProvider {
                 .pattern("PAS")
                 .pattern("GGG")
                 .define('S', Items.SPYGLASS)
-                .define('P', Tags.Items.GLASS_PANES)
-                .define('G', Tags.Items.INGOTS_GOLD)
+                .define('P', ConventionalItemTags.GLASS_PANES)
+                .define('G', ConventionalItemTags.GOLD_INGOTS)
                 .define('A', TagsAS.Items.GEMS_AQUAMARINE)
                 .unlockedBy("has_spyglass", has(Items.SPYGLASS))
                 .save(recipeOutput);
@@ -74,8 +71,8 @@ public class VanillaRecipeProvider extends RecipeProvider {
                 .pattern("AGA")
                 .pattern(" A ")
                 .define('A', TagsAS.Items.GEMS_AQUAMARINE)
-                .define('G', Tags.Items.GLASS_PANES)
-                .unlockedBy("has_glass", has(Tags.Items.GLASS_PANES))
+                .define('G', ConventionalItemTags.GLASS_PANES)
+                .unlockedBy("has_glass", has(ConventionalItemTags.GLASS_PANES))
                 .save(recipeOutput);
 
 
@@ -282,8 +279,8 @@ public class VanillaRecipeProvider extends RecipeProvider {
 
     public static void registerSpecialRecipes(RecipeOutput recipeOutput) {
         SpecialRecipeBuilder.special(RecipeChangeColor.IlluminationWandChangeColor::new)
-                .save(recipeOutput, RecipeTypesAS.ILLUMINATION_WAND_CHANGE_COLOR_SERIALIZER.getId());
+                .save(recipeOutput, Objects.requireNonNull(BuiltInRegistries.RECIPE_SERIALIZER.getKey(RecipeTypesAS.ILLUMINATION_WAND_CHANGE_COLOR_SERIALIZER)));
         SpecialRecipeBuilder.special(RecipeChangeColor.CelestialGatewayChangeColor::new)
-                .save(recipeOutput, RecipeTypesAS.CELESTIAL_GATEWAY_CHANGE_COLOR_SERIALIZER.getId());
+                .save(recipeOutput, Objects.requireNonNull(BuiltInRegistries.RECIPE_SERIALIZER.getKey(RecipeTypesAS.CELESTIAL_GATEWAY_CHANGE_COLOR_SERIALIZER)));
     }
 }

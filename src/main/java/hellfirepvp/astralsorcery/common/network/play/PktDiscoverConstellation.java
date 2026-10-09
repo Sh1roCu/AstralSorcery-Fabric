@@ -13,12 +13,12 @@ import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.network.PlayPacketHandler;
 import hellfirepvp.astralsorcery.common.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.research.ResearchMessageHelper;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -49,8 +49,8 @@ public class PktDiscoverConstellation extends PlayPacketHandler.ToServer<PktDisc
     }
 
     @Override
-    public void handle(Request payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
+    public void receive(Request payload, ServerPlayNetworking.Context context) {
+        context.server().execute(() -> {
             if (context.player() instanceof ServerPlayer sPlayer) {
                 if (ResearchHelper.discoverConstellation(sPlayer, payload.constellation())) {
                     ResearchMessageHelper.sendConstellationDiscovery(sPlayer, payload.constellation());

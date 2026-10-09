@@ -12,7 +12,7 @@ import hellfirepvp.astralsorcery.common.data.sync.ClientData;
 import hellfirepvp.astralsorcery.common.patreon.PatreonEffect;
 import hellfirepvp.astralsorcery.common.patreon.PatreonEffectHelper;
 import hellfirepvp.astralsorcery.common.patreon.entity.PatreonPartialEntity;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import java.util.*;
 
@@ -38,7 +38,7 @@ public class PatreonEntityClientData extends ClientData {
                         .orElse(null);
 
                 if (existingEntity == null) {
-                    PatreonEffect pe = PatreonEffectHelper.getPatreonEffects(LogicalSide.CLIENT, playerUUID).stream()
+                    PatreonEffect pe = PatreonEffectHelper.getPatreonEffects(EnvType.CLIENT, playerUUID).stream()
                             .filter(effect -> effect.getEffectUUID().equals(effectUUID))
                             .findFirst()
                             .orElse(null);

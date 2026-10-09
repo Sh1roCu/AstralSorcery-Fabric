@@ -9,8 +9,6 @@
 package hellfirepvp.astralsorcery.common.network;
 
 import hellfirepvp.astralsorcery.common.network.play.*;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -21,39 +19,37 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
  */
 public class NetworkRegistry {
 
-    public static final String NET_VERSION = "1";
-
-    public static void registerPackets(RegisterPayloadHandlersEvent event) {
-        PayloadRegistrar registrar = event.registrar(NET_VERSION);
-
+    public static void registerPackets() {
         // Server -> Client
-        PktSyncPlayerProgress.HANDLER.register(registrar);
-        PktSyncResearchNodes.HANDLER.register(registrar);
-        PktSyncData.HANDLER.register(registrar);
-        PktUpdateLinkSession.HANDLER.register(registrar);
-        PktPlayVisualEffect.HANDLER.register(registrar);
-        PktSyncModifierSource.HANDLER.register(registrar);
-        PktSyncPerkTree.HANDLER.register(registrar);
-        PktSyncPerkLevels.HANDLER.register(registrar);
-        PktSyncPerkActivity.HANDLER.register(registrar);
-        PktSyncCustomDestroyProgress.HANDLER.register(registrar);
-        PktSyncAuxiliaryLightManager.HANDLER.register(registrar);
-        PktSyncLumenBindingTypes.HANDLER.register(registrar);
-        PktPlayStructurePreview.HANDLER.register(registrar);
-        PktOpenClientScreen.HANDLER.register(registrar);
+        PktSyncPlayerProgress.HANDLER.register();
+        PktSyncResearchNodes.HANDLER.register();
+        PktSyncData.HANDLER.register();
+        PktUpdateLinkSession.HANDLER.register();
+        PktPlayVisualEffect.HANDLER.register();
+        PktSyncModifierSource.HANDLER.register();
+        PktSyncPerkTree.HANDLER.register();
+        PktSyncPerkLevels.HANDLER.register();
+        PktSyncPerkActivity.HANDLER.register();
+        PktSyncCustomDestroyProgress.HANDLER.register();
+        PktSyncAuxiliaryLightManager.HANDLER.register();
+        PktSyncLumenBindingTypes.HANDLER.register();
+        PktPlayStructurePreview.HANDLER.register();
+        PktOpenClientScreen.HANDLER.register();
 
         // Client -> Server
-        PktAdjustAstrolabeAngle.HANDLER.register(registrar);
-        PktDiscoverConstellation.HANDLER.register(registrar);
-        PktRequestSocketPerkItem.HANDLER.register(registrar);
-        PktRequestCancelLinkSession.HANDLER.register(registrar);
-        PktRequestGatewayTeleport.HANDLER.register(registrar);
-        PktRequestLearnedTomeNavigation.HANDLER.register(registrar);
+        PktAdjustAstrolabeAngle.HANDLER.register();
+        PktAttunePlayer.HANDLER.register();
+        PktDiscoverConstellation.HANDLER.register();
+        PktRequestSocketPerkItem.HANDLER.register();
+        PktRequestCancelLinkSession.HANDLER.register();
+        PktRequestGatewayTeleport.HANDLER.register();
+        PktRequestLearnedTomeNavigation.HANDLER.register();
+        PktSetStructureMarker.HANDLER.register();
 
         // Bi-Directional
-        PktRequestSeed.HANDLER.register(registrar);
-        PktRequestUnlockPerk.HANDLER.register(registrar);
-        PktRequestPerkSealAction.HANDLER.register(registrar);
-        PktRequestRemovePerk.HANDLER.register(registrar);
+        PktRequestSeed.HANDLER.register();
+        PktRequestUnlockPerk.HANDLER.register();
+        PktRequestPerkSealAction.HANDLER.register();
+        PktRequestRemovePerk.HANDLER.register();
     }
 }

@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.helper;
 
+import cn.sh1rocu.astralsorcery.api.event.RenderTooltipEvent;
 import com.mojang.datafixers.util.Either;
 import hellfirepvp.astralsorcery.common.component.IdentifierComponent;
 import hellfirepvp.astralsorcery.common.component.StoredLumenComponent;
@@ -15,13 +16,6 @@ import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
 import hellfirepvp.astralsorcery.common.util.tooltip.StoredLumenDisplayTooltip;
 import net.minecraft.Util;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.RenderTooltipEvent;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -32,11 +26,11 @@ import java.util.UUID;
  */
 public class StoredLumenTooltipHelper {
 
-    public static void attachEventListeners(IEventBus bus) {
-        bus.addListener(StoredLumenTooltipHelper::onTooltipGather);
+    public static void attachEventListeners() {
+        RenderTooltipEvent.GATHER_COMPONENTS.register(StoredLumenTooltipHelper::onTooltipGather);
     }
 
-    private static void onTooltipGather(RenderTooltipEvent.GatherComponents event) {
+    public static void onTooltipGather(RenderTooltipEvent.GatherComponents event) {
         ItemStack stack = event.getItemStack();
         if (stack.has(DataComponentsAS.STORED_LUMEN) && stack.has(DataComponentsAS.IDENTIFIER)) {
             IdentifierComponent idCmp = stack.getOrDefault(DataComponentsAS.IDENTIFIER, IdentifierComponent.NONE);
@@ -48,7 +42,6 @@ public class StoredLumenTooltipHelper {
             int index = -1;
             for (int i = 0; i < tooltip.size(); i++) {
                 var element = tooltip.get(i);
-
                 if (element.map(txt -> txt.getString().equals(idStr), ttCmp -> false)) {
                     index = i;
                     break;

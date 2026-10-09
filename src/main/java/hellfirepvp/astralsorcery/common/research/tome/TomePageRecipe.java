@@ -16,8 +16,11 @@ import hellfirepvp.astralsorcery.common.lib.types.TomePageTypesAS;
 import hellfirepvp.astralsorcery.common.research.ResearchNode;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.RecipeFinder;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -25,13 +28,9 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.registries.DeferredHolder;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -60,8 +59,8 @@ public record TomePageRecipe(ResourceKey<RecipeType<?>> type, ResourceLocation r
         return NOT_FOUND_PAGE;
     }
 
-    public static TomePageRecipe of(DeferredHolder<RecipeType<?>, ? extends RecipeType<?>> type, ResourceLocation recipeId) {
-        return of(type.getKey(), recipeId);
+    public static TomePageRecipe of(Holder<RecipeType<?>> type, ResourceLocation recipeId) {
+        return of(type.unwrapKey().orElseThrow(), recipeId);
     }
 
     public static TomePageRecipe of(ResourceKey<RecipeType<?>> type, ResourceLocation recipeId) {
@@ -70,11 +69,11 @@ public record TomePageRecipe(ResourceKey<RecipeType<?>> type, ResourceLocation r
 
     @Override
     public TomePageType<?> getType() {
-        return TomePageTypesAS.RECIPE_PAGE.get();
+        return TomePageTypesAS.RECIPE_PAGE;
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public RenderPage createPage(@Nullable ResearchNode node, int page) {
         return Optional.ofNullable(Minecraft.getInstance().getConnection())
                 .map(ClientPacketListener::getRecipeManager)

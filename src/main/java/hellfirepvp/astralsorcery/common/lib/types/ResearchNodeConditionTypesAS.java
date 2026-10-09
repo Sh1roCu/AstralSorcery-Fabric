@@ -13,8 +13,9 @@ import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.research.condition.ConditionConstellation;
 import hellfirepvp.astralsorcery.common.research.condition.ConditionResearchFlag;
 import hellfirepvp.astralsorcery.common.research.condition.ResearchNodeCondition;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.Registry;
+
+import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -25,13 +26,18 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  */
 public class ResearchNodeConditionTypesAS {
 
-    public static final DeferredRegister<ResearchNodeCondition.Type<?>> RESEARCH_NODE_CONDITION_REGISTER =
-            DeferredRegister.create(RegistriesAS.KEY_RESEARCH_NODE_CONDITION_TYPES, AstralSorcery.MODID);
+    public static void init() {
 
-    public static final DeferredHolder<ResearchNodeCondition.Type<?>, ResearchNodeCondition.Type<ConditionConstellation>> CONSTELLATION_DISCOVERED =
-            RESEARCH_NODE_CONDITION_REGISTER.register("constellation_discovered",
+    }
+
+    public static final ResearchNodeCondition.Type<ConditionConstellation> CONSTELLATION_DISCOVERED =
+            register("constellation_discovered",
                     () -> new ResearchNodeCondition.Type<>(ConditionConstellation.CODEC, ConditionConstellation.STREAM_CODEC));
-    public static final DeferredHolder<ResearchNodeCondition.Type<?>, ResearchNodeCondition.Type<?>> RESEARCH_FLAG_SET =
-            RESEARCH_NODE_CONDITION_REGISTER.register("research_flag_set",
+    public static final ResearchNodeCondition.Type<?> RESEARCH_FLAG_SET =
+            register("research_flag_set",
                     () -> new ResearchNodeCondition.Type<>(ConditionResearchFlag.CODEC, ConditionResearchFlag.STREAM_CODEC));
+
+    private static <T extends ResearchNodeCondition> ResearchNodeCondition.Type<T> register(String name, Supplier<ResearchNodeCondition.Type<T>> supplier) {
+        return Registry.register(RegistriesAS.REGISTRY_RESEARCH_NODE_CONDITION_TYPES, AstralSorcery.key(name), supplier.get());
+    }
 }

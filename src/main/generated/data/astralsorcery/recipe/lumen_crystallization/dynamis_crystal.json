@@ -1,0 +1,15 @@
+{
+  "type": "astralsorcery:lumen_crystallization",
+  "catalyst_shatter_multiplier": 0.0,
+  "input": {
+    "fabric:type": "fabric:components",
+    "base": {
+      "item": "astralsorcery:lumen_crystal"
+    },
+    "components": {
+      "astralsorcery:lumen": "astralsorcery:dynamis"
+    }
+  },
+  "lumen_consumed_per_operation": 1400,
+  "lumen_to_crystallize": "astralsorcery:dynamis"
+}

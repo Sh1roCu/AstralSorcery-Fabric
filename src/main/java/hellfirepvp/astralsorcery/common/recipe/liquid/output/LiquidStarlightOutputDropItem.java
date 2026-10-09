@@ -22,13 +22,13 @@ import hellfirepvp.astralsorcery.common.util.ItemUtil;
 import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -65,7 +65,7 @@ public class LiquidStarlightOutputDropItem extends LiquidStarlightRecipeOutputMo
 
     @Override
     public Type<?> getType() {
-        return LiquidStarlightRecipeOutputTypesAS.DROP_ITEM.get();
+        return LiquidStarlightRecipeOutputTypesAS.DROP_ITEM;
     }
 
     @Override
@@ -80,7 +80,7 @@ public class LiquidStarlightOutputDropItem extends LiquidStarlightRecipeOutputMo
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void playCraftingEffects(LiquidStarlightRecipe recipe, LiquidStarlightRecipeInput input, RandomSource rand, int craftingTick) {
         super.playCraftingEffects(recipe, input, rand, craftingTick);
 

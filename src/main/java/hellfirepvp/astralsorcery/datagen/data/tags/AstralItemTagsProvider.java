@@ -8,17 +8,13 @@
 
 package hellfirepvp.astralsorcery.datagen.data.tags;
 
-import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.constants.TagsAS;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.data.PackOutput;
-import net.minecraft.data.tags.ItemTagsProvider;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Block;
-import net.neoforged.neoforge.common.Tags;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -29,10 +25,10 @@ import java.util.concurrent.CompletableFuture;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class AstralItemTagsProvider extends ItemTagsProvider {
+public class AstralItemTagsProvider extends FabricTagProvider.ItemTagProvider {
 
-    public AstralItemTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, CompletableFuture<TagLookup<Block>> blockTags, ExistingFileHelper existingFileHelper) {
-        super(output, lookupProvider, blockTags, AstralSorcery.MODID, existingFileHelper);
+    public AstralItemTagsProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> completableFuture) {
+        super(output, completableFuture, AstralBlockTagsProvider.getInstance());
     }
 
     @Override
@@ -40,63 +36,63 @@ public class AstralItemTagsProvider extends ItemTagsProvider {
         copy(TagsAS.Blocks.INFUSED_WOOD, TagsAS.Items.INFUSED_WOOD);
         copy(TagsAS.Blocks.MARBLE, TagsAS.Items.MARBLE);
         copy(TagsAS.Blocks.SOOTY_MARBLE, TagsAS.Items.SOOTY_MARBLE);
-        tag(TagsAS.Items.GEMS_AQUAMARINE)
+        getOrCreateTagBuilder(TagsAS.Items.GEMS_AQUAMARINE)
                 .add(ItemsAS.AQUAMARINE.asItem());
-        tag(Tags.Items.RAW_MATERIALS)
+        getOrCreateTagBuilder(ConventionalItemTags.RAW_MATERIALS)
                 .add(ItemsAS.RAW_STARMETAL.asItem());
 
-        tag(ItemTags.LECTERN_BOOKS)
+        getOrCreateTagBuilder(ItemTags.LECTERN_BOOKS)
                 .add(ItemsAS.TOME.asItem());
 
-        tag(TagsAS.Items.CRYSTAL)
-                .addTag(TagsAS.Items.CELESTIAL_CRYSTAL)
-                .addTag(TagsAS.Items.ATTUNED_CRYSTAL)
+        getOrCreateTagBuilder(TagsAS.Items.CRYSTAL)
+                .forceAddTag(TagsAS.Items.CELESTIAL_CRYSTAL)
+                .forceAddTag(TagsAS.Items.ATTUNED_CRYSTAL)
                 .add(ItemsAS.ROCK_CRYSTAL.asItem());
-        tag(TagsAS.Items.CELESTIAL_CRYSTAL)
+        getOrCreateTagBuilder(TagsAS.Items.CELESTIAL_CRYSTAL)
                 .add(ItemsAS.CELESTIAL_CRYSTAL.asItem())
                 .add(ItemsAS.ATTUNED_CELESTIAL_CRYSTAL.asItem());
-        tag(TagsAS.Items.ROCK_CRYSTAL)
+        getOrCreateTagBuilder(TagsAS.Items.ROCK_CRYSTAL)
                 .add(ItemsAS.ROCK_CRYSTAL.asItem())
                 .add(ItemsAS.ATTUNED_ROCK_CRYSTAL.asItem());
-        tag(TagsAS.Items.ATTUNED_CRYSTAL)
+        getOrCreateTagBuilder(TagsAS.Items.ATTUNED_CRYSTAL)
                 .add(ItemsAS.ATTUNED_ROCK_CRYSTAL.asItem())
                 .add(ItemsAS.ATTUNED_CELESTIAL_CRYSTAL.asItem());
 
-        tag(TagsAS.Items.FUNCTIONAL_ALTAR_CONSTELLATION_ITEM)
-                .addTag(TagsAS.Items.ATTUNED_CRYSTAL);
-        tag(TagsAS.Items.FUNCTIONAL_ATTUNEABLE_ITEM)
+        getOrCreateTagBuilder(TagsAS.Items.FUNCTIONAL_ALTAR_CONSTELLATION_ITEM)
+                .forceAddTag(TagsAS.Items.ATTUNED_CRYSTAL);
+        getOrCreateTagBuilder(TagsAS.Items.FUNCTIONAL_ATTUNEABLE_ITEM)
                 .add(ItemsAS.ROCK_CRYSTAL.asItem())
                 .add(ItemsAS.CELESTIAL_CRYSTAL.asItem());
-        tag(TagsAS.Items.FUNCTIONAL_PERKTREE_SOCKETABLE_ITEM)
+        getOrCreateTagBuilder(TagsAS.Items.FUNCTIONAL_PERKTREE_SOCKETABLE_ITEM)
                 .add(ItemsAS.DYNAMISM_GEM_SKY.asItem())
                 .add(ItemsAS.DYNAMISM_GEM_DAY.asItem())
                 .add(ItemsAS.DYNAMISM_GEM_NIGHT.asItem());
 
-        tag(TagsAS.Items.CURIOS_NECKLACE)
+        getOrCreateTagBuilder(TagsAS.Items.CURIOS_NECKLACE)
                 .add(ItemsAS.ENCHANTMENT_AMULET.asItem());
 
-        tag(ItemTags.AXES)
+        getOrCreateTagBuilder(ItemTags.AXES)
                 .add(ItemsAS.CRYSTAL_AXE.asItem())
                 .add(ItemsAS.IRIDESCENT_CRYSTAL_AXE.asItem());
-        tag(ItemTags.PICKAXES)
+        getOrCreateTagBuilder(ItemTags.PICKAXES)
                 .add(ItemsAS.CRYSTAL_PICKAXE.asItem())
                 .add(ItemsAS.IRIDESCENT_CRYSTAL_PICKAXE.asItem());
-        tag(ItemTags.SHOVELS)
+        getOrCreateTagBuilder(ItemTags.SHOVELS)
                 .add(ItemsAS.CRYSTAL_SHOVEL.asItem())
                 .add(ItemsAS.IRIDESCENT_CRYSTAL_SHOVEL.asItem());
-        tag(ItemTags.SWORDS)
+        getOrCreateTagBuilder(ItemTags.SWORDS)
                 .add(ItemsAS.CRYSTAL_SWORD.asItem())
                 .add(ItemsAS.IRIDESCENT_CRYSTAL_SWORD.asItem());
 
-        tag(Tags.Items.INGOTS)
+        getOrCreateTagBuilder(ConventionalItemTags.INGOTS)
                 .add(ItemsAS.STARMETAL_INGOT.asItem());
 
-        tag(ItemTags.SMALL_FLOWERS)
-                .add(ItemsAS.BLOCK_GLIMMER_AMARANTH.get())
-                .add(ItemsAS.BLOCK_HYACINTH.get())
-                .add(ItemsAS.BLOCK_IRIS.get())
-                .add(ItemsAS.BLOCK_ORCHID.get())
-                .add(ItemsAS.BLOCK_PROTEA.get())
-                .add(ItemsAS.BLOCK_THISTLE.get());
+        getOrCreateTagBuilder(ItemTags.SMALL_FLOWERS)
+                .add(ItemsAS.BLOCK_GLIMMER_AMARANTH)
+                .add(ItemsAS.BLOCK_HYACINTH)
+                .add(ItemsAS.BLOCK_IRIS)
+                .add(ItemsAS.BLOCK_ORCHID)
+                .add(ItemsAS.BLOCK_PROTEA)
+                .add(ItemsAS.BLOCK_THISTLE);
     }
 }

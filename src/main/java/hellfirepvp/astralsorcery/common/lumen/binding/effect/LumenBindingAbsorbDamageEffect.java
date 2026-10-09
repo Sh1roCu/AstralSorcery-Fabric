@@ -12,18 +12,18 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.lib.types.LumenBindingEffectTypesAS;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -77,19 +77,19 @@ public class LumenBindingAbsorbDamageEffect extends LumenBindingEffect {
         cooldowns.clear();
     }
 
-    public static void attachEventListeners(IEventBus bus) {
-        bus.addListener(LumenBindingAbsorbDamageEffect::onDamageTaken);
+    public static void attachEventListeners() {
+        ServerLivingEntityEvents.AFTER_DAMAGE.register(LumenBindingAbsorbDamageEffect::onDamageTaken);
     }
 
-    private static void onDamageTaken(LivingDamageEvent.Post event) {
-        if (!(event.getEntity() instanceof ServerPlayer sPlayer)) return;
+    private static void onDamageTaken(LivingEntity entity, DamageSource source, float baseDamageTaken, float damageTaken, boolean blocked) {
+        if (!(entity instanceof ServerPlayer sPlayer)) return;
 
         long gameTime = sPlayer.level().getGameTime();
         UUID uuid = sPlayer.getUUID();
         if (cooldowns.getOrDefault(uuid, 0L) > gameTime) return;
 
         forEachEffect(sPlayer, LumenBindingAbsorbDamageEffect.class, (stack, effect) -> {
-            if (event.getNewDamage() >= effect.getThreshold() && effect.getDurationTicks() > 0) {
+            if (damageTaken >= effect.getThreshold() && effect.getDurationTicks() > 0) {
                 return effect;
             }
             return null;
@@ -117,7 +117,7 @@ public class LumenBindingAbsorbDamageEffect extends LumenBindingEffect {
     }
 
     @Override
-    public List<Component> getDisplayText(LogicalSide side, ItemStack stack) {
+    public List<Component> getDisplayText(EnvType side, ItemStack stack) {
         return List.of(Component.translatable("lumen.binding.astralsorcery.absorb_damage",
                 HEALTH_FORMAT.format(this.threshold),
                 this.getAmplifier() + 1));

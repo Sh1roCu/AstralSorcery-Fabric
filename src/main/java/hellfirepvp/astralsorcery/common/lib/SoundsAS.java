@@ -10,12 +10,11 @@ package hellfirepvp.astralsorcery.common.lib;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.sound.CategorizedSoundEvent;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.neoforged.neoforge.common.util.DeferredSoundType;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.world.level.block.SoundType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -26,8 +25,9 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  */
 public class SoundsAS {
 
-    public static final DeferredRegister<SoundEvent> SOUND_REGISTER =
-            DeferredRegister.create(BuiltInRegistries.SOUND_EVENT, AstralSorcery.MODID);
+    public static void init() {
+
+    }
 
     public static final CategorizedSoundEvent ALTAR_CRAFT_START = register("altar_craft_start", SoundSource.BLOCKS);
     public static final CategorizedSoundEvent ALTAR_CRAFT_FINISH = register("altar_craft_finish", SoundSource.BLOCKS);
@@ -69,12 +69,12 @@ public class SoundsAS {
     public static final CategorizedSoundEvent CRYSTAL_HIT = register("crystal_hit", SoundSource.BLOCKS);
     public static final CategorizedSoundEvent CRYSTAL_PLACE = register("crystal_place", SoundSource.BLOCKS);
     public static final CategorizedSoundEvent CRYSTAL_STEP = register("crystal_step", SoundSource.BLOCKS);
-    public static final DeferredSoundType CRYSTAL_SOUND_TYPE = new DeferredSoundType(1F, 1F,
+    public static final SoundType CRYSTAL_SOUND_TYPE = new SoundType(1F, 1F,
             CRYSTAL_BREAK.sound(), CRYSTAL_STEP.sound(), CRYSTAL_PLACE.sound(), CRYSTAL_HIT.sound(), CRYSTAL_HIT.sound());
 
     private static CategorizedSoundEvent register(String name, SoundSource category) {
-        DeferredHolder<SoundEvent, SoundEvent> sound = SOUND_REGISTER.register(name,
-                () -> SoundEvent.createVariableRangeEvent(AstralSorcery.key(name)));
+        SoundEvent sound = Registry.register(BuiltInRegistries.SOUND_EVENT, AstralSorcery.key(name),
+                SoundEvent.createVariableRangeEvent(AstralSorcery.key(name)));
         return new CategorizedSoundEvent(sound, category);
     }
 }

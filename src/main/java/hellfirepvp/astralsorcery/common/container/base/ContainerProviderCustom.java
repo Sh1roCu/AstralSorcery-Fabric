@@ -9,10 +9,9 @@
 package hellfirepvp.astralsorcery.common.container.base;
 
 import hellfirepvp.astralsorcery.common.util.data.MenuTypeRegistryObject;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -26,7 +25,7 @@ import javax.annotation.Nullable;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public abstract class ContainerProviderCustom<T extends AbstractContainerMenu> implements MenuProvider {
+public abstract class ContainerProviderCustom<T extends AbstractContainerMenu, D> implements ExtendedScreenHandlerFactory<D> {
 
     private final MenuTypeRegistryObject<T> menuType;
 
@@ -40,7 +39,7 @@ public abstract class ContainerProviderCustom<T extends AbstractContainerMenu> i
     }
 
     @Override
-    public abstract void writeClientSideData(AbstractContainerMenu menu, RegistryFriendlyByteBuf buffer);
+    public abstract D getScreenOpeningData(ServerPlayer player);
 
     @Nullable
     @Override

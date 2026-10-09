@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.perk.tree.perk.key;
 
+import cn.sh1rocu.astralsorcery.api.event.LivingKnockBackEvent;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.lib.types.PerkDataTypesAS;
@@ -19,12 +20,9 @@ import hellfirepvp.astralsorcery.common.perk.tree.perk.KeyPerk;
 import hellfirepvp.astralsorcery.common.perk.tree.requirement.PerkRequirement;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
-import hellfirepvp.astralsorcery.common.util.event.SidedEventBus;
+import net.fabricmc.api.EnvType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.entity.living.LivingKnockBackEvent;
-import org.jline.utils.Log;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -51,14 +49,14 @@ public class KeyPerkNoKnockback extends KeyPerk {
     }
 
     @Override
-    protected void attachEventListeners(SidedEventBus sidedEventBus) {
-        super.attachEventListeners(sidedEventBus);
-        sidedEventBus.addListener(LivingKnockBackEvent.class, SidedEventBus.entityEvent(), this::onKnockback);
+    protected void attachEventListeners() {
+        super.attachEventListeners();
+        LivingKnockBackEvent.EVENT.register(this::onKnockback);
     }
 
     private void onKnockback(LivingKnockBackEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
-        LogicalSide side = this.getSide(player);
+        EnvType side = this.getSide(player);
         PlayerProgress progress = ResearchManager.getProgress(player, side);
         if (progress.getPerkData().hasPerkEffect(this)) {
             event.setCanceled(true);

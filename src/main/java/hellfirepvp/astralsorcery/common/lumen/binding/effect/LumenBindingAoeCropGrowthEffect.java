@@ -8,10 +8,13 @@
 
 package hellfirepvp.astralsorcery.common.lumen.binding.effect;
 
+import cn.sh1rocu.astralsorcery.api.event.BaseEvent;
 import com.mojang.serialization.MapCodec;
 import hellfirepvp.astralsorcery.common.lib.types.LumenBindingEffectTypesAS;
 import hellfirepvp.astralsorcery.common.util.CropUtil;
 import hellfirepvp.astralsorcery.common.visual.type.SinglePlantGrowthEffect;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -19,11 +22,12 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.level.BlockEvent;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -42,16 +46,15 @@ public class LumenBindingAoeCropGrowthEffect extends LumenBindingEffect {
     public static final MapCodec<LumenBindingAoeCropGrowthEffect> CODEC = MapCodec.unit(INSTANCE);
     public static final StreamCodec<RegistryFriendlyByteBuf, LumenBindingAoeCropGrowthEffect> STREAM_CODEC = StreamCodec.unit(INSTANCE);
 
-    public static void attachEventListeners(IEventBus bus) {
-        bus.addListener(EventPriority.LOWEST, LumenBindingAoeCropGrowthEffect::onBlockBreak);
+    public static void attachEventListeners() {
+        PlayerBlockBreakEvents.AFTER.register(BaseEvent.LOWEST, LumenBindingAoeCropGrowthEffect::onBlockBreak);
     }
 
-    private static void onBlockBreak(BlockEvent.BreakEvent event) {
-        if (!(event.getPlayer() instanceof ServerPlayer sPlayer)) return;
+    private static void onBlockBreak(Level world, Player player, BlockPos brokenPos, BlockState state, @Nullable BlockEntity blockEntity) {
+        if (!(player instanceof ServerPlayer sPlayer)) return;
         ServerLevel sLevel = sPlayer.serverLevel();
 
         RandomSource rand = sLevel.getRandom();
-        BlockPos brokenPos = event.getPos();
         CropUtil.wrapPlant(sLevel, brokenPos).filter(plant -> plant.canHarvest(sLevel)).ifPresent(brokenPlant -> {
             forEachEffect(sPlayer, LumenBindingAoeCropGrowthEffect.class, (stack, effect) -> {
 
@@ -70,7 +73,7 @@ public class LumenBindingAoeCropGrowthEffect extends LumenBindingEffect {
     }
 
     @Override
-    public List<Component> getDisplayText(LogicalSide side, ItemStack stack) {
+    public List<Component> getDisplayText(EnvType side, ItemStack stack) {
         return List.of(Component.translatable("lumen.binding.astralsorcery.aoe_crop_growth"));
     }
 

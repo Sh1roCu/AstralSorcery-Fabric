@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.perk.tree.perk.key;
 
+import cn.sh1rocu.astralsorcery.api.event.BaseEvent;
+import cn.sh1rocu.astralsorcery.api.event.SimpleDamageCallback;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.lib.types.PerkDataTypesAS;
@@ -20,21 +22,17 @@ import hellfirepvp.astralsorcery.common.perk.tree.requirement.PerkRequirement;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.FlagExecutor;
-import hellfirepvp.astralsorcery.common.util.event.SidedEventBus;
+import net.fabricmc.api.EnvType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -61,24 +59,23 @@ public class KeyPerkRangeAreaOfEffect extends KeyPerk {
     }
 
     @Override
-    protected void attachEventListeners(SidedEventBus sidedEventBus) {
-        super.attachEventListeners(sidedEventBus);
-        sidedEventBus.addListener(EventPriority.LOW, LivingDamageEvent.Pre.class, SidedEventBus.entityEvent(), this::onDamage);
+    protected void attachEventListeners() {
+        super.attachEventListeners();
+        SimpleDamageCallback.PRE.register(BaseEvent.LOW, this::onDamage);
     }
 
-    private void onDamage(LivingDamageEvent.Pre event) {
-        DamageSource source = event.getSource();
-        if (source.isDirect()) return;
-        LivingEntity target = event.getEntity();
+    private float onDamage(LivingEntity target, DamageSource source, float vanillaAmount, float amount) {
+        if (source.isDirect()) return amount;
 
-        if (!(source.getEntity() instanceof ServerPlayer sPlayer)) return;
-        LogicalSide side = this.getSide(sPlayer);
-        if (!side.isServer()) return;
+        if (!(source.getEntity() instanceof ServerPlayer sPlayer)) return amount;
+        EnvType side = this.getSide(sPlayer);
+        if (side != EnvType.SERVER) return amount;
         PlayerProgress progress = ResearchManager.getProgress(sPlayer, side);
-        if (!progress.getPerkData().hasPerkEffect(this)) return;
+        if (!progress.getPerkData().hasPerkEffect(this)) return amount;
         ServerLevel sLevel = sPlayer.serverLevel();
         ItemStack attackStack = new ItemStack(Items.DIAMOND_SWORD);
-        AABB swordBox = attackStack.getSweepHitBox(sPlayer, target).inflate(0.5, 0.25, 0.5);
+        // AABB swordBox = attackStack.getSweepHitBox(sPlayer, target).inflate(0.5, 0.25, 0.5);
+        AABB swordBox = target.getBoundingBox().inflate(1.0D, 0.25D, 1.0D).inflate(0.5, 0.25, 0.5);
 
         FlagExecutor.run(FlagExecutor.Flag.RANGED_SWEEP_ATTACK, () -> {
             sLevel.getEntitiesOfClass(LivingEntity.class, swordBox).forEach(livingTarget -> {
@@ -88,11 +85,13 @@ public class KeyPerkRangeAreaOfEffect extends KeyPerk {
                 if (sPlayer.isAlliedTo(livingTarget)) return;
                 if (livingTarget.isInvulnerable()) return;
 
-                double dmg = 1F + sPlayer.getAttributeValue(Attributes.SWEEPING_DAMAGE_RATIO) * event.getNewDamage();
+                double dmg = 1F + sPlayer.getAttributeValue(Attributes.SWEEPING_DAMAGE_RATIO) * amount;
                 dmg = EnchantmentHelper.modifyDamage(sLevel, attackStack, livingTarget, source, (float) dmg);
 
                 livingTarget.hurt(source, (float) dmg);
             });
         });
+
+        return amount;
     }
 }

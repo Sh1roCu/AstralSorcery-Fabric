@@ -11,7 +11,7 @@ package hellfirepvp.astralsorcery.common.constellation.property;
 import hellfirepvp.astralsorcery.common.constellation.BaseConstellation;
 import hellfirepvp.astralsorcery.common.perk.data.PerkTree;
 import hellfirepvp.astralsorcery.common.perk.tree.perk.RootPerk;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -26,14 +26,14 @@ import java.util.function.Function;
 public class AttunePlayerProperty extends ConstellationProperty<AttunePlayerProperty> {
 
     public static final Key<AttunePlayerProperty> KEY = new Key<>();
-    private final Function<LogicalSide, Optional<RootPerk<?>>> rootPerkProvider;
+    private final Function<EnvType, Optional<RootPerk<?>>> rootPerkProvider;
 
-    protected AttunePlayerProperty(BaseConstellation constellation, Function<LogicalSide, Optional<RootPerk<?>>> rootPerkProvider) {
+    protected AttunePlayerProperty(BaseConstellation constellation, Function<EnvType, Optional<RootPerk<?>>> rootPerkProvider) {
         super(KEY, constellation);
         this.rootPerkProvider = rootPerkProvider;
     }
 
-    public static Function<BaseConstellation, AttunePlayerProperty> of(Function<LogicalSide, Optional<RootPerk<?>>> rootPerkProvider) {
+    public static Function<BaseConstellation, AttunePlayerProperty> of(Function<EnvType, Optional<RootPerk<?>>> rootPerkProvider) {
         return cst -> new AttunePlayerProperty(cst, rootPerkProvider);
     }
 
@@ -41,15 +41,15 @@ public class AttunePlayerProperty extends ConstellationProperty<AttunePlayerProp
         return cst -> new AttunePlayerProperty(cst, side -> Optional.ofNullable(PerkTree.getInstance().getRootPerk(side, cst)));
     }
 
-    public Optional<RootPerk<?>> getRootPerk(LogicalSide side) {
+    public Optional<RootPerk<?>> getRootPerk(EnvType side) {
         return this.rootPerkProvider.apply(side);
     }
 
-    public static Optional<RootPerk<?>> getRootPerk(BaseConstellation cst, LogicalSide side) {
+    public static Optional<RootPerk<?>> getRootPerk(BaseConstellation cst, EnvType side) {
         return getRootPerk(Optional.ofNullable(cst), side);
     }
 
-    public static Optional<RootPerk<?>> getRootPerk(Optional<BaseConstellation> cstOpt, LogicalSide side) {
+    public static Optional<RootPerk<?>> getRootPerk(Optional<BaseConstellation> cstOpt, EnvType side) {
         return cstOpt.filter(cst -> cst.hasProperty(AttunePlayerProperty.KEY))
                 .flatMap(cst -> cst.getPropertyOpt(AttunePlayerProperty.KEY))
                 .flatMap(prop -> prop.getRootPerk(side));

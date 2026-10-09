@@ -13,12 +13,11 @@ import hellfirepvp.astralsorcery.common.perk.type.base.ModifierType;
 import hellfirepvp.astralsorcery.common.perk.type.base.PerkAttributeType;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
+import net.fabricmc.api.EnvType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
 
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -32,12 +31,12 @@ public class ReaderFlatAttribute extends PerkAttributeTypeReader {
     private final double defaultValue;
     private boolean formatAsDecimal = false;
 
-    public ReaderFlatAttribute(Supplier<? extends PerkAttributeType> type, double defaultValue) {
+    public ReaderFlatAttribute(PerkAttributeType type, double defaultValue) {
         super(type);
         this.defaultValue = defaultValue;
     }
 
-    public static Function<Supplier<? extends PerkAttributeType>, ReaderFlatAttribute> withDefault(double defaultValue) {
+    public static Function<PerkAttributeType, ReaderFlatAttribute> withDefault(double defaultValue) {
         return type -> new ReaderFlatAttribute(type, defaultValue);
     }
 
@@ -47,12 +46,12 @@ public class ReaderFlatAttribute extends PerkAttributeTypeReader {
     }
 
     @Override
-    public double getDefaultValue(PerkAttributeMap statMap, Player player, LogicalSide side) {
+    public double getDefaultValue(PerkAttributeMap statMap, Player player, EnvType side) {
         return this.defaultValue;
     }
 
     @Override
-    public double getModifierValueForMode(PerkAttributeMap statMap, Player player, LogicalSide side, ModifierType mode) {
+    public double getModifierValueForMode(PerkAttributeMap statMap, Player player, EnvType side, ModifierType mode) {
         return statMap.getModifier(player, ResearchManager.getProgress(player, side), this.getType(), mode);
     }
 

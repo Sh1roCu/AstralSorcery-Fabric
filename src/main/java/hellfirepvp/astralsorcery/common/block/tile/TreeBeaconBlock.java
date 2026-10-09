@@ -48,7 +48,7 @@ public class TreeBeaconBlock extends BaseTickTileBlock<TileTreeBeacon> {
     public static MapCodec<TreeBeaconBlock> CODEC = simpleCodec(TreeBeaconBlock::new);
 
     public TreeBeaconBlock(Properties properties) {
-        super(properties, TileEntitiesAS.TREE_BEACON);
+        super(properties, () -> TileEntitiesAS.TREE_BEACON);
     }
 
     @Override

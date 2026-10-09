@@ -8,9 +8,9 @@
 
 package hellfirepvp.astralsorcery.common.event.handler;
 
+import cn.sh1rocu.astralsorcery.api.event.BaseEvent;
+import cn.sh1rocu.astralsorcery.util.neoforge.network.PacketDistributor;
 import hellfirepvp.astralsorcery.client.screen.tome.TomeResearchScreen;
-import hellfirepvp.astralsorcery.common.container.provider.ContainerTomePapersProvider;
-import hellfirepvp.astralsorcery.common.item.TomeItem;
 import hellfirepvp.astralsorcery.common.item.base.InterceptInteractItem;
 import hellfirepvp.astralsorcery.common.item.wand.ArchitectWandItem;
 import hellfirepvp.astralsorcery.common.item.wand.ExchangeWandItem;
@@ -18,7 +18,15 @@ import hellfirepvp.astralsorcery.common.item.wand.WandBlockStorageHelper;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.network.play.PktOpenClientScreen;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -26,17 +34,11 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.LecternBlock;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.LecternBlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -47,58 +49,73 @@ import net.neoforged.neoforge.network.PacketDistributor;
  */
 public class InteractEventHandler {
 
-    public static void attachListeners(IEventBus bus) {
-        bus.addListener(InteractEventHandler::onBlockInteract);
-        bus.addListener(InteractEventHandler::onEntityInteract);
-        bus.addListener(EventPriority.LOW, InteractEventHandler::onOpenLectern);
-        bus.addListener(InteractEventHandler::onLeftClickBlock);
-        bus.addListener(InteractEventHandler::onLeftClickEmpty);
+    public static void attachListeners() {
+        UseBlockCallback.EVENT.register(InteractEventHandler::onBlockInteract);
+        UseEntityCallback.EVENT.register(InteractEventHandler::onEntityInteract);
+        UseBlockCallback.EVENT.register(BaseEvent.LOW, InteractEventHandler::onOpenLectern);
+        AttackBlockCallback.EVENT.register(InteractEventHandler::onLeftClickBlock);
+        // impl via mixin
+        // InteractEventHandler::onLeftClickEmpty;
     }
 
-    private static void onBlockInteract(PlayerInteractEvent.RightClickBlock event) {
-        ItemStack held = event.getItemStack();
+    private static InteractionResult onBlockInteract(Player player, Level world, InteractionHand hand, BlockHitResult hitResult) {
+        InteractionResult[] result = new InteractionResult[]{InteractionResult.PASS};
+        ItemStack held = player.getItemInHand(hand);
         if (held.getItem() instanceof InterceptInteractItem.Block blockInteractItem) {
-            if (blockInteractItem.shouldInterceptBlockInteract(event.getSide(), event.getEntity(), event.getHand(), event.getPos(), event.getHitVec(), event.getFace()) &&
-                    blockInteractItem.doBlockInteract(event.getSide(), event.getEntity(), event.getHand(), event.getPos(), event.getHitVec(), event.getFace())) {
-                event.setCanceled(true);
-                event.setCancellationResult(InteractionResult.SUCCESS);
+            if (blockInteractItem.shouldInterceptBlockInteract(FabricLoader.getInstance().getEnvironmentType(), player, hand, hitResult.getBlockPos(),
+                    hitResult, hitResult.getDirection()) &&
+                    blockInteractItem.doBlockInteract(FabricLoader.getInstance().getEnvironmentType(), player, hand, hitResult.getBlockPos(), hitResult,
+                            hitResult.getDirection())) {
+                result[0] = InteractionResult.SUCCESS;
+//                event.setCanceled(true);
+//                event.setCancellationResult(InteractionResult.SUCCESS);
             }
         }
-        MiscUtil.getTileAt(event.getLevel(), event.getPos(), LecternBlockEntity.class, false).ifPresent(tile -> {
+        MiscUtil.getTileAt(world, hitResult.getBlockPos(), LecternBlockEntity.class, false).ifPresent(tile -> {
             if (tile.getBook().is(ItemsAS.TOME)) {
-                event.setCanceled(true);
-                event.setCancellationResult(InteractionResult.SUCCESS);
+                result[0] = InteractionResult.SUCCESS;
+//                event.setCanceled(true);
+//                event.setCancellationResult(InteractionResult.SUCCESS);
 
-                if (event.getEntity() instanceof ServerPlayer sPlayer) {
+                if (player instanceof ServerPlayer sPlayer) {
                     PacketDistributor.sendToPlayer(sPlayer, PktOpenClientScreen.openScreen(PktOpenClientScreen.ScreenType.TOME));
                 }
             }
         });
+
+        return result[0];
     }
 
-    private static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
-        ItemStack held = event.getItemStack();
-        if (held.getItem() instanceof InterceptInteractItem.Entity<?> entityInteractItem && entityInteractItem.getEntityFilterClass().isInstance(event.getTarget())) {
-            if (entityInteract(entityInteractItem, MiscUtil.cast(event.getTarget()), event.getSide(), event.getEntity(), event.getHand())) {
-                event.setCanceled(true);
-                event.setCancellationResult(InteractionResult.SUCCESS);
+    private static InteractionResult onEntityInteract(Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
+        InteractionResult result = InteractionResult.PASS;
+        ItemStack held = player.getItemInHand(hand);
+        if (held.getItem() instanceof InterceptInteractItem.Entity<?> entityInteractItem && entityInteractItem.getEntityFilterClass().isInstance(entity)) {
+            if (entityInteract(entityInteractItem, MiscUtil.cast(entity), FabricLoader.getInstance().getEnvironmentType(), player, hand)) {
+                result = InteractionResult.SUCCESS;
+//                event.setCanceled(true);
+//                event.setCancellationResult(InteractionResult.SUCCESS);
             }
         }
+
+        return result;
     }
 
-    private static <T extends Entity> boolean entityInteract(InterceptInteractItem.Entity<T> interactItem, T entity, LogicalSide side, Player interacter, InteractionHand hand) {
+    private static <T extends Entity> boolean entityInteract(InterceptInteractItem.Entity<T> interactItem, T entity, EnvType side, Player interacter, InteractionHand hand) {
         return interactItem.shouldInterceptEntityInteract(side, interacter, hand, entity) &&
                 interactItem.doEntityInteract(side, interacter, hand, entity);
     }
 
-    private static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
-        if (!event.getEntity().isShiftKeyDown()) return;
-        tryClearWandStorage(event.getEntity(), event.getItemStack());
+    private static InteractionResult onLeftClickBlock(Player player, Level world, InteractionHand hand, BlockPos pos, Direction direction) {
+        InteractionResult result = InteractionResult.PASS;
+        if (!player.isShiftKeyDown()) return result;
+        tryClearWandStorage(player, player.getItemInHand(hand));
+
+        return result;
     }
 
-    private static void onLeftClickEmpty(PlayerInteractEvent.LeftClickEmpty event) {
-        if (!event.getEntity().isShiftKeyDown()) return;
-        tryClearWandStorage(event.getEntity(), event.getItemStack());
+    public static void onLeftClickEmpty(@Nullable Player player) {
+        if (player == null || !player.isShiftKeyDown()) return;
+        tryClearWandStorage(player, player.getItemInHand(InteractionHand.MAIN_HAND));
     }
 
     private static void tryClearWandStorage(Player player, ItemStack held) {
@@ -110,20 +127,24 @@ public class InteractEventHandler {
         player.displayClientMessage(Component.translatable("message.astralsorcery.wand.cleared"), true);
     }
 
-    private static void onOpenLectern(PlayerInteractEvent.RightClickBlock event) {
-        MiscUtil.getTileAt(event.getLevel(), event.getPos(), LecternBlockEntity.class, false).ifPresent(lectern -> {
+    private static InteractionResult onOpenLectern(Player player, Level world, InteractionHand hand, BlockHitResult hitResult) {
+        InteractionResult[] result = new InteractionResult[]{InteractionResult.PASS};
+        MiscUtil.getTileAt(world, hitResult.getBlockPos(), LecternBlockEntity.class, false).ifPresent(lectern -> {
             ItemStack contained = lectern.getBook();
             if (contained.is(ItemsAS.TOME)) {
-                event.setCanceled(true);
-                event.setCancellationResult(InteractionResult.SUCCESS);
-                if (event.getLevel().isClientSide()) {
+                result[0] = InteractionResult.SUCCESS;
+//                event.setCanceled(true);
+//                event.setCancellationResult(InteractionResult.SUCCESS);
+                if (world.isClientSide()) {
                     openTomeScreen();
                 }
             }
         });
+
+        return result[0];
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private static void openTomeScreen() {
         Minecraft.getInstance().setScreen(TomeResearchScreen.getOpenTome());
     }

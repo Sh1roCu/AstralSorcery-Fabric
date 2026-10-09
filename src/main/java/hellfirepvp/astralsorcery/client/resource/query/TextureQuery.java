@@ -14,15 +14,17 @@ import hellfirepvp.astralsorcery.client.resource.AbstractRenderTexture;
 import hellfirepvp.astralsorcery.client.resource.AssetLibrary;
 import hellfirepvp.astralsorcery.client.resource.AssetLocation;
 import hellfirepvp.astralsorcery.common.util.ClientObject;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.codec.StreamDecoder;
+import net.minecraft.network.codec.StreamEncoder;
 import net.minecraft.util.StringRepresentable;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.function.IntFunction;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -62,7 +64,7 @@ public class TextureQuery {
         return new SpriteSheetQuery(this.location, rows, columns, this.path);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public AbstractRenderTexture resolve() {
         if (this.resource.isNull()) {
             this.resource.set(AssetLibrary.loadTexture(this.location, this.path));
@@ -72,12 +74,29 @@ public class TextureQuery {
 
     private static TextureQuery read(RegistryFriendlyByteBuf buf) {
         AssetLocation location = buf.readEnum(AssetLocation.class);
-        String[] path = buf.readArray(String[]::new, FriendlyByteBuf::readUtf);
+        String[] path = readArray(buf, String[]::new, FriendlyByteBuf::readUtf);
         return new TextureQuery(location, path);
     }
 
     private static void write(RegistryFriendlyByteBuf buf, TextureQuery textureQuery) {
         buf.writeEnum(textureQuery.location);
-        buf.writeArray(textureQuery.path, FriendlyByteBuf::writeUtf);
+        writeArray(buf, textureQuery.path, FriendlyByteBuf::writeUtf);
+    }
+
+    private static <T> T[] readArray(RegistryFriendlyByteBuf buf, IntFunction<T[]> builder, StreamDecoder<? super FriendlyByteBuf, T> reader) {
+        int size = buf.readVarInt();
+        T[] array = builder.apply(size);
+        for (int i = 0; i < size; i++) {
+            array[i] = reader.decode(buf);
+        }
+        return array;
+    }
+
+    private static <T> FriendlyByteBuf writeArray(RegistryFriendlyByteBuf buf, T[] array, StreamEncoder<? super FriendlyByteBuf, T> writer) {
+        buf.writeVarInt(array.length);
+        for (T t : array) {
+            writer.encode(buf, t);
+        }
+        return buf;
     }
 }

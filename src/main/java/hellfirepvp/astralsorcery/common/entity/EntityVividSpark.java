@@ -11,13 +11,15 @@ package hellfirepvp.astralsorcery.common.entity;
 import hellfirepvp.astralsorcery.client.effect.EffectHelper;
 import hellfirepvp.astralsorcery.client.effect.function.FXAlphaFunction;
 import hellfirepvp.astralsorcery.client.effect.function.FXColorFunction;
-import hellfirepvp.astralsorcery.client.effect.vfx.VFXFacingParticle;
 import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
 import hellfirepvp.astralsorcery.common.lib.EntitiesAS;
 import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
-import hellfirepvp.astralsorcery.common.util.*;
+import hellfirepvp.astralsorcery.common.util.CropUtil;
+import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -36,8 +38,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -58,11 +58,11 @@ public class EntityVividSpark extends ThrowableProjectile {
     }
 
     public EntityVividSpark(LivingEntity shooter, Level level) {
-        this(EntitiesAS.VIVID_SPARK.get(), shooter, level);
+        this(EntitiesAS.VIVID_SPARK, shooter, level);
     }
 
     public EntityVividSpark(double x, double y, double z, Level level) {
-        this(EntitiesAS.VIVID_SPARK.get(), x, y, z, level);
+        this(EntitiesAS.VIVID_SPARK, x, y, z, level);
     }
 
     protected EntityVividSpark(EntityType<? extends ThrowableProjectile> entityType, LivingEntity shooter, Level level) {
@@ -121,7 +121,7 @@ public class EntityVividSpark extends ThrowableProjectile {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void clientTick() {
         if (this.isGrowing()) {
             this.spawnSpawningParticles();
@@ -155,7 +155,7 @@ public class EntityVividSpark extends ThrowableProjectile {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void spawnFlyingParticles() {
         for (int i = 0; i < 5; i++) {
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)

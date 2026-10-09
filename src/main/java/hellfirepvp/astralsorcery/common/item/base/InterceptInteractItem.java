@@ -15,7 +15,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -30,10 +30,10 @@ public final class InterceptInteractItem {
 
     public interface Block {
 
-        boolean shouldInterceptBlockInteract(LogicalSide side, Player player, InteractionHand hand, BlockPos pos, BlockHitResult hitResult, Direction blockFace);
+        boolean shouldInterceptBlockInteract(EnvType side, Player player, InteractionHand hand, BlockPos pos, BlockHitResult hitResult, Direction blockFace);
 
         //Return true to intercept further interactions
-        boolean doBlockInteract(LogicalSide side, Player player, InteractionHand hand, BlockPos pos, BlockHitResult hitResult, Direction blockFace);
+        boolean doBlockInteract(EnvType side, Player player, InteractionHand hand, BlockPos pos, BlockHitResult hitResult, Direction blockFace);
 
     }
 
@@ -41,10 +41,10 @@ public final class InterceptInteractItem {
 
         Class<T> getEntityFilterClass();
 
-        boolean shouldInterceptEntityInteract(LogicalSide side, Player player, InteractionHand hand, T interacted);
+        boolean shouldInterceptEntityInteract(EnvType side, Player player, InteractionHand hand, T interacted);
 
         //Return true to intercept further interactions
-        boolean doEntityInteract(LogicalSide side, Player player, InteractionHand hand, T interacted);
+        boolean doEntityInteract(EnvType side, Player player, InteractionHand hand, T interacted);
 
     }
 }

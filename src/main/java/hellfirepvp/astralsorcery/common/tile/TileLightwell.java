@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.tile;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
 import com.mojang.datafixers.Products;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -21,15 +22,15 @@ import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
 import hellfirepvp.astralsorcery.common.lib.StarlightNetworkNodesAS;
 import hellfirepvp.astralsorcery.common.lib.TileEntitiesAS;
 import hellfirepvp.astralsorcery.common.recipe.lightwell.LightwellRecipe;
-import hellfirepvp.astralsorcery.common.starlight.api.provider.TransmissionNodeProvider;
 import hellfirepvp.astralsorcery.common.starlight.transmission.StarlightTransmissionPacket;
 import hellfirepvp.astralsorcery.common.tile.base.TileEntityNetwork;
 import hellfirepvp.astralsorcery.common.tile.network.ForwardingStarlightReceiverNode;
 import hellfirepvp.astralsorcery.common.tile.network.provider.ForwardingStarlightReceiverNodeProvider;
+import hellfirepvp.astralsorcery.common.util.RecipeFinder;
+import hellfirepvp.astralsorcery.common.util.RecipeUtil;
+import hellfirepvp.astralsorcery.common.util.ServerSoundHelper;
 import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
-import hellfirepvp.astralsorcery.common.util.RecipeFinder;
-import hellfirepvp.astralsorcery.common.util.ServerSoundHelper;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.TileRegistryObject;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
@@ -40,6 +41,10 @@ import hellfirepvp.astralsorcery.common.util.inventory.InventoryView;
 import hellfirepvp.astralsorcery.common.util.tank.FluidContainerList;
 import hellfirepvp.astralsorcery.common.util.tank.FluidTankView;
 import hellfirepvp.astralsorcery.common.util.tank.FluidTankViewFactory;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -50,11 +55,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.Map;
 import java.util.Optional;
@@ -87,7 +87,7 @@ public class TileLightwell extends TileEntityNetwork<ForwardingStarlightReceiver
         if (this.getTileData().getTicksExisted() % 20 == 0) {
             FluidStack stack = this.getTileData().getContainedFluid();
             if (!stack.isEmpty()) {
-                this.setLight(level, stack.getFluidType().getLightLevel(stack));
+                this.setLight(level, FluidVariantAttributes.getLuminance(stack.getFluidVariant()));
             } else {
                 this.setLight(level, 0);
             }
@@ -106,6 +106,8 @@ public class TileLightwell extends TileEntityNetwork<ForwardingStarlightReceiver
         }
 
         if (this.activeRecipe == null) {
+            if (RecipeUtil.getRecipeManager() == null) return;
+
             this.activeRecipe = this.getTileData().findMatchingRecipe(catalyst)
                     .map(RecipeHolder::value)
                     .orElse(null);
@@ -125,9 +127,12 @@ public class TileLightwell extends TileEntityNetwork<ForwardingStarlightReceiver
             gain++;
         }
         if (gain > 0) {
-            FluidStack gainedStack = new FluidStack(this.activeRecipe.getGeneratedFluid(), gain);
+            FluidStack gainedStack = new FluidStack(this.activeRecipe.getGeneratedFluid(), gain * 81L);
             this.getTileData().getFluidTank().withoutFilters(tank -> {
-                tank.fill(gainedStack, IFluidHandler.FluidAction.EXECUTE);
+                try (Transaction tx = Transaction.openOuter()) {
+                    tank.insert(gainedStack.getFluidVariant(), gainedStack.getAmount(), tx);
+                    tx.commit();
+                }
             });
         }
 
@@ -148,7 +153,7 @@ public class TileLightwell extends TileEntityNetwork<ForwardingStarlightReceiver
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void clientTick(Level level) {
         super.clientTick(level);
 
@@ -165,7 +170,7 @@ public class TileLightwell extends TileEntityNetwork<ForwardingStarlightReceiver
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void playCatalystEffect(ColorWrapper color) {
         if (this.rand.nextInt(6) != 0) return;
 
@@ -188,7 +193,7 @@ public class TileLightwell extends TileEntityNetwork<ForwardingStarlightReceiver
                 .setMaxAge(Mth.ceil(age * 0.75F));
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void playFluidEffect(FluidStack contained, ColorWrapper color) {
         if (this.rand.nextInt(3) != 0) return;
 
@@ -215,7 +220,8 @@ public class TileLightwell extends TileEntityNetwork<ForwardingStarlightReceiver
     }
 
     @Override
-    public void receiveStarlight(ServerLevel sLevel, StarlightTransmissionPacket packet) {}
+    public void receiveStarlight(ServerLevel sLevel, StarlightTransmissionPacket packet) {
+    }
 
     @Override
     public Codec<Data> dataCodec() {
@@ -223,7 +229,7 @@ public class TileLightwell extends TileEntityNetwork<ForwardingStarlightReceiver
     }
 
     @Override
-    public DeferredHolder<TransmissionNodeProvider<?>, ForwardingStarlightReceiverNodeProvider> getNodeProvider() {
+    public ForwardingStarlightReceiverNodeProvider getNodeProvider() {
         return StarlightNetworkNodesAS.FORWARDING_RECEIVER_NODE;
     }
 
@@ -271,7 +277,7 @@ public class TileLightwell extends TileEntityNetwork<ForwardingStarlightReceiver
 
         protected FluidTankViewFactory newFluidTank() {
             return FluidTankViewFactory.builder(1)
-                    .tankCapacity(tank -> 2000)
+                    .tankCapacity(tank -> 2000L * 81)
                     .inputFilter((tank, stack, existing) -> false)
                     .accessibleSides(Direction.DOWN);
         }
@@ -283,10 +289,9 @@ public class TileLightwell extends TileEntityNetwork<ForwardingStarlightReceiver
         protected FilteredInventoryViewFactory newInventoryHandler() {
             return FilteredInventoryViewFactory.filteredBuilder(1)
                     .stackSizeLimiter((slot, stack) -> 1)
-                    .extractFilter((slot, amount, existing) -> false)
-                    .inputFilter((slot, toAdd, existing) -> {
-                        if (!existing.isEmpty()) return false;
-                        return this.findMatchingRecipe(toAdd).isPresent();
+                    .extractFilter((amount, existing) -> false)
+                    .inputFilter((amount, toAdd) -> {
+                        return this.findMatchingRecipe(toAdd.toStack((int) amount)).isPresent();
                     })
                     .accessibleSides(Direction.DOWN);
         }

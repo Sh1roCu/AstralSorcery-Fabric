@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.event.handler;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.network.PacketDistributor;
 import hellfirepvp.astralsorcery.common.block.tile.AltarBlock;
 import hellfirepvp.astralsorcery.common.component.LumenComponent;
 import hellfirepvp.astralsorcery.common.component.StoredLumenComponent;
@@ -22,13 +23,12 @@ import hellfirepvp.astralsorcery.common.network.play.*;
 import hellfirepvp.astralsorcery.common.research.*;
 import hellfirepvp.astralsorcery.common.tile.TileAltar;
 import hellfirepvp.astralsorcery.common.util.RecipeUtil;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.HashSet;
 import java.util.List;
@@ -43,15 +43,15 @@ import java.util.Set;
  */
 public class PlayerEventHandler {
 
-    public static void attachListeners(IEventBus bus) {
-        bus.addListener(PlayerEventHandler::onLogin);
-        bus.addListener(PlayerEventHandler::onResearchDiscover);
+    public static void attachListeners() {
+        ServerPlayerEvents.JOIN.register(PlayerEventHandler::onLogin);
+        InventoryChangeEvent.EVENT.register(PlayerEventHandler::onResearchDiscover);
     }
 
     private static void onResearchDiscover(InventoryChangeEvent event) {
         ItemStack stack = event.getNewStack();
         ServerPlayer sPlayer = event.getPlayer();
-        PlayerProgress prog = ResearchManager.getProgress(sPlayer, LogicalSide.SERVER);
+        PlayerProgress prog = ResearchManager.getProgress(sPlayer, EnvType.SERVER);
         if (!prog.isValid()) return;
 
         if (stack.has(DataComponentsAS.LUMEN)) {
@@ -96,15 +96,15 @@ public class PlayerEventHandler {
         }
     }
 
-    private static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer sPlayer)) {
+    private static void onLogin(Player player) {
+        if (!(player instanceof ServerPlayer sPlayer)) {
             return;
         }
 
         if (GeneralConfig.CONFIG.giveTomeOnJoin.get()) {
-            PlayerProgress progress = ResearchManager.getProgress(sPlayer, LogicalSide.SERVER);
+            PlayerProgress progress = ResearchManager.getProgress(sPlayer, EnvType.SERVER);
             if (!progress.hasReceivedTome()) {
-                if (sPlayer.getInventory().add(ItemsAS.TOME.toStack())) {
+                if (sPlayer.getInventory().add(ItemsAS.TOME.getDefaultInstance())) {
                     ResearchHelper.setTomeReceived(sPlayer);
                 }
             }
@@ -114,7 +114,7 @@ public class PlayerEventHandler {
         PacketDistributor.sendToPlayer(sPlayer, PktSyncResearchNodes.newRequest());
         PacketDistributor.sendToPlayer(sPlayer, PktSyncData.syncAll(SyncDataManager.getInstance()));
         PacketDistributor.sendToPlayer(sPlayer, PktSyncPerkLevels.sync(sPlayer));
-        PacketDistributor.sendToPlayer(sPlayer, PktSyncPlayerProgress.newRequest(ResearchManager.getProgress(sPlayer, LogicalSide.SERVER)));
+        PacketDistributor.sendToPlayer(sPlayer, PktSyncPlayerProgress.newRequest(ResearchManager.getProgress(sPlayer, EnvType.SERVER)));
         PacketDistributor.sendToPlayer(sPlayer, PktSyncLumenBindingTypes.newRequest());
     }
 }

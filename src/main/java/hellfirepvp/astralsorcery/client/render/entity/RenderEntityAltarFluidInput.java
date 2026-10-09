@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.render.entity;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -18,6 +19,8 @@ import hellfirepvp.astralsorcery.common.entity.EntityAltarFluidInput;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.observerlib.client.util.LightmapUtil;
+import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -25,8 +28,6 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -65,11 +66,11 @@ public class RenderEntityAltarFluidInput extends EntityRenderer<EntityAltarFluid
         TextureAtlasSprite sprite = RenderSpriteUtil.getTexture(contained);
         Vector3 rotation = RenderVectorUtil.interpolate(entity.getPrevRotation(), entity.getRotation(), partialTick);
 
-        int light = contained.getFluid().getFluidType().getLightLevel(contained);
+        int light = FluidVariantAttributes.getLuminance(contained.getFluidVariant());
         int blockLight = packedLight >> 4 & 0xF;
         packedLight = LightmapUtil.getPackedLightCoords(packedLight >> 20 & 0xF, Math.max(blockLight, light));
 
-        int tint = IClientFluidTypeExtensions.of(contained.getFluid()).getTintColor(contained);
+        int tint = FluidVariantRendering.getColor(contained.getFluidVariant());
         ColorWrapper color = ColorWrapper.opaque(tint);
         VertexConsumer vb = bufferSource.getBuffer(RenderTypesAS.TER_CHALICE_LIQUID);
 

@@ -13,28 +13,21 @@ import hellfirepvp.astralsorcery.client.effect.EffectHelper;
 import hellfirepvp.astralsorcery.client.effect.function.FXAlphaFunction;
 import hellfirepvp.astralsorcery.client.effect.function.FXColorFunction;
 import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
-import hellfirepvp.astralsorcery.common.component.CrystalAttributesComponent;
-import hellfirepvp.astralsorcery.common.crystal.CrystalPropertyGenerator;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
-import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
-import hellfirepvp.astralsorcery.common.lib.ItemsAS;
-import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
 import hellfirepvp.astralsorcery.common.lib.types.LiquidStarlightRecipeOutputTypesAS;
 import hellfirepvp.astralsorcery.common.recipe.liquid.LiquidStarlightRecipe;
 import hellfirepvp.astralsorcery.common.recipe.liquid.LiquidStarlightRecipeInput;
-import hellfirepvp.astralsorcery.common.tile.TileCelestialCrystalCluster;
-import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -50,7 +43,8 @@ public class LiquidStarlightOutputFormGemCrystalCluster extends LiquidStarlightR
     public static final StreamCodec<RegistryFriendlyByteBuf, LiquidStarlightOutputFormGemCrystalCluster> STREAM_CODEC = StreamCodec.unit(INSTANCE);
     public static final Type<LiquidStarlightOutputFormGemCrystalCluster> TYPE = new Type<>(CODEC, STREAM_CODEC);
 
-    private LiquidStarlightOutputFormGemCrystalCluster() {}
+    private LiquidStarlightOutputFormGemCrystalCluster() {
+    }
 
     public static LiquidStarlightOutputFormGemCrystalCluster getInstance() {
         return INSTANCE;
@@ -58,7 +52,7 @@ public class LiquidStarlightOutputFormGemCrystalCluster extends LiquidStarlightR
 
     @Override
     public Type<?> getType() {
-        return LiquidStarlightRecipeOutputTypesAS.FORM_GEM_CRYSTAL_CLUSTER.get();
+        return LiquidStarlightRecipeOutputTypesAS.FORM_GEM_CRYSTAL_CLUSTER;
     }
 
     @Override
@@ -71,13 +65,13 @@ public class LiquidStarlightOutputFormGemCrystalCluster extends LiquidStarlightR
         Level level = input.getTriggerEntity().level();
         BlockPos pos = input.getTriggerEntity().blockPosition();
 
-        if (level.setBlockAndUpdate(pos, BlocksAS.GEM_CRYSTAL_CLUSTER.get().defaultBlockState())) {
+        if (level.setBlockAndUpdate(pos, BlocksAS.GEM_CRYSTAL_CLUSTER.defaultBlockState())) {
             recipe.consumeItemInputs(input);
         }
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void playCraftingEffects(LiquidStarlightRecipe recipe, LiquidStarlightRecipeInput input, RandomSource rand, int craftingTick) {
         super.playCraftingEffects(recipe, input, rand, craftingTick);
 

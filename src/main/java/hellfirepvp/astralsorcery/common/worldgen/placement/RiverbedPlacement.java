@@ -54,6 +54,6 @@ public class RiverbedPlacement extends PlacementModifier {
 
     @Override
     public PlacementModifierType<?> type() {
-        return WorldGenAS.RIVERBED_PLACEMENT.get();
+        return WorldGenAS.RIVERBED_PLACEMENT;
     }
 }

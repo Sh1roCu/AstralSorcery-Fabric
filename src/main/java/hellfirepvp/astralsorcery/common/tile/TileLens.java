@@ -15,18 +15,15 @@ import hellfirepvp.astralsorcery.common.block.tile.LensBlock;
 import hellfirepvp.astralsorcery.common.component.CrystalAttributesComponent;
 import hellfirepvp.astralsorcery.common.lib.StarlightNetworkNodesAS;
 import hellfirepvp.astralsorcery.common.lib.TileEntitiesAS;
-import hellfirepvp.astralsorcery.common.starlight.api.provider.TransmissionNodeProvider;
 import hellfirepvp.astralsorcery.common.tile.base.TileDataCrystalAttributeContainer;
 import hellfirepvp.astralsorcery.common.tile.base.TileEntityNetwork;
 import hellfirepvp.astralsorcery.common.tile.network.SimpleSingleTransmissionNode;
 import hellfirepvp.astralsorcery.common.tile.network.provider.SimpleSingleTransmissionNodeProvider;
-import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
 import hellfirepvp.astralsorcery.common.util.data.TileRegistryObject;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.registries.DeferredHolder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -57,7 +54,7 @@ public class TileLens extends TileEntityNetwork<SimpleSingleTransmissionNode, Ti
     }
 
     @Override
-    public DeferredHolder<TransmissionNodeProvider<?>, SimpleSingleTransmissionNodeProvider> getNodeProvider() {
+    public SimpleSingleTransmissionNodeProvider getNodeProvider() {
         return StarlightNetworkNodesAS.SIMPLE_SINGLE_NODE;
     }
 

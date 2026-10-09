@@ -9,7 +9,6 @@
 package hellfirepvp.astralsorcery.common.perk.source.provider.equipment;
 
 import hellfirepvp.astralsorcery.common.component.IdentifierComponent;
-import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
 import hellfirepvp.astralsorcery.common.lib.PerksAS;
 import hellfirepvp.astralsorcery.common.perk.DynamicModifierHelper;
 import hellfirepvp.astralsorcery.common.perk.modifier.PerkAttributeModifier;
@@ -17,14 +16,16 @@ import hellfirepvp.astralsorcery.common.perk.source.AttributeModifierProvider;
 import hellfirepvp.astralsorcery.common.perk.source.ModifierSource;
 import hellfirepvp.astralsorcery.common.perk.source.ModifierSourceProvider;
 import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
+import net.fabricmc.api.EnvType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.LogicalSide;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Objects;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -52,20 +53,20 @@ public class EquipmentModifierSource implements ModifierSource, AttributeModifie
     }
 
     @Override
-    public boolean canApplySource(Player player, LogicalSide dist) {
+    public boolean canApplySource(Player player, EnvType dist) {
         return true;
     }
 
     @Override
-    public void onRemove(Player player, LogicalSide dist) {
+    public void onRemove(Player player, EnvType dist) {
     }
 
     @Override
-    public void onApply(Player player, LogicalSide dist) {
+    public void onApply(Player player, EnvType dist) {
     }
 
     @Override
-    public Collection<PerkAttributeModifier> getModifiers(Player player, LogicalSide side, boolean ignoreRequirements) {
+    public Collection<PerkAttributeModifier> getModifiers(Player player, EnvType side, boolean ignoreRequirements) {
         if (this.itemStack.isEmpty()) {
             return Collections.emptyList();
         }
@@ -74,7 +75,7 @@ public class EquipmentModifierSource implements ModifierSource, AttributeModifie
 
     @Override
     public ModifierSourceProvider<?> getSourceProvider() {
-        return PerksAS.Sources.EQUIPMENT.get();
+        return PerksAS.Sources.EQUIPMENT;
     }
 
     @Override

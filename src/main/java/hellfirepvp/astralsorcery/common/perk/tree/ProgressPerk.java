@@ -20,7 +20,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -74,7 +74,7 @@ public abstract class ProgressPerk<D extends AbstractPerk.Data> extends Abstract
     }
 
     @Override
-    protected boolean addTooltip(Collection<MutableComponent> tooltip, PlayerProgress progress, @Nullable Player player, LogicalSide side) {
+    protected boolean addTooltip(Collection<MutableComponent> tooltip, PlayerProgress progress, @Nullable Player player, EnvType side) {
         if (!this.canSee(progress)) {
             tooltip.add(getInfoText("missing_progress").withStyle(ChatFormatting.RED));
             return true;
@@ -88,7 +88,7 @@ public abstract class ProgressPerk<D extends AbstractPerk.Data> extends Abstract
         return super.mayUnlockPerk(progress, player);
     }
 
-    public final boolean canSee(Player player, LogicalSide side) {
+    public final boolean canSee(Player player, EnvType side) {
         PlayerProgress prog = ResearchManager.getProgress(player, side);
         if (prog.isValid()) {
             return this.canSee(prog);

@@ -124,7 +124,7 @@ public class InfusionRecipeCategory extends ASRecipeCategory<InfusionRecipe> {
 
     @Override
     public List<ItemStack> provideCatalyst() {
-        return List.of(ItemsAS.BLOCK_INFUSER.toStack());
+        return List.of(ItemsAS.BLOCK_INFUSER.getDefaultInstance());
     }
 
     @Override

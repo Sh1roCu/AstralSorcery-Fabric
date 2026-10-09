@@ -8,8 +8,15 @@
 
 package hellfirepvp.astralsorcery.common.util;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.fluids.FluidActionResult;
+import cn.sh1rocu.astralsorcery.util.neoforge.fluids.FluidUtil;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -19,15 +26,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.common.SoundActions;
-import net.neoforged.neoforge.fluids.FluidActionResult;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
-import net.neoforged.neoforge.fluids.FluidUtil;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
@@ -43,14 +41,14 @@ public class InteractUtil {
 
     @Nullable
     public static ItemInteractionResult tryTransferFluidIntoBlock(ItemStack heldStack, Player player, Level level, BlockPos pos, Consumer<ItemStack> stackUpdateFn) {
-        IFluidHandler target = MiscUtil.getTileAt(level, pos, BlockEntity.class, true)
-                .map(blockEntity -> level.getCapability(Capabilities.FluidHandler.BLOCK, pos, null))
+        var target = MiscUtil.getTileAt(level, pos, BlockEntity.class, true)
+                .map(blockEntity -> FluidStorage.SIDED.find(level, pos, null))
                 .orElse(null);
         if (heldStack.isEmpty() || target == null) {
             return null;
         }
 
-        FluidActionResult far = FluidUtil.tryEmptyContainer(heldStack, target, FluidType.BUCKET_VOLUME, player, true);
+        FluidActionResult far = FluidUtil.tryEmptyContainer(heldStack, target, FluidConstants.BUCKET, player, true);
         if (!far.isSuccess()) return null;
         if (!player.isCreative()) stackUpdateFn.accept(far.getResult());
         return ItemInteractionResult.SUCCESS;
@@ -58,14 +56,14 @@ public class InteractUtil {
 
     @Nullable
     public static ItemInteractionResult tryTransferFluidFromBlock(ItemStack heldStack, Player player, Level level, BlockPos pos, Consumer<ItemStack> stackUpdateFn) {
-        IFluidHandler target = MiscUtil.getTileAt(level, pos, BlockEntity.class, true)
-                .map(blockEntity -> level.getCapability(Capabilities.FluidHandler.BLOCK, pos, null))
+        var target = MiscUtil.getTileAt(level, pos, BlockEntity.class, true)
+                .map(blockEntity -> FluidStorage.SIDED.find(level, pos, null))
                 .orElse(null);
         if (heldStack.isEmpty() || target == null) {
             return null;
         }
 
-        FluidActionResult far = FluidUtil.tryFillContainer(heldStack, target, FluidType.BUCKET_VOLUME, player, true);
+        FluidActionResult far = FluidUtil.tryFillContainer(heldStack, target, FluidConstants.BUCKET, player, true);
         if (!far.isSuccess()) return null;
         if (!player.isCreative()) stackUpdateFn.accept(far.getResult());
         return ItemInteractionResult.SUCCESS;
@@ -73,8 +71,8 @@ public class InteractUtil {
 
     @Nullable
     public static ItemInteractionResult tryPlaceItemIntoBlock(ItemStack heldStack, Player player, Level level, BlockPos pos) {
-        IItemHandler target = MiscUtil.getTileAt(level, pos, BlockEntity.class, true)
-                .map(blockEntity -> level.getCapability(Capabilities.ItemHandler.BLOCK, pos, null))
+        var target = MiscUtil.getTileAt(level, pos, BlockEntity.class, true)
+                .map(blockEntity -> ItemStorage.SIDED.find(level, pos, null))
                 .orElse(null);
         if (target == null) {
             return null;
@@ -83,8 +81,13 @@ public class InteractUtil {
         boolean playPickupSound = false;
         ItemInteractionResult result = null;
         //Extract 1 item that can be found
-        for (int slot = 0; slot < target.getSlots(); slot++) {
-            ItemStack invSlot = target.extractItem(slot, 64, false);
+        for (var view : target.nonEmptyViews()) {
+            ItemStack invSlot = ItemStack.EMPTY;
+            try (Transaction tx = Transaction.openOuter()) {
+                long extracted = target.extract(view.getResource(), 64, tx);
+                if (extracted > 0) invSlot = view.getResource().toStack((int) extracted);
+                tx.commit();
+            }
             if (!invSlot.isEmpty()) {
                 if (!player.getInventory().add(invSlot)) {
                     ItemUtil.dropItem(level, player.position(), invSlot);
@@ -96,19 +99,20 @@ public class InteractUtil {
         }
 
         if (!heldStack.isEmpty()) {
-            for (int slot = 0; slot < target.getSlots(); slot++) {
-                ItemStack remaining = target.insertItem(slot, heldStack, false);
-                int inserted = heldStack.getCount() - remaining.getCount();
-                if (inserted > 0) {
-                    playPickupSound = true;
-                    if (!player.isCreative()) {
-                        heldStack.shrink(inserted);
-                    }
-                    result = ItemInteractionResult.SUCCESS;
-                    break;
+            long inserted;
+            try (Transaction tx = Transaction.openOuter()) {
+                inserted = target.insert(ItemVariant.of(heldStack), heldStack.getCount(), tx);
+                tx.commit();
+            }
+            if (inserted > 0) {
+                playPickupSound = true;
+                if (!player.isCreative()) {
+                    heldStack.shrink((int) inserted);
                 }
+                result = ItemInteractionResult.SUCCESS;
             }
         }
+
 
         if (playPickupSound) {
             level.playSound(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
@@ -136,6 +140,9 @@ public class InteractUtil {
     }
 
     public static void giveItemToPlayer(Player player, ItemStack stack, int slot) {
-        ItemHandlerHelper.giveItemToPlayer(player, stack, slot);
+        try (Transaction tx = Transaction.openOuter()) {
+            PlayerInventoryStorage.of(player).offerOrDrop(ItemVariant.of(stack), stack.getCount(), tx);
+            tx.commit();
+        }
     }
 }

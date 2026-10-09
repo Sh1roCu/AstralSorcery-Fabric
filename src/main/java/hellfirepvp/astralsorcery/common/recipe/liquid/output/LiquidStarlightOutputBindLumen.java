@@ -33,6 +33,8 @@ import hellfirepvp.astralsorcery.common.util.SidedHelper;
 import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -44,9 +46,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.LogicalSide;
 
 import java.util.HashSet;
 import java.util.List;
@@ -69,7 +68,8 @@ public class LiquidStarlightOutputBindLumen extends LiquidStarlightRecipeOutputM
 
     private final RandomSource rand = RandomSource.create();
 
-    private LiquidStarlightOutputBindLumen() {}
+    private LiquidStarlightOutputBindLumen() {
+    }
 
     public static LiquidStarlightOutputBindLumen getInstance() {
         return INSTANCE;
@@ -77,7 +77,7 @@ public class LiquidStarlightOutputBindLumen extends LiquidStarlightRecipeOutputM
 
     @Override
     public Type<?> getType() {
-        return LiquidStarlightRecipeOutputTypesAS.BIND_LUMEN.get();
+        return LiquidStarlightRecipeOutputTypesAS.BIND_LUMEN;
     }
 
     @Override
@@ -89,7 +89,7 @@ public class LiquidStarlightOutputBindLumen extends LiquidStarlightRecipeOutputM
     public void createOutput(LiquidStarlightRecipe recipe, LiquidStarlightRecipeInput input) {
         ItemEntity inputEntity = input.getTriggerEntity();
         Level level = inputEntity.level();
-        LogicalSide side = SidedHelper.getSide(level);
+        EnvType side = SidedHelper.getSide(level);
 
         ItemStack bindableInput = input.getOtherEntities().stream()
                 .map(ItemEntity::getItem)
@@ -102,7 +102,7 @@ public class LiquidStarlightOutputBindLumen extends LiquidStarlightRecipeOutputM
         if (lumenRef.is(LumenAS.NONE.getKey())) return;
         Lumen lumen = lumenRef.value();
 
-        LumenBindingTypeLoader.getInstance().getLumenBindingType(side, lumenRef.getKey()).ifPresent(bindingKey -> {
+        LumenBindingTypeLoader.getInstance().getLumenBindingType(side, lumenRef.unwrapKey().orElseThrow()).ifPresent(bindingKey -> {
             ItemStack output = bindableInput.copyWithCount(1);
 
             if (IsLumenBindableIngredient.INSTANCE.isPotionLumenBindable(output)) {
@@ -121,7 +121,7 @@ public class LiquidStarlightOutputBindLumen extends LiquidStarlightRecipeOutputM
 
                         cmp = cmp.setFlag(FlagsComponent.Flag.HAS_PRISMATIC_LUMEN);
                         output.set(DataComponentsAS.FLAGS, cmp);
-                        output.set(DataComponents.RARITY, EnumExtensions.RARITY_RELIC.getValue());
+                        output.set(DataComponents.RARITY, EnumExtensions.RARITY_RELIC);
                     }
                 } else {
                     LumenBindingTypeLoader.getInstance().getBindingType(side, bindingKey).ifPresent(bindingType -> {
@@ -130,7 +130,7 @@ public class LiquidStarlightOutputBindLumen extends LiquidStarlightRecipeOutputM
                             contents = new PotionContents(Optional.empty(), contents.customColor(), contents.customEffects());
                             contents = contents.withEffectAdded(effect);
                             output.set(DataComponents.POTION_CONTENTS, contents);
-                            output.set(DataComponents.RARITY, EnumExtensions.RARITY_RELIC.getValue());
+                            output.set(DataComponents.RARITY, EnumExtensions.RARITY_RELIC);
 
                             ItemUtil.dropItem(level, inputEntity.getX(), inputEntity.getY(), inputEntity.getZ(), output);
                             recipe.consumeItemInputs(input);
@@ -147,7 +147,7 @@ public class LiquidStarlightOutputBindLumen extends LiquidStarlightRecipeOutputM
             if (!lumenRef.is(LumenAS.PRISMATIC.getKey())) {
                 Set<Lumen> otherCopy = new HashSet<>(cmp.boundLumen().keySet());
                 for (Lumen otherLumen : otherCopy) {
-                    if (otherLumen.getRegistryKey().isEmpty() || !LumenAS.PRISMATIC.is(otherLumen.getRegistryKey().get())) {
+                    if (otherLumen.getRegistryKey().isEmpty() || !LumenAS.PRISMATIC.holder().is(otherLumen.getRegistryKey().get())) {
                         cmp = cmp.removeBinding(otherLumen);
                         cmp = cmp.updateLumenStack(otherLumen, 0, cmp.properties().capacity());
                     }
@@ -165,7 +165,7 @@ public class LiquidStarlightOutputBindLumen extends LiquidStarlightRecipeOutputM
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void playCraftingEffects(LiquidStarlightRecipe recipe, LiquidStarlightRecipeInput input, RandomSource rand, int craftingTick) {
         super.playCraftingEffects(recipe, input, rand, craftingTick);
 

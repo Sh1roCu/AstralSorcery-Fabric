@@ -8,6 +8,10 @@
 
 package hellfirepvp.astralsorcery.common.event.helper;
 
+import cn.sh1rocu.astralsorcery.api.event.GetEnchantmentLevelEvent;
+import cn.sh1rocu.astralsorcery.api.event.PlayerTickEvent;
+import cn.sh1rocu.astralsorcery.util.neoforge.common.util.LogicalSidedProvider;
+import cn.sh1rocu.observerlib.ObserverLibFabric;
 import hellfirepvp.astralsorcery.common.Mods;
 import hellfirepvp.astralsorcery.common.component.EnchantmentModifierComponent;
 import hellfirepvp.astralsorcery.common.component.WeakPlayerReferenceComponent;
@@ -15,6 +19,7 @@ import hellfirepvp.astralsorcery.common.enchantment.CombinedEnchantmentModifiers
 import hellfirepvp.astralsorcery.common.event.DynamicEnchantmentEvent;
 import hellfirepvp.astralsorcery.common.integration.IntegrationCurios;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
+import net.fabricmc.api.EnvType;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -25,13 +30,6 @@ import net.minecraft.world.item.BookItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.util.LogicalSidedProvider;
-import net.neoforged.neoforge.event.enchanting.GetEnchantmentLevelEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,9 +48,9 @@ public class EnchantmentModifierHelper {
 
     private static final ResourceLocation AIR_ID = ResourceLocation.withDefaultNamespace("air");
 
-    public static void attachListeners(IEventBus bus) {
-        bus.addListener(EnchantmentModifierHelper::onPlayerTick);
-        bus.addListener(EnchantmentModifierHelper::onEnchantmentAdd);
+    public static void attachListeners() {
+        PlayerTickEvent.PRE.register(EnchantmentModifierHelper::onPlayerTick);
+        GetEnchantmentLevelEvent.EVENT.register(EnchantmentModifierHelper::onEnchantmentAdd);
     }
 
     private static void onPlayerTick(PlayerTickEvent.Pre event) {
@@ -108,8 +106,8 @@ public class EnchantmentModifierHelper {
 
     private static CombinedEnchantmentModifiers getModifiersToApply(ItemStack tool) {
         return getPlayer(tool).map(player -> {
-            DynamicEnchantmentEvent.Add createEvent = new DynamicEnchantmentEvent.Add(player);
-            NeoForge.EVENT_BUS.post(createEvent);
+            var createEvent = new DynamicEnchantmentEvent.Add(player);
+            DynamicEnchantmentEvent.Add.EVENT.invoker().post(createEvent);
             CombinedEnchantmentModifiers modifiers = createEvent.getDynamicEnchantments().build();
 
             for (ItemStack modifierStack : findEnchantmentModifiers(player)) {
@@ -117,8 +115,8 @@ public class EnchantmentModifierHelper {
                 modifiers = modifiers.combine(mod.combined());
             }
 
-            DynamicEnchantmentEvent.Modify modifyEvent = new DynamicEnchantmentEvent.Modify(player, modifiers);
-            NeoForge.EVENT_BUS.post(modifyEvent);
+            var modifyEvent = new DynamicEnchantmentEvent.Modify(player, modifiers);
+            DynamicEnchantmentEvent.Modify.EVENT.invoker().post(modifyEvent);
             return modifyEvent.getDynamicEnchantments().build();
         }).orElse(CombinedEnchantmentModifiers.of());
     }
@@ -143,11 +141,11 @@ public class EnchantmentModifierHelper {
         UUID playerId = tool.getOrDefault(DataComponentsAS.WEAK_PLAYER_REFERENCE, WeakPlayerReferenceComponent.NONE).playerUUID();
 
         //Try server first, then client world lookup
-        MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
+        MinecraftServer srv = ObserverLibFabric.getServer();
         if (srv != null) {
             return Optional.ofNullable(srv.getPlayerList().getPlayer(playerId));
         } else {
-            return LogicalSidedProvider.CLIENTWORLD.get(LogicalSide.CLIENT).map(level -> {
+            return LogicalSidedProvider.CLIENTWORLD.get(EnvType.CLIENT).map(level -> {
                 return level.getPlayerByUUID(playerId);
             });
         }

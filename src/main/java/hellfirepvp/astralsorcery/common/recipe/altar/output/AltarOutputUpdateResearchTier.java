@@ -8,16 +8,16 @@
 
 package hellfirepvp.astralsorcery.common.recipe.altar.output;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.network.codec.NeoForgeStreamCodecs;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.recipe.altar.AltarCraftingInput;
 import hellfirepvp.astralsorcery.common.research.*;
+import net.fabricmc.api.EnvType;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.network.codec.NeoForgeStreamCodecs;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -59,7 +59,7 @@ public class AltarOutputUpdateResearchTier extends AltarRecipeOutputModifier {
     @Override
     public ItemStack modifyOutput(ItemStack output, AltarCraftingInput input, HolderLookup.Provider registries) {
         input.getCraftingServerPlayer().ifPresent(sPlayer -> {
-            PlayerProgress prog = ResearchManager.getProgress(sPlayer, LogicalSide.SERVER);
+            PlayerProgress prog = ResearchManager.getProgress(sPlayer, EnvType.SERVER);
             ResearchTier current = prog.getTierReached();
             if (prog.isValid() && this.tier.isThisLater(current)) {
                 if (ResearchHelper.setResearchProgress(sPlayer, this.tier)) {

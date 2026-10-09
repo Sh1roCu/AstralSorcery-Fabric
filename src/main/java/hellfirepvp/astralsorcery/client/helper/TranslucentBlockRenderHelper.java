@@ -25,7 +25,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.model.data.ModelData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,7 +61,7 @@ public class TranslucentBlockRenderHelper {
                 RenderUtil.safeCopyDepth(transparencyTarget, particleTarget);
                 renders.forEach(render -> {
                     brd.renderSingleBlock(render.state(), render.pose(), chainBuffers,
-                            LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, null);
+                            LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY/*, ModelData.EMPTY, null*/);
                 });
                 chainBuffers.end();
                 ShaderProgramsAS.TRANSPARENCY_COLOR.redirect(particleTarget, chain -> chain.process(pTicks));
@@ -98,5 +97,6 @@ public class TranslucentBlockRenderHelper {
         colorFrameRenderables.computeIfAbsent(color, c -> new ArrayList<>()).add(new BlockRenderable(state, copy));
     }
 
-    private record BlockRenderable(BlockState state, PoseStack pose) {}
+    private record BlockRenderable(BlockState state, PoseStack pose) {
+    }
 }

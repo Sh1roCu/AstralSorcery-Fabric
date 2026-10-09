@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.block;
 
+import cn.sh1rocu.astralsorcery.api.extension.IPathTypeBlock;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -42,7 +43,7 @@ import java.util.function.Supplier;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class ColumnBlock extends Block implements SimpleWaterloggedBlock {
+public class ColumnBlock extends Block implements SimpleWaterloggedBlock, IPathTypeBlock {
 
     public static final MapCodec<ColumnBlock> CODEC = simpleCodec(ColumnBlock::new);
 
@@ -55,7 +56,7 @@ public class ColumnBlock extends Block implements SimpleWaterloggedBlock {
         super(properties);
         this.registerDefaultState(this.getStateDefinition().any().setValue(COLUMN_TYPE, ColumnType.MIDDLE).setValue(WATERLOGGED, false));
         this.middleShape = createColumnShape();
-        this.topShape    = createColumnTopShape();
+        this.topShape = createColumnTopShape();
         this.bottomShape = createColumnBottomShape();
     }
 
@@ -119,7 +120,7 @@ public class ColumnBlock extends Block implements SimpleWaterloggedBlock {
     }
 
     private BlockState getThisState(BlockGetter world, BlockPos pos) {
-        boolean hasUp   = world.getBlockState(pos.above()).getBlock() == this;
+        boolean hasUp = world.getBlockState(pos.above()).getBlock() == this;
         boolean hasDown = world.getBlockState(pos.below()).getBlock() == this;
         if (hasUp) {
             if (hasDown) {

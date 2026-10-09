@@ -22,10 +22,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
-
-import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -99,7 +96,7 @@ public class LumenCrystallizationRecipe extends CustomRecipe<LumenCrystallizatio
     }
 
     @Override
-    public Supplier<? extends RecipeSerializer<LumenCrystallizationRecipe>> getRecipeSerializer() {
+    public RecipeSerializer<LumenCrystallizationRecipe> getRecipeSerializer() {
         return RecipeTypesAS.LUMEN_CRYSTALLIZATION_SERIALIZER;
     }
 

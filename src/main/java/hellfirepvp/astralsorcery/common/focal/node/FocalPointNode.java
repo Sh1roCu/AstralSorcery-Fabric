@@ -21,6 +21,8 @@ import hellfirepvp.astralsorcery.common.tile.TileStarlightFocusCrystal;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColumnPos;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -28,8 +30,6 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -61,9 +61,11 @@ public abstract class FocalPointNode {
         this.focalPosition = focalPosition.orElse(null);
     }
 
-    public void onLoad(ServerLevel sLevel) {}
+    public void onLoad(ServerLevel sLevel) {
+    }
 
-    public void onUnload(ServerLevel sLevel) {}
+    public void onUnload(ServerLevel sLevel) {
+    }
 
     protected static <T extends FocalPointNode> Products.P4<RecordCodecBuilder.Mu<T>, ColumnPos, BaseConstellation, Long, Optional<BlockPos>> commonFields(RecordCodecBuilder.Instance<T> inst) {
         return inst.group(
@@ -112,12 +114,13 @@ public abstract class FocalPointNode {
         this.ticksExisted++;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void tickEffects(ClientLevel level) {
         this.ticksExisted++;
     }
 
     public abstract Type<?> getType();
 
-    public record Type<T extends FocalPointNode>(MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> syncCodec) {}
+    public record Type<T extends FocalPointNode>(MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> syncCodec) {
+    }
 }

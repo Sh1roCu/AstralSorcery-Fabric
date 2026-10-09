@@ -8,8 +8,10 @@
 
 package hellfirepvp.astralsorcery.common.event;
 
+import cn.sh1rocu.astralsorcery.api.event.EntityEvent;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.neoforged.neoforge.event.entity.EntityEvent;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -22,6 +24,12 @@ public class ProjectileInaccuracyEvent extends EntityEvent {
 
     private final Projectile projectile;
     private float inaccuracy;
+
+    public static final Event<Callback> EVENT = EventFactory.createArrayBacked(Callback.class, callbacks -> event -> {
+        for (Callback callback : callbacks) {
+            callback.post(event);
+        }
+    });
 
     public ProjectileInaccuracyEvent(Projectile projectile, float inaccuracy) {
         super(projectile);
@@ -39,5 +47,9 @@ public class ProjectileInaccuracyEvent extends EntityEvent {
 
     public void setInaccuracy(float inaccuracy) {
         this.inaccuracy = inaccuracy;
+    }
+
+    public interface Callback {
+        void post(ProjectileInaccuracyEvent event);
     }
 }

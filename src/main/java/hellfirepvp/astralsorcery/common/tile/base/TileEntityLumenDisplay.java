@@ -8,7 +8,6 @@
 
 package hellfirepvp.astralsorcery.common.tile.base;
 
-import hellfirepvp.astralsorcery.common.component.IdentifierComponent;
 import hellfirepvp.astralsorcery.common.component.StoredLumenComponent;
 import hellfirepvp.astralsorcery.common.lumen.ILumenHandler;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
@@ -46,7 +45,7 @@ public interface TileEntityLumenDisplay {
         Level level = be.getLevel();
         if (level == null) return Optional.empty();
         BlockState state = be.getBlockState();
-        ILumenHandler handler = level.getCapability(ILumenHandler.BLOCK, be.getBlockPos(), state, be, null);
+        ILumenHandler handler = ILumenHandler.BLOCK.find(level, be.getBlockPos(), state, be, null);
         if (handler == null) return Optional.empty();
 
         List<StoredLumenComponent.StoredLumen> lumenList = new ArrayList<>();

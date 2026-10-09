@@ -8,7 +8,13 @@
 
 package hellfirepvp.astralsorcery.common.util;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
+import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -18,11 +24,6 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.common.extensions.IFluidExtension;
-import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -43,12 +44,12 @@ public class ColorUtil {
 
         int a1 = (color1 & 0xFF000000) >> 24;
         int r1 = (color1 & 0x00FF0000) >> 16;
-        int g1 = (color1 & 0x0000FF00) >>  8;
+        int g1 = (color1 & 0x0000FF00) >> 8;
         int b1 = (color1 & 0x000000FF);
 
         int a2 = (color2 & 0xFF000000) >> 24;
         int r2 = (color2 & 0x00FF0000) >> 16;
-        int g2 = (color2 & 0x0000FF00) >>  8;
+        int g2 = (color2 & 0x0000FF00) >> 8;
         int b2 = (color2 & 0x000000FF);
 
         int a = Mth.clamp(Math.round(a1 * ratio1 + a2 * ratio2), 0, 255);
@@ -83,11 +84,11 @@ public class ColorUtil {
         int alpha = (base & 0xFF000000) >> 24;
 
         int baseR = (base & 0x00FF0000) >> 16;
-        int baseG = (base & 0x0000FF00) >>  8;
+        int baseG = (base & 0x0000FF00) >> 8;
         int baseB = (base & 0x000000FF);
 
         int overlayR = (overlay & 0x00FF0000) >> 16;
-        int overlayG = (overlay & 0x0000FF00) >>  8;
+        int overlayG = (overlay & 0x0000FF00) >> 8;
         int overlayB = (overlay & 0x000000FF);
 
         int r = Math.round(baseR * (overlayR / 255F)) & 0xFF;
@@ -97,13 +98,18 @@ public class ColorUtil {
         return alpha << 24 | r << 16 | g << 8 | b;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public static ColorWrapper getOverlayColor(FluidStack stack) {
         if (stack.isEmpty()) return ColorWrapper.WHITE;
-        return ColorWrapper.transparent(IClientFluidTypeExtensions.of(stack.getFluidType()).getTintColor(stack));
+        return getOverlayColor(stack.getFluidVariant());
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
+    public static ColorWrapper getOverlayColor(FluidVariant fluidVariant) {
+        return ColorWrapper.transparent(FluidVariantRendering.getColor(fluidVariant));
+    }
+
+    @Environment(EnvType.CLIENT)
     public static ColorWrapper getOverlayColor(ItemStack stack) {
         if (stack.isEmpty()) return ColorWrapper.WHITE;
         if (stack.getItem() instanceof BlockItem) {
@@ -111,7 +117,9 @@ public class ColorUtil {
             if (state == null || state.isAir()) return ColorWrapper.WHITE;
             return ColorWrapper.transparent(Minecraft.getInstance().getBlockColors().getColor(state, Minecraft.getInstance().level, BlockPos.ZERO, 0));
         } else {
-            return ColorWrapper.transparent(Minecraft.getInstance().getItemColors().getColor(stack, 0));
+            var provider = ColorProviderRegistry.ITEM.get(stack.getItem());
+            if (provider == null) return ColorWrapper.WHITE;
+            return ColorWrapper.transparent(provider.getColor(stack, 0));
         }
     }
 

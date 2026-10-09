@@ -13,16 +13,15 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.client.screen.tome.page.RenderPage;
 import hellfirepvp.astralsorcery.client.screen.tome.page.RenderPageConstellation;
 import hellfirepvp.astralsorcery.client.screen.tome.page.RenderPageConstellationDetail;
-import hellfirepvp.astralsorcery.client.screen.tome.page.RenderPageText;
 import hellfirepvp.astralsorcery.common.constellation.BaseConstellation;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.lib.types.TomePageTypesAS;
 import hellfirepvp.astralsorcery.common.research.ResearchNode;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 
@@ -45,11 +44,11 @@ public record TomePageConstellation(BaseConstellation constellation) implements 
 
     @Override
     public TomePageType<?> getType() {
-        return TomePageTypesAS.CONSTELLATION_PAGE.get();
+        return TomePageTypesAS.CONSTELLATION_PAGE;
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public RenderPage createPage(@Nullable ResearchNode node, int page) {
         if (page % 2 != 0) {
             return new RenderPageConstellationDetail(node, page, this.constellation);

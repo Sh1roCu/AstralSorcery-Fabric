@@ -8,7 +8,10 @@
 
 package hellfirepvp.astralsorcery.client.init;
 
+import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.lib.*;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
@@ -19,16 +22,24 @@ import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class AssetInitializer implements ResourceManagerReloadListener {
+public class AssetInitializer implements ResourceManagerReloadListener, IdentifiableResourceReloadListener {
 
     private static final AssetInitializer INSTANCE = new AssetInitializer();
 
+    public static final ResourceLocation ID = AstralSorcery.key("asset_initializer");
+
     private boolean initialized = false;
 
-    private AssetInitializer() {}
+    private AssetInitializer() {
+    }
 
     public static AssetInitializer getInstance() {
         return INSTANCE;
+    }
+
+    @Override
+    public ResourceLocation getFabricId() {
+        return ID;
     }
 
     @Override

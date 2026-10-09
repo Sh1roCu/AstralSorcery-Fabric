@@ -8,32 +8,33 @@
 
 package hellfirepvp.astralsorcery.common.ingredient;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.fluids.FluidUtil;
+import cn.sh1rocu.astralsorcery.util.neoforge.fluids.crafing.SizedFluidIngredient;
+import cn.sh1rocu.astralsorcery.util.transfer.ItemStackStorage;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import hellfirepvp.astralsorcery.common.lib.IngredientsAS;
+import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.neoforged.neoforge.common.crafting.ICustomIngredient;
-import net.neoforged.neoforge.common.crafting.IngredientType;
-import net.neoforged.neoforge.fluids.FluidActionResult;
-import net.neoforged.neoforge.fluids.FluidUtil;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.templates.VoidFluidHandler;
-import net.neoforged.neoforge.fluids.crafting.FluidIngredient;
-import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -42,13 +43,32 @@ import java.util.stream.Stream;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public final class IngredientBridge implements ICustomIngredient {
+public final class IngredientBridge implements CustomIngredient {
 
     public static final IngredientBridge EMPTY = of(Ingredient.EMPTY);
     public static final MapCodec<IngredientBridge> CODEC = StringRepresentable.fromEnum(Type::values)
             .dispatchMap(ingredient -> ingredient.type, Type::getIngredientCodec);
     public static final StreamCodec<RegistryFriendlyByteBuf, IngredientBridge> STREAM_CODEC =
             Type.STREAM_CODEC.dispatch(ing -> ing.type, Type::getIngredientStreamCodec);
+
+    public static final CustomIngredientSerializer<IngredientBridge> SERIALIZER = new CustomIngredientSerializer<>() {
+        private static final ResourceLocation ID = AstralSorcery.key("bridge");
+
+        @Override
+        public ResourceLocation getIdentifier() {
+            return ID;
+        }
+
+        @Override
+        public MapCodec<IngredientBridge> getCodec(boolean allowEmpty) {
+            return CODEC;
+        }
+
+        @Override
+        public StreamCodec<RegistryFriendlyByteBuf, IngredientBridge> getPacketCodec() {
+            return STREAM_CODEC;
+        }
+    };
 
     private final Type type;
     private final Ingredient ingredient;
@@ -89,19 +109,24 @@ public final class IngredientBridge implements ICustomIngredient {
     }
 
     @Override
-    public Stream<ItemStack> getItems() {
+    public List<ItemStack> getMatchingStacks() {
         return switch (this.type) {
-            case ITEM -> Arrays.stream(this.ingredient.getItems());
-            case FLUID -> Arrays.stream(this.fluidIngredient.getFluids()).map(FluidUtil::getFilledBucket);
+            case ITEM -> Arrays.asList(this.ingredient.getItems());
+            case FLUID -> Arrays.stream(this.fluidIngredient.getFluids()).map(FluidUtil::getFilledBucket).toList();
         };
     }
 
     @Override
-    public boolean isSimple() {
+    public boolean requiresTesting() {
         return switch (this.type) {
-            case ITEM -> this.ingredient.isSimple();
-            case FLUID -> this.fluidIngredient.ingredient().isSimple();
+            case ITEM -> this.ingredient.requiresTesting();
+            case FLUID -> !this.fluidIngredient.ingredient().isSimple();
         };
+    }
+
+    @Override
+    public CustomIngredientSerializer<?> getSerializer() {
+        return SERIALIZER;
     }
 
     public boolean isEmpty() {
@@ -119,7 +144,7 @@ public final class IngredientBridge implements ICustomIngredient {
 
         return switch (this.type) {
             case ITEM -> {
-                ItemStack remainder = extracted.getCraftingRemainingItem().copy();
+                ItemStack remainder = extracted.getRecipeRemainder().copy();
                 if (!remainder.isEmpty()) {
                     if (!setter.apply(remainder).isEmpty() && !simulate) {
                         onRemainder.accept(remainder);
@@ -128,11 +153,17 @@ public final class IngredientBridge implements ICustomIngredient {
                 yield true;
             }
             case FLUID -> {
-                FluidActionResult result = FluidUtil.tryEmptyContainer(extracted, VoidFluidHandler.INSTANCE,
-                        this.fluidIngredient.amount(), null, !simulate);
-                if (!result.isSuccess()) yield false;
+                ContainerItemContext context = ContainerItemContext.ofSingleSlot(new ItemStackStorage(extracted));
+                var storage = context.find(FluidStorage.ITEM);
+                if (storage == null) yield false;
+                try (Transaction tx = Transaction.openOuter()) {
+                    StorageUtil.extractAny(storage, this.fluidIngredient.amount(), tx);
+                    if (!simulate) {
+                        tx.commit();
+                    }
+                }
 
-                ItemStack remainder = result.getResult().copy();
+                ItemStack remainder = context.getItemVariant().toStack(extracted.getCount()).copy();
                 if (!remainder.isEmpty()) {
                     if (!setter.apply(remainder).isEmpty() && !simulate) {
                         onRemainder.accept(remainder);
@@ -141,11 +172,6 @@ public final class IngredientBridge implements ICustomIngredient {
                 yield true;
             }
         };
-    }
-
-    @Override
-    public IngredientType<?> getType() {
-        return IngredientsAS.INGREDIENT_BRIDGE.get();
     }
 
     public enum Type implements StringRepresentable {

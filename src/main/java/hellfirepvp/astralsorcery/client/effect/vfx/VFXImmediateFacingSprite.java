@@ -55,7 +55,7 @@ public class VFXImmediateFacingSprite extends VFXFacingParticle implements Immed
 
     private RenderType createDecoratedType() {
         RenderType r = RenderTypesAS.EFFECT_FX_GENERIC_PARTICLE;
-        return new RenderType(r.name, r.format, r.mode, r.bufferSize, r.affectsCrumbling, r.sortOnUpload, r::setupRenderState, r::clearRenderState) {
+        return new RenderType(r.toString(), r.format(), r.mode(), r.bufferSize(), r.affectsCrumbling(), r.sortOnUpload(), r::setupRenderState, r::clearRenderState) {
             @Override
             public void setupRenderState() {
                 super.setupRenderState();

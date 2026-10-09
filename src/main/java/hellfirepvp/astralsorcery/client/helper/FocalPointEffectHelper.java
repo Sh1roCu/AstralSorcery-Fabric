@@ -23,7 +23,6 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -37,13 +36,13 @@ import java.util.function.Predicate;
  */
 public class FocalPointEffectHelper {
 
-    public static void onClientTick(ClientTickEvent.Pre event) {
-        if (Minecraft.getInstance().isPaused()) return;
+    public static void onClientTick(Minecraft client) {
+        if (client.isPaused()) return;
 
-        ClientLevel level = Minecraft.getInstance().level;
-        Player player = Minecraft.getInstance().player;
+        ClientLevel level = client.level;
+        Player player = client.player;
         if (level != null && player != null) {
-            double maxEffectDistance = (Minecraft.getInstance().options.getEffectiveRenderDistance() * 2) * 16;
+            double maxEffectDistance = (client.options.getEffectiveRenderDistance() * 2) * 16;
 
             Vec3 playerPosition = player.position();
             SyncDataManager.getInstance().getClientData(SyncDataTypesAS.FOCAL_POINT)

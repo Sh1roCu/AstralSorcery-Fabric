@@ -73,6 +73,6 @@ public class ConditionConstellation implements ResearchNodeCondition {
 
     @Override
     public Type<?> getType() {
-        return ResearchNodeConditionTypesAS.CONSTELLATION_DISCOVERED.get();
+        return ResearchNodeConditionTypesAS.CONSTELLATION_DISCOVERED;
     }
 }

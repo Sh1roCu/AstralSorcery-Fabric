@@ -11,8 +11,9 @@ package hellfirepvp.astralsorcery.common.lib.types;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.recipe.altar.effect.*;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.Registry;
+
+import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -23,16 +24,20 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  */
 public class AltarEffectsAS {
 
-    public static final DeferredRegister<AltarEffect> ALTAR_EFFECT_REGISTER =
-            DeferredRegister.create(RegistriesAS.KEY_ALTAR_EFFECTS, AstralSorcery.MODID);
+    public static void init() {
 
-    public static final DeferredHolder<AltarEffect, DefaultAltarEffectCentralBeam> DEFAULT_CENTRAL_BEAM =
-            ALTAR_EFFECT_REGISTER.register("default_central_beam", DefaultAltarEffectCentralBeam::new);
-    public static final DeferredHolder<AltarEffect, DefaultAltarEffectAltarSparkle> DEFAULT_ALTAR_SPARKLE =
-            ALTAR_EFFECT_REGISTER.register("default_altar_sparkle", DefaultAltarEffectAltarSparkle::new);
-    public static final DeferredHolder<AltarEffect, DefaultAltarEffectRelayInput> DEFAULT_RELAY_INPUT =
-            ALTAR_EFFECT_REGISTER.register("default_relay_input", DefaultAltarEffectRelayInput::new);
-    public static final DeferredHolder<AltarEffect, DefaultAltarEffectLumenInput> DEFAULT_LUMEN_INPUT =
-            ALTAR_EFFECT_REGISTER.register("default_lumen_input", DefaultAltarEffectLumenInput::new);
+    }
 
+    public static final DefaultAltarEffectCentralBeam DEFAULT_CENTRAL_BEAM =
+            register("default_central_beam", DefaultAltarEffectCentralBeam::new);
+    public static final DefaultAltarEffectAltarSparkle DEFAULT_ALTAR_SPARKLE =
+            register("default_altar_sparkle", DefaultAltarEffectAltarSparkle::new);
+    public static final DefaultAltarEffectRelayInput DEFAULT_RELAY_INPUT =
+            register("default_relay_input", DefaultAltarEffectRelayInput::new);
+    public static final DefaultAltarEffectLumenInput DEFAULT_LUMEN_INPUT =
+            register("default_lumen_input", DefaultAltarEffectLumenInput::new);
+
+    private static <T extends AltarEffect> T register(String name, Supplier<T> supplier) {
+        return Registry.register(RegistriesAS.REGISTRY_ALTAR_EFFECTS, AstralSorcery.key(name), supplier.get());
+    }
 }

@@ -56,6 +56,6 @@ public class GenerateCrystalPropertiesFunction extends LootItemConditionalFuncti
 
     @Override
     public LootItemFunctionType<? extends LootItemConditionalFunction> getType() {
-        return LootAS.GENERATE_CRYSTAL_PROPERTIES_FUNCTION.get();
+        return LootAS.GENERATE_CRYSTAL_PROPERTIES_FUNCTION;
     }
 }

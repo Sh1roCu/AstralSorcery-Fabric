@@ -13,15 +13,11 @@ import hellfirepvp.astralsorcery.common.container.*;
 import hellfirepvp.astralsorcery.common.container.provider.ContainerAltarProvider;
 import hellfirepvp.astralsorcery.common.container.provider.ContainerTomePapersProvider;
 import hellfirepvp.astralsorcery.common.util.data.MenuTypeRegistryObject;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.world.flag.FeatureFlags;
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
-import net.neoforged.neoforge.network.IContainerFactory;
-import net.neoforged.neoforge.registries.DeferredRegister;
-
-import java.util.function.BiConsumer;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -32,24 +28,25 @@ import java.util.function.BiConsumer;
  */
 public class MenuTypesAS {
 
-    public static final DeferredRegister<MenuType<?>> MENU_TYPE_REGISTER =
-            DeferredRegister.create(Registries.MENU, AstralSorcery.MODID);
+    public static void init() {
+
+    }
 
     public static final MenuTypeRegistryObject<ContainerTomePapers> TOME_PAPERS =
-            register("tome_papers", ContainerTomePapersProvider::createClient);
+            register("tome_papers", ContainerTomePapersProvider.TYPE);
 
     public static final MenuTypeRegistryObject<ContainerAltarIllumination> ALTAR_ILLUMINATION =
-            register("altar_illumination", ContainerAltarProvider::createClient);
+            register("altar_illumination", ContainerAltarProvider.ILLUMINATION_TYPE);
     public static final MenuTypeRegistryObject<ContainerAltarResonance> ALTAR_RESONANCE =
-            register("altar_resonance", ContainerAltarProvider::createClient);
+            register("altar_resonance", ContainerAltarProvider.Resonance.TYPE);
     public static final MenuTypeRegistryObject<ContainerAltarLuminance> ALTAR_LUMINANCE =
-            register("altar_luminance", ContainerAltarProvider::createClient);
+            register("altar_luminance", ContainerAltarProvider.LUMINANCE_TYPE);
     public static final MenuTypeRegistryObject<ContainerAltarRadiance> ALTAR_RADIANCE =
-            register("altar_radiance", ContainerAltarProvider::createClient);
+            register("altar_radiance", ContainerAltarProvider.RADIANCE_TYPE);
 
-    private static <T extends AbstractContainerMenu> MenuTypeRegistryObject<T> register(String name,
-                                                                                        IContainerFactory<T> clientFactory) {
-        var holder = MENU_TYPE_REGISTER.register(name, () -> new MenuType<>(clientFactory, FeatureFlags.VANILLA_SET));
-        return new MenuTypeRegistryObject<>(holder);
+    private static <T extends AbstractContainerMenu, D> MenuTypeRegistryObject<T> register(String name, ExtendedScreenHandlerType<T, D> type) {
+
+        MenuType<T> menu = Registry.register(BuiltInRegistries.MENU, AstralSorcery.key(name), type);
+        return new MenuTypeRegistryObject<>(menu);
     }
 }

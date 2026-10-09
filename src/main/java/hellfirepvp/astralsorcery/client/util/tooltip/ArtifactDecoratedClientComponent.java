@@ -11,23 +11,16 @@ package hellfirepvp.astralsorcery.client.util.tooltip;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.effect.function.FXAlphaFunction;
 import hellfirepvp.astralsorcery.client.effect.function.FXColorFunction;
-import hellfirepvp.astralsorcery.client.helper.ArtifactTooltipHelper;
-import hellfirepvp.astralsorcery.client.helper.StoredLumenTooltipHelper;
 import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
-import hellfirepvp.astralsorcery.client.lib.RenderTypesAS;
 import hellfirepvp.astralsorcery.client.screen.effect.ScreenEffectTicketManager;
 import hellfirepvp.astralsorcery.client.screen.effect.ticket.TooltipIdTicket;
-import hellfirepvp.astralsorcery.client.util.RenderUtil;
 import hellfirepvp.astralsorcery.common.component.IdentifierComponent;
 import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
-import hellfirepvp.astralsorcery.common.util.data.IntRectangle;
-import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.tooltip.ArtifactDecoratedTooltip;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTextTooltip;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.locale.Language;
@@ -36,7 +29,6 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.neoforged.neoforge.client.GlStateBackup;
 import org.joml.Matrix4f;
 
 /**
@@ -73,7 +65,8 @@ public class ArtifactDecoratedClientComponent implements ClientTooltipComponent 
     }
 
     @Override
-    public void renderText(Font font, int mouseX, int mouseY, Matrix4f matrix, MultiBufferSource.BufferSource bufferSource) {}
+    public void renderText(Font font, int mouseX, int mouseY, Matrix4f matrix, MultiBufferSource.BufferSource bufferSource) {
+    }
 
     @Override
     public void renderImage(Font font, int x, int y, GuiGraphics guiGraphics) {

@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.screen.tome.research;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.network.PacketDistributor;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -27,7 +28,6 @@ import hellfirepvp.astralsorcery.client.screen.tome.TomeResearchScreen;
 import hellfirepvp.astralsorcery.client.shader.DrawChainRenderType;
 import hellfirepvp.astralsorcery.client.shader.WrappedBufferSource;
 import hellfirepvp.astralsorcery.client.util.Blending;
-import hellfirepvp.astralsorcery.client.util.RenderQuadUtil;
 import hellfirepvp.astralsorcery.client.util.RenderUtil;
 import hellfirepvp.astralsorcery.client.util.tooltip.TooltipUtil;
 import hellfirepvp.astralsorcery.common.network.play.PktRequestLearnedTomeNavigation;
@@ -52,7 +52,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.joml.Matrix4f;
 
 import java.util.*;
@@ -183,10 +182,10 @@ public class TomeResearchClusterRenderer {
                     }
 
                     PoseStack.Pose pose = guiGraphics.pose().last();
-                    buf.addVertex(pose, nodeBox.x(),    nodeBox.maxY(), 0).setColor(zoomAlpha, zoomAlpha, zoomAlpha, zoomAlpha).setUv(0, 1);
+                    buf.addVertex(pose, nodeBox.x(), nodeBox.maxY(), 0).setColor(zoomAlpha, zoomAlpha, zoomAlpha, zoomAlpha).setUv(0, 1);
                     buf.addVertex(pose, nodeBox.maxX(), nodeBox.maxY(), 0).setColor(zoomAlpha, zoomAlpha, zoomAlpha, zoomAlpha).setUv(1, 1);
-                    buf.addVertex(pose, nodeBox.maxX(), nodeBox.y(),    0).setColor(zoomAlpha, zoomAlpha, zoomAlpha, zoomAlpha).setUv(1, 0);
-                    buf.addVertex(pose, nodeBox.x(),    nodeBox.y(),    0).setColor(zoomAlpha, zoomAlpha, zoomAlpha, zoomAlpha).setUv(0, 0);
+                    buf.addVertex(pose, nodeBox.maxX(), nodeBox.y(), 0).setColor(zoomAlpha, zoomAlpha, zoomAlpha, zoomAlpha).setUv(1, 0);
+                    buf.addVertex(pose, nodeBox.x(), nodeBox.y(), 0).setColor(zoomAlpha, zoomAlpha, zoomAlpha, zoomAlpha).setUv(0, 0);
                 });
             });
             RenderSystem.disableBlend();
@@ -236,7 +235,7 @@ public class TomeResearchClusterRenderer {
         float alpha = zoomAlpha * 0.75F;
 
         int travelPeriod = 60;
-        int totalPeriod  = 80;
+        int totalPeriod = 80;
 
         // I could have done this with a shader, you're so right
         // Why not? idk. am lazy or smth

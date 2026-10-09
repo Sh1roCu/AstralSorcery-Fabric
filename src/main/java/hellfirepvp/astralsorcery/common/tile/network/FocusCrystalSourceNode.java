@@ -133,6 +133,6 @@ public class FocusCrystalSourceNode implements TransmissionSourceNode, SimpleLin
 
     @Override
     public TransmissionSourceNodeProvider<?> getProvider() {
-        return StarlightNetworkNodesAS.FOCUS_CRYSTAL_SOURCE_NODE.get();
+        return StarlightNetworkNodesAS.FOCUS_CRYSTAL_SOURCE_NODE;
     }
 }

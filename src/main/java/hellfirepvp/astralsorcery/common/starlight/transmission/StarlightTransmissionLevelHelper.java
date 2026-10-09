@@ -8,13 +8,13 @@
 
 package hellfirepvp.astralsorcery.common.starlight.transmission;
 
+import cn.sh1rocu.astralsorcery.api.event.LevelEvent;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.event.level.ChunkEvent;
-import net.neoforged.neoforge.event.level.LevelEvent;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,21 +32,22 @@ public class StarlightTransmissionLevelHelper {
     private static final StarlightTransmissionLevelHelper INSTANCE = new StarlightTransmissionLevelHelper();
     private final Map<ResourceKey<Level>, StarlightTransmissionLevelHandler> levelHandlers = new HashMap<>();
 
-    private StarlightTransmissionLevelHelper() {}
+    private StarlightTransmissionLevelHelper() {
+    }
 
     public static StarlightTransmissionLevelHelper getInstance() {
         return INSTANCE;
     }
 
-    public void attachEventListeners(IEventBus eventBus) {
-        eventBus.addListener(this::onLevelTick);
-        eventBus.addListener(this::onLevelUnload);
-        eventBus.addListener(this::onChunkLoad);
-        eventBus.addListener(this::onChunkUnload);
+    public void attachEventListeners() {
+        ServerTickEvents.END_WORLD_TICK.register(this::onLevelTick);
+        LevelEvent.UNLOAD.register(this::onLevelUnload);
+        ServerChunkEvents.CHUNK_LOAD.register(this::onChunkLoad);
+        ServerChunkEvents.CHUNK_UNLOAD.register(this::onChunkUnload);
     }
 
-    private void onLevelTick(LevelTickEvent.Post event) {
-        if (event.getLevel() instanceof ServerLevel sLevel) {
+    private void onLevelTick(Level level) {
+        if (level instanceof ServerLevel sLevel) {
             this.levelHandlers.computeIfAbsent(sLevel.dimension(), StarlightTransmissionLevelHandler::new).tick(sLevel);
         }
     }
@@ -60,17 +61,17 @@ public class StarlightTransmissionLevelHelper {
         }
     }
 
-    private void onChunkLoad(ChunkEvent.Load event) {
-        if (event.getLevel() instanceof ServerLevel sLevel) {
+    private void onChunkLoad(Level level, LevelChunk chunk) {
+        if (level instanceof ServerLevel sLevel) {
             this.getHandler(sLevel).ifPresent(handler ->
-                    handler.onChunkLoad(event.getChunk().getPos()));
+                    handler.onChunkLoad(chunk.getPos()));
         }
     }
 
-    private void onChunkUnload(ChunkEvent.Unload event) {
-        if (event.getLevel() instanceof ServerLevel sLevel) {
+    private void onChunkUnload(Level level, LevelChunk chunk) {
+        if (level instanceof ServerLevel sLevel) {
             this.getHandler(sLevel).ifPresent(handler ->
-                    handler.onChunkUnload(event.getChunk().getPos()));
+                    handler.onChunkUnload(chunk.getPos()));
         }
     }
 

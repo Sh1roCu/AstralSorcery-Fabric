@@ -11,17 +11,15 @@ package hellfirepvp.astralsorcery.common.research.tome;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.screen.tome.page.RenderPage;
-import hellfirepvp.astralsorcery.client.screen.tome.page.RenderPageEmpty;
 import hellfirepvp.astralsorcery.client.screen.tome.page.RenderPageText;
 import hellfirepvp.astralsorcery.common.lib.types.TomePageTypesAS;
 import hellfirepvp.astralsorcery.common.research.ResearchNode;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 
@@ -44,11 +42,11 @@ public record TomePageText(String textKey) implements TomePage {
 
     @Override
     public TomePageType<?> getType() {
-        return TomePageTypesAS.TEXT_PAGE.get();
+        return TomePageTypesAS.TEXT_PAGE;
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public RenderPage createPage(@Nullable ResearchNode node, int page) {
         return new RenderPageText(node, page, this.textKey());
     }

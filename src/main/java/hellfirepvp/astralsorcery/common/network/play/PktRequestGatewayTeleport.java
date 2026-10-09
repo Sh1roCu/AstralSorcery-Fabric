@@ -14,6 +14,7 @@ import hellfirepvp.astralsorcery.common.tile.TileCelestialGateway;
 import hellfirepvp.astralsorcery.common.util.EntityUtil;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -24,7 +25,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -60,8 +60,8 @@ public class PktRequestGatewayTeleport extends PlayPacketHandler.ToServer<PktReq
     }
 
     @Override
-    public void handle(Request payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
+    public void receive(Request payload, ServerPlayNetworking.Context context) {
+        context.server().execute(() -> {
             if (context.player() instanceof ServerPlayer sPlayer) {
                 MinecraftServer srv = sPlayer.getServer();
                 if (srv == null) return;
@@ -72,7 +72,7 @@ public class PktRequestGatewayTeleport extends PlayPacketHandler.ToServer<PktReq
 
                     ServerLevel sLevel = srv.getLevel(payload.levelKey());
                     if (sLevel != null) {
-                        DataAS.DOMAIN_AS.getData(sLevel, DataAS.KEY_CELESTIAL_GATEWAY_DATA).getGateway(payload.targetPos()).ifPresent(targetEntry ->{
+                        DataAS.DOMAIN_AS.getData(sLevel, DataAS.KEY_CELESTIAL_GATEWAY_DATA).getGateway(payload.targetPos()).ifPresent(targetEntry -> {
                             MiscUtil.getTileAt(sLevel, targetEntry.getPos(), TileCelestialGateway.class, true).ifPresent(targetGateway -> {
                                 if (!targetGateway.hasStructure() || !targetGateway.doesSeeSky()) {
                                     return;

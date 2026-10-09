@@ -87,7 +87,7 @@ public class LumenCrystallizationRecipeCategory extends ASRecipeCategory<LumenCr
 
     @Override
     public List<ItemStack> provideCatalyst() {
-        return List.of(ItemsAS.BLOCK_LUMEN_CRYSTALLIZER.toStack());
+        return List.of(ItemsAS.BLOCK_LUMEN_CRYSTALLIZER.getDefaultInstance());
     }
 
     @Override

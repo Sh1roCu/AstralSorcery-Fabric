@@ -17,7 +17,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -61,7 +61,7 @@ public class ShootingStarHandler {
         int perTickSpawnChance = dayLength / 6;
         if (dayTime >= (midnightTick - spawnRange) && dayTime <= (midnightTick + spawnRange)) {
             sLevel.players().forEach(sPlayer -> {
-                if (ResearchManager.getProgress(sPlayer, LogicalSide.SERVER).getTierReached().isThisLaterOrEqual(ResearchTier.ILLUMINATION)) {
+                if (ResearchManager.getProgress(sPlayer, EnvType.SERVER).getTierReached().isThisLaterOrEqual(ResearchTier.ILLUMINATION)) {
                     if (!this.spawnedPlayerStars.contains(sPlayer.getUUID()) && rand.nextInt(perTickSpawnChance) == 0) {
                         this.spawnedPlayerStars.add(sPlayer.getUUID());
 

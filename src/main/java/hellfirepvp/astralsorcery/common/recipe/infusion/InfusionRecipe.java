@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.recipe.infusion;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -15,6 +16,7 @@ import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
 import hellfirepvp.astralsorcery.common.recipe.CustomRecipe;
 import hellfirepvp.astralsorcery.common.tile.TileInfuser;
 import hellfirepvp.astralsorcery.common.util.data.ResolvingRecipeTypeRegistryObject;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -27,21 +29,15 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -155,14 +151,14 @@ public class InfusionRecipe extends CustomRecipe<InfusionRecipe, InfusionRecipeI
     }
 
     public FluidStack getChaliceInputFluidStack() {
-        int amount = Math.round(FluidType.BUCKET_VOLUME * this.getFluidConsumptionChance());
+        long amount = Math.round(FluidConstants.BUCKET * this.getFluidConsumptionChance());
         amount *= Mth.ceil(amount * 0.75F);
         amount = this.consumeMultipleFluids() ? amount * TileInfuser.getLiquidOffsets().size() : amount;
         return new FluidStack(this.getFluidInput(), amount);
     }
 
     @Override
-    public Supplier<? extends RecipeSerializer<InfusionRecipe>> getRecipeSerializer() {
+    public RecipeSerializer<InfusionRecipe> getRecipeSerializer() {
         return RecipeTypesAS.INFUSION_SERIALIZER;
     }
 

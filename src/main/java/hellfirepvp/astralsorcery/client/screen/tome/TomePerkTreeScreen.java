@@ -8,9 +8,13 @@
 
 package hellfirepvp.astralsorcery.client.screen.tome;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.network.PacketDistributor;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import hellfirepvp.astralsorcery.client.ClientProxy;
 import hellfirepvp.astralsorcery.client.lib.SpritesAS;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
@@ -55,6 +59,7 @@ import hellfirepvp.astralsorcery.common.util.data.FloatPoint;
 import hellfirepvp.astralsorcery.common.util.data.FloatRectangle;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.tick.TimeoutList;
+import net.fabricmc.api.EnvType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -70,14 +75,10 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.joml.Matrix4f;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.List;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -140,7 +141,7 @@ public class TomePerkTreeScreen extends TomeScreen {
     }
 
     public static void ensureBuffers() {
-        PerkTree.getInstance().getVersion(LogicalSide.CLIENT).ifPresent(version -> {
+        PerkTree.getInstance().getVersion(EnvType.CLIENT).ifPresent(version -> {
             if (lastTreeBufferVersion == null || !lastTreeBufferVersion.equals(version)) {
                 releaseBuffers();
 
@@ -150,7 +151,7 @@ public class TomePerkTreeScreen extends TomeScreen {
                 neededTypes.add(PerkRenderType.Types.PERK_SEARCH);
                 neededTypes.add(PerkRenderType.Types.PERK_SEAL);
                 neededTypes.add(PerkRenderType.Types.PERK_NULLIFIER);
-                PerkTree.getInstance().getPerkPoints(LogicalSide.CLIENT).forEach(point -> {
+                PerkTree.getInstance().getPerkPoints(EnvType.CLIENT).forEach(point -> {
                     neededTypes.addAll(point.getFixedRenderTypes().get());
                 });
                 neededTypes.forEach(builder::addRenderType);
@@ -169,14 +170,14 @@ public class TomePerkTreeScreen extends TomeScreen {
         this.initBookmarks();
 
         this.sealSlot = new FakeSlotElement(this.screenLeft + 29, this.screenTop + 16, TexturesAS.SCREEN_ELEMENT_MENU_SLOT, () -> {
-            return ItemsAS.PERK_SEAL.toStack(this.sealInventoryCount);
+            return new ItemStack(ItemsAS.PERK_SEAL, this.sealInventoryCount);
         });
         this.sealSlot.setOnClick(button -> {
             if (button == 0 && this.sealInventoryCount > 0) this.draggingSeal = true;
         });
         this.addRenderableWidget(this.sealSlot);
         this.nullifierSlot = new FakeSlotElement(this.screenLeft + 47, this.screenTop + 16, TexturesAS.SCREEN_ELEMENT_MENU_SLOT, () -> {
-            return ItemsAS.PERK_NULLIFIER.toStack(this.nullifierInventoryCount);
+            return new ItemStack(ItemsAS.PERK_NULLIFIER, this.nullifierInventoryCount);
         });
         this.nullifierSlot.setOnClick(button -> {
             if (button == 0 && this.nullifierInventoryCount > 0) this.draggingNullifier = true;
@@ -184,7 +185,7 @@ public class TomePerkTreeScreen extends TomeScreen {
         this.addRenderableWidget(this.nullifierSlot);
         this.searchInput = this.addRenderableWidget(new SearchInputElement(this.screenLeft + 300, this.screenTop + 16, this::onSearchInput));
 
-        boolean shiftView = AttunePlayerProperty.getRootPerk(ResearchManager.getClientProgress().getAttunedConstellation(), LogicalSide.CLIENT)
+        boolean shiftView = AttunePlayerProperty.getRootPerk(ResearchManager.getClientProgress().getAttunedConstellation(), EnvType.CLIENT)
                 .map(root -> {
                     FloatPoint shiftedPos = this.sizeHandler.evRelativePos(root.getOffset());
                     this.moveMouse(Mth.floor(shiftedPos.x()), Mth.floor(shiftedPos.y()));
@@ -207,7 +208,7 @@ public class TomePerkTreeScreen extends TomeScreen {
         if (player == null) return;
         PlayerProgress progress = ResearchManager.getClientProgress();
 
-        for (PerkTreePoint<?> point : PerkTree.getInstance().getPerkPoints(LogicalSide.CLIENT)) {
+        for (PerkTreePoint<?> point : PerkTree.getInstance().getPerkPoints(EnvType.CLIENT)) {
             AbstractPerk<?> perk = point.getPerk();
             if (perk instanceof ProgressPerk<?> progressPerk &&
                     !progressPerk.canSee(progress)) {
@@ -217,7 +218,7 @@ public class TomePerkTreeScreen extends TomeScreen {
             if (perk.getCategory().getDisplayName().getString().toLowerCase(Locale.ROOT).contains(searchText)) {
                 this.searchMatches.add(perk);
             } else {
-                for (MutableComponent cmp : perk.getTooltip(progress, player, LogicalSide.CLIENT)) {
+                for (MutableComponent cmp : perk.getTooltip(progress, player, EnvType.CLIENT)) {
                     if (cmp.getString().toLowerCase(Locale.ROOT).contains(searchText)) {
                         this.searchMatches.add(perk);
                         break;
@@ -286,13 +287,13 @@ public class TomePerkTreeScreen extends TomeScreen {
         if (this.draggingSeal && this.sealInventoryCount <= 0) this.draggingSeal = false;
         if (this.draggingSeal) {
             guiGraphics.pose().pushPose();
-            guiGraphics.renderItem(ItemsAS.PERK_SEAL.toStack(), mouseX - 8, mouseY - 8);
+            guiGraphics.renderItem(ItemsAS.PERK_SEAL.getDefaultInstance(), mouseX - 8, mouseY - 8);
             guiGraphics.pose().popPose();
         }
         if (this.draggingNullifier && this.nullifierInventoryCount <= 0) this.draggingNullifier = false;
         if (this.draggingNullifier) {
             guiGraphics.pose().pushPose();
-            guiGraphics.renderItem(ItemsAS.PERK_NULLIFIER.toStack(), mouseX - 8, mouseY - 8);
+            guiGraphics.renderItem(ItemsAS.PERK_NULLIFIER.getDefaultInstance(), mouseX - 8, mouseY - 8);
             guiGraphics.pose().popPose();
         }
     }
@@ -302,7 +303,7 @@ public class TomePerkTreeScreen extends TomeScreen {
         PlayerProgress prog = ResearchManager.getClientProgress();
 
         int availablePerkPoints;
-        if (prog.isAttuned() && (availablePerkPoints = prog.getPerkData().getAvailablePerkPoints(player, LogicalSide.CLIENT)) > 0) {
+        if (prog.isAttuned() && (availablePerkPoints = prog.getPerkData().getAvailablePerkPoints(player, EnvType.CLIENT)) > 0) {
             Component pointsTxt = Component.translatable("perk.info.astralsorcery.points", availablePerkPoints);
             graphics.drawString(Minecraft.getInstance().font, pointsTxt, this.screenLeft + 68, this.screenTop + 17, 0xCCCCCC);
         }
@@ -316,7 +317,7 @@ public class TomePerkTreeScreen extends TomeScreen {
         PlayerProgress progress = ResearchManager.getClientProgress();
 
         Map<Integer, ItemStack> socketableItems = ItemUtil.findItemsInInventory(player, stack -> {
-            return this.socketMenuPerk.canSocketItem(stack, player, progress, LogicalSide.CLIENT);
+            return this.socketMenuPerk.canSocketItem(stack, player, progress, EnvType.CLIENT);
         });
         if (socketableItems.isEmpty()) {
             this.closeSocketMenu();
@@ -346,8 +347,10 @@ public class TomePerkTreeScreen extends TomeScreen {
         graphics.pose().pushPose();
         graphics.pose().translate(offsetX, offsetY, 1);
         graphics.pose().scale(scale, scale, 1F);
-        TooltipRenderUtil.renderTooltipBackground(graphics, 0, 0, slotMenuWidth * 18, slotMenuHeight * 18, 0,
-                        0xEE000011, 0xEE000011, 0xEE000047, 0xEE000047);
+        // Fabric
+        TooltipUtil.changeColor(0xEE000011, 0xEE000011, 0xEE000047, 0xEE000047, () -> {
+            TooltipRenderUtil.renderTooltipBackground(graphics, 0, 0, slotMenuWidth * 18, slotMenuHeight * 18, 0);
+        });
         graphics.pose().popPose();
 
         graphics.pose().pushPose();
@@ -372,7 +375,7 @@ public class TomePerkTreeScreen extends TomeScreen {
             float addedX = (menuSlotIndex % 5) * slotSize;
             float addedY = (menuSlotIndex / 5) * slotSize;
             FloatRectangle slotRect = new FloatRectangle(offsetX + addedX, offsetY + addedY, slotSize, slotSize);
-            Font fr = IClientItemExtensions.of(invStack).getFont(invStack, IClientItemExtensions.FontContext.ITEM_COUNT);
+            Font fr = null/*IClientItemExtensions.of(invStack).getFont(invStack, IClientItemExtensions.FontContext.ITEM_COUNT)*/;
             if (fr == null) fr = Minecraft.getInstance().font;
 
             graphics.pose().pushPose();
@@ -399,7 +402,7 @@ public class TomePerkTreeScreen extends TomeScreen {
                     if (!inSlot.isEmpty()) {
                         TooltipUtil.blueColor(() -> {
                             List<Component> toolTip = Screen.getTooltipFromItem(Minecraft.getInstance(), inSlot);
-                            Font fr = IClientItemExtensions.of(inSlot).getFont(inSlot, IClientItemExtensions.FontContext.TOOLTIP);
+                            Font fr = null /*IClientItemExtensions.of(inSlot).getFont(inSlot, IClientItemExtensions.FontContext.TOOLTIP)*/;
                             if (fr == null) fr = Minecraft.getInstance().font;
                             graphics.renderComponentTooltip(fr, toolTip, mouseX, mouseY);
                         });
@@ -411,7 +414,7 @@ public class TomePerkTreeScreen extends TomeScreen {
 
         if (this.sealInventoryCount > 0 && this.sealSlot.getRectangle().containsPoint(mouseX, mouseY)) {
             List<Component> tooltip = new ArrayList<>();
-            tooltip.addAll(Screen.getTooltipFromItem(Minecraft.getInstance(), ItemsAS.PERK_SEAL.toStack(1)));
+            tooltip.addAll(Screen.getTooltipFromItem(Minecraft.getInstance(), new ItemStack(ItemsAS.PERK_SEAL, 1)));
             tooltip.add(Component.empty());
             tooltip.add(Component.translatable("perk.info.astralsorcery.sealed.usage"));
             tooltip.add(Component.translatable("perk.info.astralsorcery.sealed.usage.ctrl"));
@@ -424,7 +427,7 @@ public class TomePerkTreeScreen extends TomeScreen {
 
         if (this.nullifierInventoryCount > 0 && this.nullifierSlot.getRectangle().containsPoint(mouseX, mouseY)) {
             List<Component> tooltip = new ArrayList<>();
-            tooltip.addAll(Screen.getTooltipFromItem(Minecraft.getInstance(), ItemsAS.PERK_NULLIFIER.toStack(1)));
+            tooltip.addAll(Screen.getTooltipFromItem(Minecraft.getInstance(), new ItemStack(ItemsAS.PERK_NULLIFIER, 1)));
             tooltip.add(Component.empty());
             tooltip.add(Component.translatable("perk.info.astralsorcery.nullifier.usage"));
             tooltip.add(Component.translatable("perk.info.astralsorcery.nullifier.usage.ctrl"));
@@ -440,7 +443,7 @@ public class TomePerkTreeScreen extends TomeScreen {
         for (AbstractPerk<?> perk : this.getMouseOverPerks(mouseX, mouseY)) {
             List<Component> tooltip = new ArrayList<>();
 
-            perk.getTooltip(progress, player, LogicalSide.CLIENT).forEach(cmp -> {
+            perk.getTooltip(progress, player, EnvType.CLIENT).forEach(cmp -> {
                 if (cmp.getStyle().getColor() == null) {
                     cmp.withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
                 }
@@ -513,13 +516,13 @@ public class TomePerkTreeScreen extends TomeScreen {
         }
 
         List<PerkTreePoint<?>> immediatePerks = new ArrayList<>();
-        for (PerkTreePoint<?> point : PerkTree.getInstance().getPerkPoints(LogicalSide.CLIENT)) {
+        for (PerkTreePoint<?> point : PerkTree.getInstance().getPerkPoints(EnvType.CLIENT)) {
             AbstractPerk<?> perk = point.getPerk();
             if (perk instanceof ProgressPerk<?> progressPerk && !progressPerk.canSee(progress)) {
                 continue;
             }
 
-            FloatRectangle drawnPerkRect = this.drawPerk(treeBuffers, graphics, point, perk.getPerkStatus(player, LogicalSide.CLIENT),
+            FloatRectangle drawnPerkRect = this.drawPerk(treeBuffers, graphics, point, perk.getPerkStatus(player, EnvType.CLIENT),
                     pTicks, perkData.isPerkSealed(perk));
             if (drawnPerkRect != null) {
                 this.thisFramePerks.put(perk, drawnPerkRect);
@@ -534,7 +537,7 @@ public class TomePerkTreeScreen extends TomeScreen {
         immediatePerks.forEach(point -> {
             AbstractPerk<?> perk = point.getPerk();
             PerkRenderer renderer = point.getRenderer().get();
-            PerkAllocationStatus status = perk.getPerkStatus(player, LogicalSide.CLIENT);
+            PerkAllocationStatus status = perk.getPerkStatus(player, EnvType.CLIENT);
             FloatPoint offset = this.sizeHandler.scalePointToGui(this, this.mousePoint, point.getOffset());
             renderer.renderImmediate(graphics, point, status,
                     pTicks, offset.x(), offset.y(), this.sizeHandler.getScalingFactor());
@@ -705,13 +708,13 @@ public class TomePerkTreeScreen extends TomeScreen {
 
         double effectPart = (Math.sin(Math.toRadians(((effectTick) * 8) % 360D)) + 1D) / 4D;
         float br = 0.1F + 0.4F * (2F - ((float) effectPart));
-        float rR = (overlay.getRed()   / 255F) * br;
+        float rR = (overlay.getRed() / 255F) * br;
         float rG = (overlay.getGreen() / 255F) * br;
-        float rB = (overlay.getBlue()  / 255F) * br;
+        float rB = (overlay.getBlue() / 255F) * br;
         float rA = (overlay.getAlpha() / 255F) * br;
 
         Vector3 fromStar = new Vector3(offsetFrom.x(), offsetFrom.y(), 0);
-        Vector3 toStar   = new Vector3(offsetTo.x(), offsetTo.y(), 0);
+        Vector3 toStar = new Vector3(offsetTo.x(), offsetTo.y(), 0);
 
         double width = 4.0D * this.sizeHandler.getScalingFactor();
 
@@ -751,7 +754,7 @@ public class TomePerkTreeScreen extends TomeScreen {
             PerkAllocationStatus status;
             if (allocations == 2) {
                 status = PerkAllocationStatus.ALLOCATED;
-            } else if (allocations == 1 && perkData.hasFreeAllocationPoint(player, LogicalSide.CLIENT)) {
+            } else if (allocations == 1 && perkData.hasFreeAllocationPoint(player, EnvType.CLIENT)) {
                 status = PerkAllocationStatus.UNLOCKABLE;
             } else {
                 status = PerkAllocationStatus.UNALLOCATED;
@@ -762,7 +765,8 @@ public class TomePerkTreeScreen extends TomeScreen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {}
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    }
 
     @Override
     protected void mouseDragTick(double mouseX, double mouseY, double mouseDiffX, double mouseDiffY, double mouseOffsetX, double mouseOffsetY) {
@@ -927,7 +931,7 @@ public class TomePerkTreeScreen extends TomeScreen {
             this.rescaleMouse();
             return true;
         }
-        if (scrollY > 0)  {
+        if (scrollY > 0) {
             this.sizeHandler.handleZoomIn();
             this.rescaleMouse();
             return true;
@@ -985,7 +989,7 @@ public class TomePerkTreeScreen extends TomeScreen {
         Player player = Minecraft.getInstance().player;
         if (player == null) return false;
         ItemStack stack = player.getInventory().getItem(slotId);
-        if (!perk.canSocketItem(stack, player, ResearchManager.getClientProgress(), LogicalSide.CLIENT)) return false;
+        if (!perk.canSocketItem(stack, player, ResearchManager.getClientProgress(), EnvType.CLIENT)) return false;
 
         this.closeSocketMenu();
         PacketDistributor.sendToServer(PktRequestSocketPerkItem.insertItem(perk, slotId));

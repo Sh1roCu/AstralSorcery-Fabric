@@ -8,20 +8,11 @@
 
 package hellfirepvp.astralsorcery.common.crystal;
 
-import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.component.CrystalAttributesComponent;
-import hellfirepvp.astralsorcery.common.item.tool.CrystalAxeItem;
-import hellfirepvp.astralsorcery.common.item.tool.CrystalSwordItem;
-import hellfirepvp.astralsorcery.common.item.tool.CrystalToolItem;
 import hellfirepvp.astralsorcery.common.lib.CrystalPropertiesAS;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.EquipmentSlotGroup;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -35,7 +26,8 @@ import java.util.function.Function;
  */
 public class CrystalPropertyCalculator {
 
-    private CrystalPropertyCalculator() {}
+    private CrystalPropertyCalculator() {
+    }
 
     private static <T> T withProperties(ItemStack stack, T _default, Function<CrystalAttributesComponent, T> run) {
         CrystalAttributesComponent cmp = stack.getOrDefault(DataComponentsAS.CRYSTAL_ATTRIBUTES, CrystalAttributesComponent.defaultEmpty());
@@ -60,7 +52,7 @@ public class CrystalPropertyCalculator {
 
     public static float getStarlightTransmissionLoss(CrystalAttributesComponent cmp) {
         int purityTier = cmp.getAttributeTier(CrystalPropertiesAS.PURITY);
-        int missingTiers = CrystalPropertiesAS.PURITY.get().getMaxTier() - purityTier;
+        int missingTiers = CrystalPropertiesAS.PURITY.getMaxTier() - purityTier;
         return 1F - (missingTiers * 0.15F);
     }
 

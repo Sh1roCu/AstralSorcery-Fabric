@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.helper;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.network.PacketDistributor;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -66,10 +67,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.InputEvent;
-import net.neoforged.neoforge.client.event.ScreenEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -78,6 +75,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -96,7 +94,9 @@ public class RenderAstrolabeOverlay {
     private static final List<DrawnConstellationLine> drawnLines = new ArrayList<>();
     private static FloatPoint drawLineStart = null;
 
-    /** Mirrors {@link net.minecraft.client.gui.Gui#renderSpyglassOverlay} */
+    /**
+     * Mirrors {@link net.minecraft.client.gui.Gui#renderSpyglassOverlay}
+     */
     public static void render(GuiGraphics guiGraphics, float scopeScale) {
         handleMouseState();
 
@@ -113,7 +113,7 @@ public class RenderAstrolabeOverlay {
         float minScreenSize = (float) Math.min(guiGraphics.guiWidth(), guiGraphics.guiHeight());
         float scaledSize = Math.min(guiGraphics.guiWidth() / minScreenSize, guiGraphics.guiHeight() / minScreenSize) * scopeScale;
         int size = Mth.floor(minScreenSize * scaledSize);
-        int xOffset = (guiGraphics.guiWidth()  - size) / 2;
+        int xOffset = (guiGraphics.guiWidth() - size) / 2;
         int yOffset = (guiGraphics.guiHeight() - size) / 2;
         int maxX = xOffset + size;
         int maxY = yOffset + size;
@@ -251,7 +251,7 @@ public class RenderAstrolabeOverlay {
         guiGraphics.pose().translate(0, 0, 100);
 
         guiGraphics.drawString(font, angleStr,
-                indicatorAngleXOffset, indicatorYOffset, ChatFormatting.GOLD.getColor(), true);
+                (int) indicatorAngleXOffset, (int) indicatorYOffset, ChatFormatting.GOLD.getColor(), true);
     }
 
     private static void renderDrawnLines(GuiGraphics guiGraphics) {
@@ -510,30 +510,32 @@ public class RenderAstrolabeOverlay {
         return Math.abs(center.x() - x) <= maxDistance && Math.abs(center.y() - y) <= maxDistance;
     }
 
-    public static void astrolabeMouseScroll(InputEvent.MouseScrollingEvent event) {
-        if (!Minecraft.getInstance().options.getCameraType().isFirstPerson()) return;
+    public static boolean astrolabeMouseScroll(Screen screen, double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (!Minecraft.getInstance().options.getCameraType().isFirstPerson()) return true;
         if (isDrawing()) {
-            event.setCanceled(true);
-            return; // No adjusting angle while drawing
+            // event.setCanceled(true);
+            return false; // No adjusting angle while drawing
         }
 
         Player player = Minecraft.getInstance().player;
-        if (player == null) return;
+        if (player == null) return true;
 
         if (player.isScoping() && player.getUseItem().is(ItemsAS.ASTROLABE)) {
             AstrolabeAngleComponent cmp = player.getUseItem().getOrDefault(DataComponentsAS.ASTROLABE_ANGLE, AstrolabeAngleComponent.DEFAULT);
-            float adjustedAngle = cmp.angle() + (float) event.getScrollDeltaY();
+            float adjustedAngle = cmp.angle() + (float) scrollY;
             player.getUseItem().set(DataComponentsAS.ASTROLABE_ANGLE, new AstrolabeAngleComponent(adjustedAngle, cmp.matchesAll()));
             PacketDistributor.sendToServer(PktAdjustAstrolabeAngle.adjustAngle(adjustedAngle));
-            event.setCanceled(true);
+            // event.setCanceled(true);
+            return false;
         }
+        return true;
     }
 
-    public static void overrideFov(ClientTickEvent.Pre event) {
-        Player player = Minecraft.getInstance().player;
+    public static void overrideFov(Minecraft client) {
+        Player player = client.player;
         if (player == null) {
             if (capturedFov > 0) {
-                Minecraft.getInstance().options.fov().set(capturedFov);
+                client.options.fov().set(capturedFov);
                 capturedFov = -1;
             }
             return;
@@ -541,32 +543,33 @@ public class RenderAstrolabeOverlay {
 
         if (AstrolabeItem.isUsingAstrolabe(player)) {
             if (capturedFov < 0) {
-                capturedFov = Minecraft.getInstance().options.fov().get();
-                Minecraft.getInstance().options.fov().set(70); //Min fov for drawing
+                capturedFov = client.options.fov().get();
+                client.options.fov().set(70); //Min fov for drawing
             }
         } else {
             if (capturedFov > 0) {
-                Minecraft.getInstance().options.fov().set(capturedFov);
+                client.options.fov().set(capturedFov);
                 capturedFov = -1;
             }
         }
     }
 
-    public static void preventScreenOpen(ScreenEvent.Opening event) {
+    public static void preventScreenOpen(AtomicBoolean cancelled) {
         if (isDrawing()) {
-            event.setCanceled(true);
+            // event.setCanceled(true);
+            cancelled.set(true);
         }
     }
 
-    public static void overrideMouseClickDuringDrawing(InputEvent.MouseButton.Pre event) {
-        if (isDrawing() && event.getButton() == 0) {
+    public static void overrideMouseClickDuringDrawing(int button, int action, AtomicBoolean cancelled) {
+        if (isDrawing() && button == 0) {
             Minecraft mc = Minecraft.getInstance();
             float mouseX = (float) (mc.mouseHandler.xpos() * mc.getWindow().getGuiScaledWidth() / mc.getWindow().getScreenWidth());
             float mouseY = (float) (mc.mouseHandler.ypos() * mc.getWindow().getGuiScaledHeight() / mc.getWindow().getScreenHeight());
             if (isInsideDrawingBounds(mouseX, mouseY)) {
-                if (event.getAction() == GLFW.GLFW_PRESS) {
+                if (action == GLFW.GLFW_PRESS) {
                     drawLineStart = new FloatPoint(mouseX, mouseY);
-                } else if (event.getAction() == GLFW.GLFW_RELEASE) {
+                } else if (action == GLFW.GLFW_RELEASE) {
                     if (drawLineStart != null) {
                         drawnLines.add(new DrawnConstellationLine(drawLineStart, new FloatPoint(mouseX, mouseY)));
                         drawLineStart = null;
@@ -577,7 +580,8 @@ public class RenderAstrolabeOverlay {
             } else {
                 drawLineStart = null;
             }
-            event.setCanceled(true);
+            // event.setCanceled(true);
+            cancelled.set(true);
         }
     }
 

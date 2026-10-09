@@ -10,11 +10,12 @@ package hellfirepvp.astralsorcery.common.network.play;
 
 import hellfirepvp.astralsorcery.common.network.PlayPacketHandler;
 import hellfirepvp.astralsorcery.common.perk.data.PerkTree;
-import hellfirepvp.astralsorcery.common.perk.tree.AbstractPerk;
 import hellfirepvp.astralsorcery.common.perk.tree.perk.socket.GemSocketPerk;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -22,8 +23,6 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -65,12 +64,12 @@ public class PktRequestSocketPerkItem extends PlayPacketHandler.ToServer<PktRequ
     }
 
     @Override
-    public void handle(Request payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
+    public void receive(Request payload, ServerPlayNetworking.Context context) {
+        context.server().execute(() -> {
             if (context.player() instanceof ServerPlayer sPlayer) {
-                PerkTree.getInstance().getPerk(LogicalSide.SERVER, payload.perkKey()).ifPresent(perk -> {
+                PerkTree.getInstance().getPerk(EnvType.SERVER, payload.perkKey()).ifPresent(perk -> {
                     if (perk instanceof GemSocketPerk gemSocketPerk) {
-                        PlayerProgress progress = ResearchManager.getProgress(sPlayer, LogicalSide.SERVER);
+                        PlayerProgress progress = ResearchManager.getProgress(sPlayer, EnvType.SERVER);
                         switch (payload.action()) {
                             case INSERT_ITEM -> {
                                 if (!gemSocketPerk.hasGemStack(progress)) {

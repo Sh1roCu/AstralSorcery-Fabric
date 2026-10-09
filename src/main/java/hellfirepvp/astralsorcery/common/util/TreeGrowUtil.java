@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.util;
 
+import cn.sh1rocu.astralsorcery.api.event.BlockGrowFeatureEvent;
+import cn.sh1rocu.astralsorcery.api.event.LevelEvent;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import net.minecraft.core.BlockPos;
@@ -15,14 +17,9 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.event.level.BlockGrowFeatureEvent;
-import net.neoforged.neoforge.event.level.LevelEvent;
 
 import java.util.*;
 import java.util.function.BiPredicate;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -88,9 +85,9 @@ public class TreeGrowUtil {
         }
     }
 
-    public static void attachEventListeners(IEventBus bus) {
-        bus.addListener(TreeGrowUtil::onGrow);
-        bus.addListener(TreeGrowUtil::onUnload);
+    public static void attachEventListeners() {
+        BlockGrowFeatureEvent.EVENT.register(TreeGrowUtil::onGrow);
+        LevelEvent.UNLOAD.register(TreeGrowUtil::onUnload);
     }
 
     private static void onGrow(BlockGrowFeatureEvent event) {

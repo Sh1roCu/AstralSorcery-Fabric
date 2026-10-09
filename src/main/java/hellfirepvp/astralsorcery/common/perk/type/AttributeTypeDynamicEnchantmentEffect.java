@@ -15,9 +15,8 @@ import hellfirepvp.astralsorcery.common.perk.PerkManager;
 import hellfirepvp.astralsorcery.common.perk.type.base.PerkAttributeType;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.SidedHelper;
+import net.fabricmc.api.EnvType;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,14 +35,14 @@ public class AttributeTypeDynamicEnchantmentEffect extends PerkAttributeType {
     }
 
     @Override
-    protected void attachListeners(IEventBus eventBus) {
-        super.attachListeners(eventBus);
-        eventBus.addListener(this::onModify);
+    protected void attachListeners() {
+        super.attachListeners();
+        DynamicEnchantmentEvent.Modify.EVENT.register(this::onModify);
     }
 
     private void onModify(DynamicEnchantmentEvent.Modify event) {
         Player player = event.getEntity();
-        LogicalSide side = SidedHelper.getSide(player);
+        EnvType side = SidedHelper.getSide(player);
         if (!this.hasTypeApplied(player, side)) return;
 
         float modifier = AttributeEvent.postProcessModded(player, this, PerkManager.getOrCreateAttributes(player)

@@ -8,21 +8,23 @@
 
 package hellfirepvp.astralsorcery.common.item;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.network.PacketDistributor;
 import hellfirepvp.astralsorcery.common.data.level.RockCrystalData;
-import hellfirepvp.astralsorcery.common.network.play.PktPlayStructurePreview;
-import hellfirepvp.astralsorcery.common.util.data.ObserverRegistryObject;
-import hellfirepvp.astralsorcery.common.visual.type.RockCrystalSparkle;
 import hellfirepvp.astralsorcery.common.item.base.InterceptInteractItem;
 import hellfirepvp.astralsorcery.common.item.base.ItemCustom;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.DataAS;
+import hellfirepvp.astralsorcery.common.network.play.PktPlayStructurePreview;
 import hellfirepvp.astralsorcery.common.structure.observer.CompoundObserverProviderStructure;
 import hellfirepvp.astralsorcery.common.tile.base.TileEntityTick;
 import hellfirepvp.astralsorcery.common.util.ChunkUtil;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
+import hellfirepvp.astralsorcery.common.util.data.ObserverRegistryObject;
+import hellfirepvp.astralsorcery.common.visual.type.RockCrystalSparkle;
 import hellfirepvp.observerlib.api.ObserverProvider;
 import hellfirepvp.observerlib.api.structure.MatchableStructure;
 import hellfirepvp.observerlib.common.change.ObserverProviderStructure;
+import net.fabricmc.api.EnvType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -37,8 +39,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -82,12 +82,12 @@ public class WandItem extends ItemCustom implements InterceptInteractItem.Block 
     }
 
     @Override
-    public boolean shouldInterceptBlockInteract(LogicalSide side, Player player, InteractionHand hand, BlockPos pos, BlockHitResult hitResult, Direction blockFace) {
+    public boolean shouldInterceptBlockInteract(EnvType side, Player player, InteractionHand hand, BlockPos pos, BlockHitResult hitResult, Direction blockFace) {
         return true;
     }
 
     @Override
-    public boolean doBlockInteract(LogicalSide side, Player player, InteractionHand hand, BlockPos pos, BlockHitResult hitResult, Direction blockFace) {
+    public boolean doBlockInteract(EnvType side, Player player, InteractionHand hand, BlockPos pos, BlockHitResult hitResult, Direction blockFace) {
         Level level = player.level();
         if (level.isClientSide()) return false;
         if (!(player instanceof ServerPlayer sPlayer)) return false;
@@ -95,7 +95,7 @@ public class WandItem extends ItemCustom implements InterceptInteractItem.Block 
         MiscUtil.getTileAt(level, pos, TileEntityTick.class, true).ifPresent(te -> {
             ObserverRegistryObject registryObject = te.getRequiredObserver();
             if (registryObject != null) {
-                ObserverProvider<?> observer = registryObject.observer().get();
+                ObserverProvider<?> observer = registryObject.observer();
 
                 boolean isValid = ((TileEntityTick<?>) te).getStructureObserver()
                         .map(sub -> sub.isValid(level))

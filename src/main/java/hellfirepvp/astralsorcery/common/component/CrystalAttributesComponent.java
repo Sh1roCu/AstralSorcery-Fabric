@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.component;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.common.util.AttributeTooltipContext;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.crystal.CrystalProperty;
@@ -18,11 +19,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.TooltipProvider;
-import net.neoforged.neoforge.common.util.AttributeTooltipContext;
 
 import java.util.*;
 import java.util.function.Consumer;

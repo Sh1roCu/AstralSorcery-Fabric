@@ -8,13 +8,13 @@
 
 package hellfirepvp.astralsorcery.common.util;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.common.TriPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.common.util.TriPredicate;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -80,8 +80,8 @@ public class BlockFinder {
     }
 
     private static void searchFaceNeighbors(Level level, BlockPos origin, BlockPos current,
-                                             BlockStatePredicate match, boolean onlyExposed, int cubeSize, int limit,
-                                             Set<BlockPos> visited, List<BlockPos> result, Deque<BlockPos> searchNext) {
+                                            BlockStatePredicate match, boolean onlyExposed, int cubeSize, int limit,
+                                            Set<BlockPos> visited, List<BlockPos> result, Deque<BlockPos> searchNext) {
         for (Direction face : Direction.values()) {
             BlockPos neighbor = current.relative(face);
             tryAddPosition(level, origin, neighbor, match, onlyExposed, cubeSize, limit,
@@ -90,8 +90,8 @@ public class BlockFinder {
     }
 
     private static void searchCornerNeighbors(Level level, BlockPos origin, BlockPos current,
-                                               BlockStatePredicate match, boolean onlyExposed, int cubeSize, int limit,
-                                               Set<BlockPos> visited, List<BlockPos> result, Deque<BlockPos> searchNext) {
+                                              BlockStatePredicate match, boolean onlyExposed, int cubeSize, int limit,
+                                              Set<BlockPos> visited, List<BlockPos> result, Deque<BlockPos> searchNext) {
         for (int xx = -1; xx <= 1; xx++) {
             for (int yy = -1; yy <= 1; yy++) {
                 for (int zz = -1; zz <= 1; zz++) {
@@ -104,8 +104,8 @@ public class BlockFinder {
     }
 
     private static void tryAddPosition(Level level, BlockPos origin, BlockPos pos,
-                                        BlockStatePredicate match, boolean onlyExposed, int cubeSize, int limit,
-                                        Set<BlockPos> visited, List<BlockPos> result, Deque<BlockPos> searchNext) {
+                                       BlockStatePredicate match, boolean onlyExposed, int cubeSize, int limit,
+                                       Set<BlockPos> visited, List<BlockPos> result, Deque<BlockPos> searchNext) {
         if (!visited.add(pos)) return;
         if (cubeSize > 0 && getCubeDistance(pos, origin) > cubeSize) return;
         if (limit != -1 && result.size() >= limit) return;
@@ -134,5 +134,6 @@ public class BlockFinder {
         return false;
     }
 
-    public interface BlockStatePredicate extends TriPredicate<Level, BlockPos, BlockState> {}
+    public interface BlockStatePredicate extends TriPredicate<Level, BlockPos, BlockState> {
+    }
 }

@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.util;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
 import hellfirepvp.astralsorcery.common.constellation.BaseConstellation;
 import hellfirepvp.astralsorcery.common.lib.LumenAS;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
@@ -24,17 +25,14 @@ import hellfirepvp.astralsorcery.common.recipe.liquid.LiquidStarlightRecipe;
 import hellfirepvp.astralsorcery.common.recipe.liquid.LiquidStarlightRecipeInput;
 import hellfirepvp.astralsorcery.common.recipe.lumen.LumenCrystallizationRecipe;
 import hellfirepvp.astralsorcery.common.recipe.lumen.LumenCrystallizationRecipeInput;
-import hellfirepvp.astralsorcery.common.recipe.lumen.LumenGenerationRecipeInput;
 import hellfirepvp.astralsorcery.common.recipe.lumen.LumenGenerationRecipe;
+import hellfirepvp.astralsorcery.common.recipe.lumen.LumenGenerationRecipeInput;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.extensions.IHolderExtension;
-import net.neoforged.neoforge.fluids.FluidStack;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.ArrayList;
@@ -83,45 +81,45 @@ public class RecipeFinder {
 
     public Optional<RecipeHolder<FocalTransmutationRecipe>> findFocalTransmutationRecipe(Level level, BaseConstellation cst, BlockPos transmutationPos, boolean isFocused) {
         FocalTransmutationCraftingInput input = new FocalTransmutationCraftingInput(cst, level, transmutationPos, isFocused);
-        return this.mgr.getRecipeFor(RecipeTypesAS.FOCAL_TRANSMUTATION_TYPE.get(), input, level);
+        return this.mgr.getRecipeFor(RecipeTypesAS.FOCAL_TRANSMUTATION_TYPE.type(), input, level);
     }
 
     public Optional<RecipeHolder<FocalCombineRecipe>> findFocalCombineRecipe(Level level, BaseConstellation cst, List<ItemEntity> combinableItems) {
         FocalCombineCraftingInput input = new FocalCombineCraftingInput(cst, level, combinableItems);
-        return this.mgr.getRecipeFor(RecipeTypesAS.FOCAL_COMBINE_TYPE.get(), input, level);
+        return this.mgr.getRecipeFor(RecipeTypesAS.FOCAL_COMBINE_TYPE.type(), input, level);
     }
 
     public Optional<RecipeHolder<AltarRecipe>> findAltarRecipe(Level level, AltarCraftingInput input) {
-        return this.mgr.getRecipeFor(RecipeTypesAS.ALTAR_CRAFTING_TYPE.get(), input, level);
+        return this.mgr.getRecipeFor(RecipeTypesAS.ALTAR_CRAFTING_TYPE.type(), input, level);
     }
 
     public Optional<RecipeHolder<LumenGenerationRecipe>> findLumenGenerationRecipe(ItemStack inputStack, Lumen generatedLumen, boolean useCombinationRecipes) {
         LumenGenerationRecipeInput input = LumenGenerationRecipeInput.create(inputStack);
         if (generatedLumen.equals(LumenAS.NONE.get())) {
-            return this.mgr.getRecipesFor(RecipeTypesAS.LUMEN_GENERATION_TYPE.get(), input, null).stream()
+            return this.mgr.getRecipesFor(RecipeTypesAS.LUMEN_GENERATION_TYPE.type(), input, null).stream()
                     .filter(recipeHolder -> useCombinationRecipes != recipeHolder.value().getLumenCombinationInputs().isEmpty())
                     .findFirst();
         }
-        return this.mgr.getRecipesFor(RecipeTypesAS.LUMEN_GENERATION_TYPE.get(), input, null).stream()
+        return this.mgr.getRecipesFor(RecipeTypesAS.LUMEN_GENERATION_TYPE.type(), input, null).stream()
                 .filter(recipeHolder -> useCombinationRecipes != recipeHolder.value().getLumenCombinationInputs().isEmpty())
                 .filter(recipeHolder -> recipeHolder.value().getProducedLumen().equals(generatedLumen))
                 .findFirst();
     }
 
     public Optional<RecipeHolder<LumenGenerationRecipe>> findLumenGenerationRecipeByOutput(Lumen generatedLumen) {
-        return this.mgr.getAllRecipesFor(RecipeTypesAS.LUMEN_GENERATION_TYPE.get()).stream()
+        return this.mgr.getAllRecipesFor(RecipeTypesAS.LUMEN_GENERATION_TYPE.type()).stream()
                 .filter(recipeHolder -> recipeHolder.value().getProducedLumen().equals(generatedLumen))
                 .findFirst();
     }
 
     public Optional<RecipeHolder<LightwellRecipe>> findLightwellRecipe(ItemStack inputStack, FluidStack existingFluid) {
         LightwellRecipeInput input = LightwellRecipeInput.of(inputStack, existingFluid);
-        return this.mgr.getRecipeFor(RecipeTypesAS.LIGHTWELL_TYPE.get(), input, null);
+        return this.mgr.getRecipeFor(RecipeTypesAS.LIGHTWELL_TYPE.type(), input, null);
     }
 
     public Optional<RecipeHolder<LiquidStarlightRecipe>> findLiquidStarlightRecipe(ItemEntity itemEntity) {
         LiquidStarlightRecipeInput input = LiquidStarlightRecipeInput.of(itemEntity);
-        List<RecipeHolder<LiquidStarlightRecipe>> recipes = this.mgr.getRecipesFor(RecipeTypesAS.LIQUID_STARLIGHT_TYPE.get(), input, itemEntity.level());
+        List<RecipeHolder<LiquidStarlightRecipe>> recipes = this.mgr.getRecipesFor(RecipeTypesAS.LIQUID_STARLIGHT_TYPE.type(), input, itemEntity.level());
         recipes = new ArrayList<>(recipes);
         if (recipes.isEmpty()) return Optional.empty();
 
@@ -132,12 +130,12 @@ public class RecipeFinder {
 
     public Optional<RecipeHolder<LumenCrystallizationRecipe>> findCrystallizationRecipe(ItemStack stack) {
         LumenCrystallizationRecipeInput input = LumenCrystallizationRecipeInput.of(stack);
-        return this.mgr.getRecipeFor(RecipeTypesAS.LUMEN_CRYSTALLIZATION_TYPE.get(), input, null);
+        return this.mgr.getRecipeFor(RecipeTypesAS.LUMEN_CRYSTALLIZATION_TYPE.type(), input, null);
     }
 
     public Optional<RecipeHolder<LumenCrystallizationRecipe>> findCrystallizationRecipe(Lumen lumen) {
         LumenCrystallizationRecipeInput input = LumenCrystallizationRecipeInput.of(lumen);
-        return this.mgr.getRecipeFor(RecipeTypesAS.LUMEN_CRYSTALLIZATION_TYPE.get(), input, null);
+        return this.mgr.getRecipeFor(RecipeTypesAS.LUMEN_CRYSTALLIZATION_TYPE.type(), input, null);
     }
 
     public <I extends RecipeInput, T extends Recipe<I>> Optional<RecipeHolder<T>> findRecipe(RecipeType<T> type, ResourceLocation recipeId) {

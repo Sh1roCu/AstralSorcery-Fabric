@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.perk.type;
 
+import cn.sh1rocu.astralsorcery.api.event.EntityJoinLevelEvent;
 import hellfirepvp.astralsorcery.common.event.AttributeEvent;
 import hellfirepvp.astralsorcery.common.perk.PerkManager;
 import hellfirepvp.astralsorcery.common.perk.type.base.PerkAttributeType;
@@ -16,11 +17,9 @@ import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.SidedHelper;
 import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.api.EnvType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -36,15 +35,15 @@ public class AttributeTypeProjectileSpeed extends PerkAttributeType {
     }
 
     @Override
-    protected void attachListeners(IEventBus eventBus) {
-        super.attachListeners(eventBus);
-        eventBus.addListener(this::onProjectileSpawn);
+    protected void attachListeners() {
+        super.attachListeners();
+        EntityJoinLevelEvent.EVENT.register(this::onProjectileSpawn);
     }
 
     private void onProjectileSpawn(EntityJoinLevelEvent event) {
         if (!(event.getEntity() instanceof Projectile projectile)) return;
         if (!(projectile.getOwner() instanceof Player player)) return;
-        LogicalSide side = SidedHelper.getSide(player);
+        EnvType side = SidedHelper.getSide(player);
         if (!this.hasTypeApplied(player, side)) return;
 
         PlayerProgress progress = ResearchManager.getProgress(player, side);

@@ -20,7 +20,7 @@ import hellfirepvp.astralsorcery.common.perk.type.base.ModifierType;
 import hellfirepvp.astralsorcery.common.perk.type.base.PerkAttributeType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import java.util.List;
 
@@ -48,7 +48,7 @@ public class DynamicModifierHelper {
         IdentifierComponent.createIdentifierIfNotExists(stack);
     }
 
-    public static List<PerkAttributeModifier> getModifiers(ItemStack stack, Player player, LogicalSide side, boolean ignoreRequirements) {
+    public static List<PerkAttributeModifier> getModifiers(ItemStack stack, Player player, EnvType side, boolean ignoreRequirements) {
         List<PerkAttributeModifier> modifiers = Lists.newArrayList();
 
         if (stack.getItem() instanceof AttributeModifierProvider modifierProvider) {

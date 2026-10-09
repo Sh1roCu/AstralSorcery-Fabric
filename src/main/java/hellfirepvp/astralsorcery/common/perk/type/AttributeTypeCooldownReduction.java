@@ -13,9 +13,8 @@ import hellfirepvp.astralsorcery.common.event.ItemCooldownEvent;
 import hellfirepvp.astralsorcery.common.perk.PerkManager;
 import hellfirepvp.astralsorcery.common.perk.type.base.PerkAttributeType;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
+import net.fabricmc.api.EnvType;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -31,18 +30,18 @@ public class AttributeTypeCooldownReduction extends PerkAttributeType {
     }
 
     @Override
-    protected void attachListeners(IEventBus eventBus) {
-        super.attachListeners(eventBus);
-        eventBus.addListener(this::onItemCooldown);
+    protected void attachListeners() {
+        super.attachListeners();
+        ItemCooldownEvent.EVENT.register(this::onItemCooldown);
     }
 
     private void onItemCooldown(ItemCooldownEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer sPlayer)) return;
-        if (!this.hasTypeApplied(sPlayer, LogicalSide.SERVER)) return;
+        if (!this.hasTypeApplied(sPlayer, EnvType.SERVER)) return;
 
         float cooldown = event.getCooldown();
         cooldown = PerkManager.getOrCreateAttributes(sPlayer)
-                .modifyValue(sPlayer, ResearchManager.getProgress(sPlayer, LogicalSide.SERVER), this, cooldown);
+                .modifyValue(sPlayer, ResearchManager.getProgress(sPlayer, EnvType.SERVER), this, cooldown);
         cooldown = AttributeEvent.postProcessModded(sPlayer, this, cooldown);
         event.setCooldown(Math.max(1, Math.round(cooldown)));
     }

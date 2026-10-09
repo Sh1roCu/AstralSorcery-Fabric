@@ -17,7 +17,6 @@ import hellfirepvp.astralsorcery.common.starlight.transmission.StarlightTransmis
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.neoforged.neoforge.common.extensions.IBlockEntityExtension;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -51,10 +50,10 @@ public class ForwardingStarlightReceiverNode implements TransmissionReceiverNode
 
     @Override
     public TransmissionNodeProvider<?> getProvider() {
-        return StarlightNetworkNodesAS.FORWARDING_RECEIVER_NODE.value();
+        return StarlightNetworkNodesAS.FORWARDING_RECEIVER_NODE;
     }
 
-    public static interface ReceiverTile extends IBlockEntityExtension {
+    public static interface ReceiverTile {
 
         void receiveStarlight(ServerLevel sLevel, StarlightTransmissionPacket packet);
 

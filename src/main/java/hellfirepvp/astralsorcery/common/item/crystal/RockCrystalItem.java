@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.item.crystal;
 
+import cn.sh1rocu.astralsorcery.api.extension.ICustomEntityItem;
 import hellfirepvp.astralsorcery.common.component.CrystalAttributesComponent;
 import hellfirepvp.astralsorcery.common.crystal.CrystalPropertyGenerator;
 import hellfirepvp.astralsorcery.common.entity.ItemEntityReplacement;
@@ -34,7 +35,7 @@ import javax.annotation.Nullable;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class RockCrystalItem extends ItemCustom implements AttuneableItem {
+public class RockCrystalItem extends ItemCustom implements AttuneableItem, ICustomEntityItem {
 
     public RockCrystalItem() {
         this(CrystalAttributesComponent.empty(4, 9));
@@ -63,10 +64,10 @@ public class RockCrystalItem extends ItemCustom implements AttuneableItem {
     @Nullable
     public Entity createEntity(Level level, Entity location, ItemStack stack) {
         if (location instanceof ItemEntity itemEntity) {
-            return ItemEntityReplacement.replace(EntitiesAS.ITEM_CRYSTAL.get(), itemEntity)
+            return ItemEntityReplacement.replace(EntitiesAS.ITEM_CRYSTAL, itemEntity)
                     .setColor(this.getItemEntityColor(stack));
         }
-        return super.createEntity(level, location, stack);
+        return null;
     }
 
     @Nullable
@@ -81,6 +82,6 @@ public class RockCrystalItem extends ItemCustom implements AttuneableItem {
 
     @Override
     public Item getAttunedItem() {
-        return ItemsAS.ATTUNED_ROCK_CRYSTAL.get();
+        return ItemsAS.ATTUNED_ROCK_CRYSTAL;
     }
 }

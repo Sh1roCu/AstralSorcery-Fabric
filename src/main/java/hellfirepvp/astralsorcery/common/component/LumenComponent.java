@@ -16,7 +16,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceKey;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -30,7 +29,7 @@ import java.util.Optional;
  */
 public record LumenComponent(Holder<Lumen> lumen) {
 
-    public static final LumenComponent EMPTY = new LumenComponent(LumenAS.NONE);
+    public static final LumenComponent EMPTY = new LumenComponent(LumenAS.NONE.holder());
 
     public static final Codec<LumenComponent> CODEC =
             RegistriesAS.REGISTRY_LUMEN.holderByNameCodec().xmap(LumenComponent::new, LumenComponent::lumen);

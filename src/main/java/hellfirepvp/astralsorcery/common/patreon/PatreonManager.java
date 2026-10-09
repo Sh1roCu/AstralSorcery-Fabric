@@ -12,12 +12,12 @@ import hellfirepvp.astralsorcery.common.data.sync.SyncDataManager;
 import hellfirepvp.astralsorcery.common.data.sync.server.PatreonEntitySyncData;
 import hellfirepvp.astralsorcery.common.lib.types.SyncDataTypesAS;
 import hellfirepvp.astralsorcery.common.patreon.entity.PatreonPartialEntity;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.Level;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import java.util.*;
 
@@ -30,12 +30,12 @@ import java.util.*;
  */
 public class PatreonManager {
 
-    public static void attachListeners(IEventBus eventBus) {
-        eventBus.addListener(PatreonManager::onServerTick);
+    public static void attachListeners() {
+        ServerTickEvents.END_SERVER_TICK.register(PatreonManager::onServerTick);
     }
 
-    private static void onServerTick(ServerTickEvent.Post event) {
-        PlayerList players = event.getServer().getPlayerList();
+    private static void onServerTick(MinecraftServer server) {
+        PlayerList players = server.getPlayerList();
         PatreonEntitySyncData data = SyncDataManager.getInstance().getData(SyncDataTypesAS.PATREON_ENTITY);
 
         Set<UUID> existingOwners = new HashSet<>(data.getOwners());
@@ -47,7 +47,7 @@ public class PatreonManager {
             if (sPlayer == null) return;
 
             Set<PatreonPartialEntity> knownEntities = data.getEntities(playerUUID);
-            for (PatreonEffect effect : PatreonEffectHelper.getPatreonEffects(LogicalSide.SERVER, playerUUID)) {
+            for (PatreonEffect effect : PatreonEffectHelper.getPatreonEffects(EnvType.SERVER, playerUUID)) {
                 if (effect == null || effect.getPartialEntityProvider() == null) continue;
 
                 PatreonPartialEntity existing = knownEntities.stream()

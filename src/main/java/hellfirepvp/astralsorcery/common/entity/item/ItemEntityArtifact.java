@@ -18,8 +18,8 @@ import hellfirepvp.astralsorcery.common.entity.ItemEntityChiselAttackable;
 import hellfirepvp.astralsorcery.common.item.ArtifactItem;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
+import hellfirepvp.astralsorcery.common.util.EntityUtil;
 import hellfirepvp.astralsorcery.common.util.ItemUtil;
-import hellfirepvp.astralsorcery.common.util.ServerSoundHelper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -30,11 +30,8 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
@@ -44,10 +41,10 @@ import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.event.EventHooks;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -69,6 +66,7 @@ public class ItemEntityArtifact extends ItemEntityChiselAttackable {
     private ActiveArtifactTrigger activeTrigger = null;
     private int triggerTimeout = 0;
     private int gracePulseTimeout = 1 * 20;
+    private int forcedMoveTimeout = 0;
 
     public ItemEntityArtifact(EntityType<? extends ItemEntityArtifact> entityType, Level level) {
         super(entityType, level);
@@ -110,6 +108,9 @@ public class ItemEntityArtifact extends ItemEntityChiselAttackable {
         if (pos == null) {
             pos = BlockPos.ZERO;
             speed = 0;
+            this.forcedMoveTimeout = 0;
+        } else {
+            this.forcedMoveTimeout = 10 * 20;
         }
         this.getEntityData().set(FORCED_MOVE_POS, pos);
         this.getEntityData().set(FORCED_MOVE_SPEED, speed);
@@ -200,6 +201,14 @@ public class ItemEntityArtifact extends ItemEntityChiselAttackable {
         }
 
         if (this.level() instanceof ServerLevel sLevel) {
+            if (this.forcedMoveTimeout > 0) {
+                this.forcedMoveTimeout--;
+            }
+            if (this.hasForcedMovePos() && this.forcedMoveTimeout <= 0) {
+                EntityUtil.transferEntity(this, Vector3.atBottomCenter(this.getForcedMovePos()));
+                this.resetForcedMovePos();
+            }
+
             this.getArtifactComponent().ifPresent(component -> {
                 if (!component.stability().mayTriggerPulse()) return;
                 if (component.lastPulseGameTick() == -1) {
@@ -247,7 +256,7 @@ public class ItemEntityArtifact extends ItemEntityChiselAttackable {
                         if (!component.stability().mayTriggerPulse()) return;
 
                         long nextPulseTick = component.getNextPulseTick();
-                        if (nextPulseTick <  sLevel.getGameTime() - (ArtifactConfig.CONFIG.pulseDelay.getAsInt() * 2L)) {
+                        if (nextPulseTick < sLevel.getGameTime() - (ArtifactConfig.CONFIG.pulseDelay.getAsInt() * 2L)) {
                             component = component.updatePulseTick(sLevel);
                             this.setArtifactComponent(component);
                         }
@@ -312,7 +321,7 @@ public class ItemEntityArtifact extends ItemEntityChiselAttackable {
     @Override
     public boolean hurt(DamageSource source, float amount) {
         if (source.is(DamageTypes.GENERIC_KILL)) { //At least make it removeable somehow
-            this.getItem().onDestroyed(this, source);
+            this.getItem().onDestroyed(this);
             this.discard();
             return false;
         }
@@ -333,7 +342,7 @@ public class ItemEntityArtifact extends ItemEntityChiselAttackable {
                 }
 
                 Holder<Enchantment> fortuneEnch = sPlayer.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(Enchantments.FORTUNE);
-                int fortune = chisel.getEnchantmentLevel(fortuneEnch);
+                int fortune = EnchantmentHelper.getItemEnchantmentLevel(fortuneEnch, chisel);
                 float breakChance = 0.4F;
                 breakChance -= Mth.clamp(fortune, 0, 10) * 0.03F;
                 if (random.nextFloat() < breakChance) {
@@ -345,7 +354,7 @@ public class ItemEntityArtifact extends ItemEntityChiselAttackable {
             if (random.nextFloat() < 0.75F) {
                 chisel.hurtAndBreak(1 + random.nextInt(2), sPlayer.serverLevel(), sPlayer, (item) -> {
                     sPlayer.onEquippedItemBroken(item, EquipmentSlot.MAINHAND);
-                    EventHooks.onPlayerDestroyItem(sPlayer, chisel, InteractionHand.MAIN_HAND);
+                    // EventHooks.onPlayerDestroyItem(sPlayer, chisel, InteractionHand.MAIN_HAND);
                 });
             }
         }

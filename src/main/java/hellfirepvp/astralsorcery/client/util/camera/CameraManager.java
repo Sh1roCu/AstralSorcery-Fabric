@@ -8,14 +8,13 @@
 
 package hellfirepvp.astralsorcery.client.util.camera;
 
+import cn.sh1rocu.astralsorcery.api.event.RenderFrameEvent;
 import net.minecraft.client.Minecraft;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.InputEvent;
-import net.neoforged.neoforge.client.event.RenderFrameEvent;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -31,20 +30,21 @@ public class CameraManager {
     private final Deque<RevertableCameraTransformer> transformers = new ArrayDeque<>();
     private RevertableCameraTransformer activeTransformer = null;
 
-    private CameraManager() {}
+    private CameraManager() {
+    }
 
     public static CameraManager getInstance() {
         return INSTANCE;
     }
 
-    public void onClientTick(ClientTickEvent.Pre event) {
-        if (Minecraft.getInstance().player == null) {
+    public void onClientTick(Minecraft client) {
+        if (client.player == null) {
             this.transformers.clear();
             this.activeTransformer = null;
             return;
         }
 
-        if (!Minecraft.getInstance().isPaused()) {
+        if (!client.isPaused()) {
             if (this.activeTransformer != null) {
                 if (this.activeTransformer.getPersistencyFunction().isExpired()) {
                     this.activeTransformer.stopTransforming();
@@ -70,10 +70,11 @@ public class CameraManager {
         });
     }
 
-    public void onMouseInput(InputEvent.MouseButton.Pre event) {
+    public void onMouseInput(AtomicBoolean cancelled) {
         if (Minecraft.getInstance().isPaused()) return;
         this.getActiveTransformer().ifPresent(transformer -> {
-            event.setCanceled(true);
+            // event.setCanceled(true);
+            cancelled.set(true);
         });
     }
 

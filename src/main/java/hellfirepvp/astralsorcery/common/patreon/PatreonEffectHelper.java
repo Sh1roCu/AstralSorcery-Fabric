@@ -10,13 +10,12 @@ package hellfirepvp.astralsorcery.common.patreon;
 
 import hellfirepvp.astralsorcery.client.config.RenderingConfig;
 import hellfirepvp.astralsorcery.common.util.data.MapStream;
+import net.fabricmc.api.EnvType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -36,8 +35,8 @@ public class PatreonEffectHelper {
         return effectMap.get(effectUUID);
     }
 
-    public static List<PatreonEffect> getPatreonEffects(LogicalSide side, UUID playerUUID) {
-        if (side.isClient() && !RenderingConfig.CONFIG.patreonEffects.get()) {
+    public static List<PatreonEffect> getPatreonEffects(EnvType side, UUID playerUUID) {
+        if (side == EnvType.CLIENT && !RenderingConfig.CONFIG.patreonEffects.get()) {
             return Collections.emptyList();
         }
         if (!loadingFinished) {

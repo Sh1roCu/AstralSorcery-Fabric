@@ -12,11 +12,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import hellfirepvp.astralsorcery.common.constellation.BaseConstellation;
 import hellfirepvp.astralsorcery.common.tile.TileAttunementAltar;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.LogicalSide;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -92,7 +91,7 @@ public abstract class AttunementRecipe<T extends AttunementRecipe.Active<?, ?>> 
             return this.tick;
         }
 
-        public final void tick(LogicalSide side, TileAttunementAltar altar) {
+        public final void tick(EnvType side, TileAttunementAltar altar) {
             this.doTick(side, altar);
             this.tick++;
         }
@@ -112,13 +111,13 @@ public abstract class AttunementRecipe<T extends AttunementRecipe.Active<?, ?>> 
         public abstract void finishRecipe(TileAttunementAltar altar);
 
         //Called every tick for both sides
-        public abstract void doTick(LogicalSide side, TileAttunementAltar altar);
+        public abstract void doTick(EnvType side, TileAttunementAltar altar);
 
         //Called every tick on server to test if this recipe is done. Create 'reward' and return true when finished.
         public abstract boolean isFinished(TileAttunementAltar altar);
 
         //Called on client to stop effects and such
-        @OnlyIn(Dist.CLIENT)
+        @Environment(EnvType.CLIENT)
         public abstract void stopEffects(TileAttunementAltar altar);
 
         public void copyEffectDataTo(A other) {

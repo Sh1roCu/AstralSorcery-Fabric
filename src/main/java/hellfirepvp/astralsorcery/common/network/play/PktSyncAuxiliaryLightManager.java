@@ -9,15 +9,15 @@
 package hellfirepvp.astralsorcery.common.network.play;
 
 import hellfirepvp.astralsorcery.common.network.PlayPacketHandler;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -52,13 +52,19 @@ public class PktSyncAuxiliaryLightManager extends PlayPacketHandler.ToClient<Pkt
         return CODEC;
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
-    public void handle(Request payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
+    public void receive(Request payload, ClientPlayNetworking.Context context) {
+        context.client().execute(() -> {
             Level level = context.player().level();
-            AuxiliaryLightManager lightMgr = level.getAuxLightManager(payload.pos());
-            if (lightMgr == null) return;
-            lightMgr.setLightAt(payload.pos(), payload.lightLevel());
+            // Fabric
+            level.getLightEngine().checkBlock(payload.pos());
+
+            // TODO?
+//            AuxiliaryLightManager lightMgr = level.getAuxLightManager(payload.pos());
+//            if (lightMgr == null) return;
+//            lightMgr.setLightAt(payload.pos(), payload.lightLevel());
+
         });
     }
 

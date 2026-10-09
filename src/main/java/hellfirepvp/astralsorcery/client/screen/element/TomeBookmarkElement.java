@@ -85,7 +85,7 @@ public class TomeBookmarkElement extends AbstractWidget {
     }
 
     @Override
-    public void onClick(double mouseX, double mouseY, int button) {
+    public void onClick(double mouseX, double mouseY) {
         if (Minecraft.getInstance().screen instanceof TomeScreen tomeScreen) {
             if (tomeScreen.getBookmarkIndex() != this.provider.getBookmarkIndex()) {
                 tomeScreen.doBookmarkClick(this.provider);

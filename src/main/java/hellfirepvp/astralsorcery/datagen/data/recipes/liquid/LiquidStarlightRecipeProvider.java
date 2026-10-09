@@ -8,22 +8,18 @@
 
 package hellfirepvp.astralsorcery.datagen.data.recipes.liquid;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.common.crafting.SizedIngredient;
 import hellfirepvp.astralsorcery.common.ingredient.HasStoredLumenIngredient;
 import hellfirepvp.astralsorcery.common.ingredient.IsLumenBindableIngredient;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.constants.TagsAS;
 import hellfirepvp.astralsorcery.common.recipe.builder.LiquidStarlightRecipeBuilder;
 import hellfirepvp.astralsorcery.common.recipe.liquid.output.*;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.neoforged.neoforge.common.crafting.SizedIngredient;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -32,15 +28,11 @@ import java.util.concurrent.CompletableFuture;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class LiquidStarlightRecipeProvider extends RecipeProvider {
-
-    private LiquidStarlightRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-        super(output, registries);
-    }
+public class LiquidStarlightRecipeProvider {
 
     public static void registerRecipes(RecipeOutput recipeOutput) {
         LiquidStarlightRecipeBuilder.builder("infused_wood", new SizedIngredient(Ingredient.of(ItemTags.LOGS), 1))
-                .addOutputModifier(LiquidStarlightOutputDropItem.create(ItemsAS.BLOCK_INFUSED_WOOD_RAW.toStack()))
+                .addOutputModifier(LiquidStarlightOutputDropItem.create(ItemsAS.BLOCK_INFUSED_WOOD_RAW.getDefaultInstance()))
                 .duration(30)
                 .randomAdditionalDuration(0)
                 .save(recipeOutput);

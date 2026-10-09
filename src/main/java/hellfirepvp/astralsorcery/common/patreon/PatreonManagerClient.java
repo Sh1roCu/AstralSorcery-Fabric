@@ -11,13 +11,11 @@ package hellfirepvp.astralsorcery.common.patreon;
 import hellfirepvp.astralsorcery.common.data.sync.SyncDataManager;
 import hellfirepvp.astralsorcery.common.data.sync.client.PatreonEntityClientData;
 import hellfirepvp.astralsorcery.common.lib.types.SyncDataTypesAS;
-import hellfirepvp.astralsorcery.common.patreon.entity.client.PatreonPartialClientEntity;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -28,15 +26,15 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
  */
 public class PatreonManagerClient {
 
-    public static void attachListeners(IEventBus eventBus) {
-        eventBus.addListener(PatreonManagerClient::onClientTick);
+    public static void attachListeners() {
+        ClientTickEvents.END_CLIENT_TICK.register(PatreonManagerClient::onClientTick);
     }
 
-    private static void onClientTick(ClientTickEvent.Post event) {
-        Level clientLevel = Minecraft.getInstance().level;
-        Player player = Minecraft.getInstance().player;
+    private static void onClientTick(Minecraft client) {
+        Level clientLevel = client.level;
+        Player player = client.player;
         if (clientLevel == null || player == null) return;
-        if (Minecraft.getInstance().isPaused()) return;
+        if (client.isPaused()) return;
 
         ResourceKey<Level> levelKey = clientLevel.dimension();
         PatreonEntityClientData data = SyncDataManager.getInstance().getClientData(SyncDataTypesAS.PATREON_ENTITY);

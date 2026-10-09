@@ -13,6 +13,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.component.DynamicModifiersComponent;
+import hellfirepvp.astralsorcery.common.lib.AdvancementsAS;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
 import hellfirepvp.astralsorcery.common.lib.constants.TagsAS;
 import hellfirepvp.astralsorcery.common.lib.types.PerkDataTypesAS;
@@ -41,7 +42,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -86,7 +87,7 @@ public class GemSocketPerk extends AttributeModifierPerk<GemSocketPerk.Data> {
     }
 
     @Override
-    public Collection<PerkAttributeModifier> getModifiers(Player player, LogicalSide side, boolean ignoreRequirements) {
+    public Collection<PerkAttributeModifier> getModifiers(Player player, EnvType side, boolean ignoreRequirements) {
         List<PerkAttributeModifier> modifiers = new ArrayList<>(super.getModifiers(player, side, ignoreRequirements));
         if (!ignoreRequirements && ResearchManager.getProgress(player, side).getPerkData().isPerkSealed(this)) {
             return modifiers;
@@ -105,7 +106,7 @@ public class GemSocketPerk extends AttributeModifierPerk<GemSocketPerk.Data> {
     }
 
     @Override
-    protected boolean addTooltip(Collection<MutableComponent> tooltip, PlayerProgress progress, @Nullable Player player, LogicalSide side) {
+    protected boolean addTooltip(Collection<MutableComponent> tooltip, PlayerProgress progress, @Nullable Player player, EnvType side) {
         boolean addLine = super.addTooltip(tooltip, progress, player, side);
         if (!this.canSee(progress)) {
             return addLine;
@@ -164,7 +165,7 @@ public class GemSocketPerk extends AttributeModifierPerk<GemSocketPerk.Data> {
     }
 
     public void dropGemStack(ServerPlayer sPlayer) {
-        ResearchManager.getProgress(sPlayer, LogicalSide.SERVER).getPerkData().getPerkData(this).ifPresent(data -> {
+        ResearchManager.getProgress(sPlayer, EnvType.SERVER).getPerkData().getPerkData(this).ifPresent(data -> {
             this.dropGemStack(sPlayer, data);
         });
     }
@@ -173,7 +174,7 @@ public class GemSocketPerk extends AttributeModifierPerk<GemSocketPerk.Data> {
         ItemStack stack = gemSocketData.getGemStack();
         if (!stack.isEmpty()) {
             if (stack.getItem() instanceof GemSocketItem gemSocketItem) {
-                gemSocketItem.onExtract(stack, this, sPlayer, ResearchManager.getProgress(sPlayer, LogicalSide.SERVER));
+                gemSocketItem.onExtract(stack, this, sPlayer, ResearchManager.getProgress(sPlayer, EnvType.SERVER));
             }
             if (!sPlayer.addItem(stack)) {
                 ItemUtil.dropItem(sPlayer.serverLevel(), sPlayer.getX(), sPlayer.getY(), sPlayer.getZ(), stack);
@@ -186,13 +187,13 @@ public class GemSocketPerk extends AttributeModifierPerk<GemSocketPerk.Data> {
     }
 
     public boolean setGemStack(ServerPlayer sPlayer, ItemStack stack) {
-        return ResearchManager.getProgress(sPlayer, LogicalSide.SERVER).getPerkData().getPerkData(this).map(data -> {
+        return ResearchManager.getProgress(sPlayer, EnvType.SERVER).getPerkData().getPerkData(this).map(data -> {
             return this.setGemStack(sPlayer, stack, data);
         }).orElse(false);
     }
 
     public boolean setGemStack(ServerPlayer sPlayer, ItemStack stack, Data gemSocketData) {
-        PlayerProgress progress = ResearchManager.getProgress(sPlayer, LogicalSide.SERVER);
+        PlayerProgress progress = ResearchManager.getProgress(sPlayer, EnvType.SERVER);
         if (!progress.getPerkData().hasPerkEffect(this)) return false;
 
         boolean updateData = false;
@@ -210,7 +211,7 @@ public class GemSocketPerk extends AttributeModifierPerk<GemSocketPerk.Data> {
             updateData = true;
         }
         if (!stack.isEmpty()) {
-            if (this.canSocketItem(stack, sPlayer, progress, LogicalSide.SERVER)) {
+            if (this.canSocketItem(stack, sPlayer, progress, EnvType.SERVER)) {
                 if (stack.getItem() instanceof GemSocketItem gemSocketItem) {
                     gemSocketItem.onInsert(stack, this, sPlayer, progress);
                 }
@@ -219,13 +220,16 @@ public class GemSocketPerk extends AttributeModifierPerk<GemSocketPerk.Data> {
             }
         }
 
-        if (updateData) {
-            ResearchHelper.updatePerkData(sPlayer, this, gemSocketData, newGemData);
+        if (updateData && ResearchHelper.updatePerkData(sPlayer, this, gemSocketData, newGemData)) {
+            ItemStack socketed = newGemData.getGemStack();
+            if (!socketed.isEmpty()) {
+                AdvancementsAS.GEM_SOCKET.trigger(sPlayer, socketed);
+            }
         }
         return true;
     }
 
-    public boolean canSocketItem(ItemStack stack, Player player, PlayerProgress progress, LogicalSide side) {
+    public boolean canSocketItem(ItemStack stack, Player player, PlayerProgress progress, EnvType side) {
         if (stack.isEmpty()) return false;
         if (!stack.is(TagsAS.Items.FUNCTIONAL_PERKTREE_SOCKETABLE_ITEM)) return false;
         if (stack.getItem() instanceof GemSocketItem gemSocketItem) {
@@ -268,7 +272,7 @@ public class GemSocketPerk extends AttributeModifierPerk<GemSocketPerk.Data> {
 
         @Override
         public PerkDataType<?> getType() {
-            return PerkDataTypesAS.GEM_SOCKET_DATA.get();
+            return PerkDataTypesAS.GEM_SOCKET_DATA;
         }
 
         protected void setGemStack(ItemStack gemStack) {

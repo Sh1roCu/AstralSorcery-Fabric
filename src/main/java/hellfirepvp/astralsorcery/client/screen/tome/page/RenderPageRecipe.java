@@ -8,6 +8,9 @@
 
 package hellfirepvp.astralsorcery.client.screen.tome.page;
 
+import cn.sh1rocu.astralsorcery.util.GuiGraphicsUtil;
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
+import cn.sh1rocu.astralsorcery.util.neoforge.fluids.crafing.SizedFluidIngredient;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -41,6 +44,9 @@ import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.IntRectangle;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -66,9 +72,6 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.material.Fluid;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 
 import javax.annotation.Nullable;
 import java.text.DecimalFormat;
@@ -100,7 +103,7 @@ public abstract class RenderPageRecipe<T extends Recipe<?>> extends RenderPage {
     }
 
     public static Factory<?> registerPageFactory(Holder<RecipeType<?>> type, Factory<?> factory) {
-        return registerPageFactory(type.getKey(), factory);
+        return registerPageFactory(type.unwrapKey().orElseThrow(), factory);
     }
 
     public static Factory<?> registerPageFactory(ResourceKey<RecipeType<?>> type, Factory<?> factory) {
@@ -163,8 +166,8 @@ public abstract class RenderPageRecipe<T extends Recipe<?>> extends RenderPage {
                                     components.add(Component.translatable("screen.astralsorcery.element.recipe_lookup").withStyle(ChatFormatting.GRAY));
                                 }
                             }
-                            graphics.renderComponentTooltip(Minecraft.getInstance().font, components, Mth.floor(mouseX), Mth.floor(mouseY), firstStack);
-                }));
+                            GuiGraphicsUtil.renderComponentTooltip(graphics, Minecraft.getInstance().font, components, Mth.floor(mouseX), Mth.floor(mouseY), firstStack);
+                        }));
         graphics.pose().popPose();
     }
 
@@ -175,7 +178,7 @@ public abstract class RenderPageRecipe<T extends Recipe<?>> extends RenderPage {
     }
 
     public boolean handleRecipeIdCopyClick(int mouseX, int mouseY) {
-        if (Minecraft.getInstance().getDebugOverlay().showDebugScreen() && Screen.hasControlDown() && Minecraft.getInstance().player != null)  {
+        if (Minecraft.getInstance().getDebugOverlay().showDebugScreen() && Screen.hasControlDown() && Minecraft.getInstance().player != null) {
             for (IntRectangle rect : this.recipeIdCopyHovers) {
                 if (rect.contains(mouseX, mouseY)) {
                     ResourceLocation id = this.resolveRecipe().map(RecipeHolder::id).orElse(null);
@@ -310,7 +313,7 @@ public abstract class RenderPageRecipe<T extends Recipe<?>> extends RenderPage {
 
     public void renderLiquidInput(GuiGraphics graphics, int offsetX, int offsetY, FluidStack fluidStack) {
         TextureAtlasSprite sprite = RenderSpriteUtil.getTexture(fluidStack);
-        int tint = IClientFluidTypeExtensions.of(fluidStack.getFluid()).getTintColor(fluidStack);
+        int tint = FluidVariantRendering.getColor(fluidStack.getFluidVariant());
         ColorWrapper color = ColorWrapper.opaque(tint);
         PoseStack pose = graphics.pose();
 
@@ -335,7 +338,7 @@ public abstract class RenderPageRecipe<T extends Recipe<?>> extends RenderPage {
 
     public void renderLiquidOutput(GuiGraphics graphics, int offsetX, int offsetY, FluidStack fluidStack) {
         TextureAtlasSprite sprite = RenderSpriteUtil.getTexture(fluidStack);
-        int tint = IClientFluidTypeExtensions.of(fluidStack.getFluid()).getTintColor(fluidStack);
+        int tint = FluidVariantRendering.getColor(fluidStack.getFluidVariant());
         ColorWrapper color = ColorWrapper.opaque(tint);
         PoseStack pose = graphics.pose();
 
@@ -431,7 +434,8 @@ public abstract class RenderPageRecipe<T extends Recipe<?>> extends RenderPage {
         this.addTooltip(fluidStack, tooltip);
 
         Component countCmp;
-        int neededCount = fluidStack.getAmount();
+        // fabric: d->mB
+        long neededCount = fluidStack.getAmount() / 81;
         if (neededCount >= 1000) {
             String bucketFormat = FLUID_BUCKET_FORMAT.format(neededCount / 1000.0D);
             countCmp = Component.translatable("ingredient.astralsorcery.fluid.description.bucket", bucketFormat);
@@ -461,7 +465,8 @@ public abstract class RenderPageRecipe<T extends Recipe<?>> extends RenderPage {
                 Fluid fluid = fluids.getFirst();
 
                 Component countCmp;
-                int neededCount = ingredient.amount();
+                // fabric: d->mB
+                long neededCount = ingredient.amount() / 81;
                 if (neededCount >= 1000) {
                     String bucketFormat = FLUID_BUCKET_FORMAT.format(neededCount / 1000.0D);
                     countCmp = Component.translatable("ingredient.astralsorcery.fluid.description.bucket", bucketFormat);
@@ -470,7 +475,7 @@ public abstract class RenderPageRecipe<T extends Recipe<?>> extends RenderPage {
                 }
 
                 tooltip.add(Component.empty());
-                tooltip.add(Component.translatable("ingredient.astralsorcery.fluid_container.description", fluid.getFluidType().getDescription(), countCmp)
+                tooltip.add(Component.translatable("ingredient.astralsorcery.fluid_container.description", FluidVariantAttributes.getName(FluidVariant.of(fluid)), countCmp)
                         .withStyle(ChatFormatting.GRAY));
             }
         }
@@ -480,8 +485,7 @@ public abstract class RenderPageRecipe<T extends Recipe<?>> extends RenderPage {
     protected List<Component> getTooltip(ItemStack stack, @Nullable Ingredient ingredient) {
         List<Component> tooltip = new ArrayList<>();
         this.addTooltip(stack, tooltip);
-
-        if (ingredient != null && ingredient.isSimple()) {
+        if (ingredient != null && !ingredient.requiresTesting()) {
             // Same thing here btw as with the fluid ingredient. Different classes, same concept. Dont' you think this is better.
             TagKey<Item> guessedKey = IngredientUtil.guessIngredientTag(ingredient);
             if (guessedKey != null) {
@@ -574,7 +578,7 @@ public abstract class RenderPageRecipe<T extends Recipe<?>> extends RenderPage {
                 float length = (float) Math.sqrt(dirX * dirX + dirY * dirY);
 
                 float perpX = -dirY / length;
-                float perpY =  dirX / length;
+                float perpY = dirX / length;
 
                 float offset = randomOffset * length * 0.8F;
                 float ctrlX = (fromX + toX) * 0.5F + perpX * offset;
@@ -584,7 +588,7 @@ public abstract class RenderPageRecipe<T extends Recipe<?>> extends RenderPage {
                 spawnX = inv * inv * fromX + 2F * inv * cyclePart * ctrlX + cyclePart * cyclePart * toX;
                 spawnY = inv * inv * fromY + 2F * inv * cyclePart * ctrlY + cyclePart * cyclePart * toY;
             }
-            case STRAIGHT ->  {
+            case STRAIGHT -> {
                 spawnX = Mth.lerp(cyclePart, fromX, toX);
                 spawnY = Mth.lerp(cyclePart, fromY, toY);
             }

@@ -38,7 +38,7 @@ public class AkashicSingularityItem extends ItemCustom {
     public AkashicSingularityItem() {
         super(new Properties()
                 .stacksTo(1)
-                .rarity(EnumExtensions.RARITY_RELIC.getValue())
+                .rarity(EnumExtensions.RARITY_RELIC)
                 .component(DataComponentsAS.STORED_ITEMS, StoredItemsComponent.EMPTY));
     }
 

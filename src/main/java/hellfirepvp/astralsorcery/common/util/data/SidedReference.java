@@ -8,7 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.util.data;
 
-import net.neoforged.fml.LogicalSide;
+
+import net.fabricmc.api.EnvType;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -25,24 +26,25 @@ public class SidedReference<T> {
     private T clientData = null;
     private T serverData = null;
 
-    public SidedReference() {}
+    public SidedReference() {
+    }
 
     public static <T> SidedReference<T> create(Supplier<T> defaults) {
         SidedReference<T> ref = new SidedReference<>();
-        ref.setData(LogicalSide.CLIENT, defaults.get());
-        ref.setData(LogicalSide.SERVER, defaults.get());
+        ref.setData(EnvType.CLIENT, defaults.get());
+        ref.setData(EnvType.SERVER, defaults.get());
         return ref;
     }
 
-    public Optional<T> getData(LogicalSide side) {
-        if (side.isClient()) {
+    public Optional<T> getData(EnvType side) {
+        if (side == EnvType.CLIENT) {
             return Optional.ofNullable(this.clientData);
         }
         return Optional.ofNullable(this.serverData);
     }
 
-    public void setData(LogicalSide side, T data) {
-        if (side.isClient()) {
+    public void setData(EnvType side, T data) {
+        if (side == EnvType.CLIENT) {
             this.clientData = data;
         } else {
             this.serverData = data;

@@ -10,6 +10,7 @@ package hellfirepvp.astralsorcery.common.util.data;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -30,7 +31,7 @@ public record EnchantmentRegistryObject(ResourceKey<Enchantment> id) {
     }
 
     public Holder<Enchantment> enchantmentHolder(Level level) {
-        return level.holderOrThrow(this.id());
+        return level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(this.id());
     }
 
     public Enchantment enchantment(Level level) {

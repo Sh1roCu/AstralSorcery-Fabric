@@ -31,7 +31,7 @@ public class LumenAlchemyArrayBlock extends LumenArrayBlock {
     private static final VoxelShape SHAPE = Block.box(-1, 0, -1, 17, 17, 17);
 
     public LumenAlchemyArrayBlock(Properties properties) {
-        super(properties, TileEntitiesAS.LUMEN_ALCHEMY_ARRAY);
+        super(properties, () -> TileEntitiesAS.LUMEN_ALCHEMY_ARRAY);
     }
 
     @Override

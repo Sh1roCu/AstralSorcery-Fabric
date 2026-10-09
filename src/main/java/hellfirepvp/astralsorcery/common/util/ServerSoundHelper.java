@@ -26,15 +26,15 @@ import net.minecraft.world.phys.Vec3;
 public class ServerSoundHelper {
 
     public static void playSoundAround(CategorizedSoundEvent sound, Level world, Vec3i position, float volume, float pitch) {
-        playSoundAround(sound.sound().get(), sound.category(), world, position.getX(), position.getY(), position.getZ(), volume, pitch);
+        playSoundAround(sound.sound(), sound.category(), world, position.getX(), position.getY(), position.getZ(), volume, pitch);
     }
 
     public static void playSoundAround(CategorizedSoundEvent sound, Level world, Vec3 position, float volume, float pitch) {
-        playSoundAround(sound.sound().get(), sound.category(), world, position.x(), position.y(), position.z(), volume, pitch);
+        playSoundAround(sound.sound(), sound.category(), world, position.x(), position.y(), position.z(), volume, pitch);
     }
 
     public static void playSoundAround(CategorizedSoundEvent sound, Level world, Vector3 position, float volume, float pitch) {
-        playSoundAround(sound.sound().get(), sound.category(), world, position.getX(), position.getY(), position.getZ(), volume, pitch);
+        playSoundAround(sound.sound(), sound.category(), world, position.getX(), position.getY(), position.getZ(), volume, pitch);
     }
 
     public static void playSoundAround(SoundEvent sound, SoundSource category, Level world, Vec3i position, float volume, float pitch) {

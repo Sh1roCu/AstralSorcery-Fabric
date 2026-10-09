@@ -10,7 +10,6 @@ package hellfirepvp.astralsorcery.common.util.data;
 
 import hellfirepvp.astralsorcery.common.perk.tree.AbstractPerk;
 import hellfirepvp.astralsorcery.common.perk.tree.PerkType;
-import net.neoforged.neoforge.registries.DeferredHolder;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -19,5 +18,5 @@ import net.neoforged.neoforge.registries.DeferredHolder;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public record PerkTypeRegistryObject<T extends AbstractPerk<?>>(DeferredHolder<PerkType<?>, PerkType<T>> type) {
+public record PerkTypeRegistryObject<T extends AbstractPerk<?>>(PerkType<T> type) {
 }

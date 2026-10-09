@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.item.tool;
 
+import cn.sh1rocu.astralsorcery.api.extension.INoRepairItem;
 import hellfirepvp.astralsorcery.client.effect.EffectHelper;
 import hellfirepvp.astralsorcery.client.effect.function.FXAlphaFunction;
 import hellfirepvp.astralsorcery.client.effect.function.FXColorFunction;
@@ -31,6 +32,8 @@ import hellfirepvp.astralsorcery.common.util.level.DayTimeHelper;
 import hellfirepvp.astralsorcery.common.visual.type.CelestialStrikeBeamEffect;
 import hellfirepvp.astralsorcery.common.visual.type.SwordCrescentWaveEffect;
 import hellfirepvp.astralsorcery.common.visual.type.SwordShockwaveEffect;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -53,13 +56,10 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -68,7 +68,7 @@ import java.util.function.Supplier;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class IridescentCrystalSwordItem extends CrystalSwordItem {
+public class IridescentCrystalSwordItem extends CrystalSwordItem implements INoRepairItem {
 
     public static final int PARRY_WINDOW_TICKS = 5;
 
@@ -88,7 +88,7 @@ public class IridescentCrystalSwordItem extends CrystalSwordItem {
 
     public IridescentCrystalSwordItem() {
         super(ItemsAS.CRYSTAL_TOOL_TIER, new Properties()
-                .setNoRepair()
+                // .setNoRepair()impl via mixin
                 .component(DataComponentsAS.DYNAMIC_MODIFIERS, new DynamicModifiersComponent(List.of(BASE_CRIT_MODIFIER)))
                 .attributes(swordAttributes()));
     }
@@ -218,8 +218,8 @@ public class IridescentCrystalSwordItem extends CrystalSwordItem {
         return new Vector3(entity.getViewVector(1F)).normalize();
     }
 
-    private static boolean isAttunedTo(Optional<BaseConstellation> attuned, Supplier<BaseConstellation> constellation) {
-        return attuned.map(constellation.get()::equals).orElse(false);
+    private static boolean isAttunedTo(Optional<BaseConstellation> attuned, BaseConstellation constellation) {
+        return attuned.map(constellation::equals).orElse(false);
     }
 
     private static List<LivingEntity> getTargetsAround(ServerPlayer sPlayer, ServerLevel sLevel, float range) {
@@ -240,7 +240,7 @@ public class IridescentCrystalSwordItem extends CrystalSwordItem {
         return multiplier;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void playChargeParticles(LivingEntity entity, float progress) {
         Vector3 center = new Vector3(entity).addY(entity.getBbHeight() * 0.6F);
         int amount = 1 + Math.round(progress * 4F);

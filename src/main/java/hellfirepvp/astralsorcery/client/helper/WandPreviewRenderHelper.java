@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.helper;
 
+import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.component.BlockStateStorageComponent;
 import hellfirepvp.astralsorcery.common.component.IntegerModeComponent;
 import hellfirepvp.astralsorcery.common.item.wand.ArchitectWandItem;
@@ -18,13 +19,14 @@ import hellfirepvp.astralsorcery.common.util.BlockFinder;
 import hellfirepvp.astralsorcery.common.util.BlockUtil;
 import hellfirepvp.astralsorcery.common.util.ChunkUtil;
 import hellfirepvp.astralsorcery.common.util.RayTraceUtil;
-import hellfirepvp.astralsorcery.AstralSorcery;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
@@ -33,13 +35,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -70,13 +71,14 @@ public class WandPreviewRenderHelper {
     private static final int FRAME_HALF_HEIGHT = 13;
     private static final int FRAME_FULL_HEIGHT = 26;
 
-    public static void attachEventListeners(IEventBus eventBus) {
-        eventBus.addListener(WandPreviewRenderHelper::onRenderLevelStage);
-        eventBus.addListener(WandPreviewRenderHelper::onRenderGuiLayer);
+    public static void attachEventListeners() {
+        WorldRenderEvents.AFTER_ENTITIES.register(WandPreviewRenderHelper::onRenderLevelStage);
+        // impl via mixin
+        // RenderGuiLayerEvent.Post.EVENT.register(WandPreviewRenderHelper::onRenderGuiLayer);
     }
 
-    private static void onRenderLevelStage(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES) return;
+    private static void onRenderLevelStage(WorldRenderContext context) {
+        // if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES) return;
 
         Player player = Minecraft.getInstance().player;
         if (player == null) return;
@@ -95,7 +97,7 @@ public class WandPreviewRenderHelper {
         int modeOrdinal = held.getOrDefault(DataComponentsAS.MODE, IntegerModeComponent.ZERO).mode();
 
         Level level = player.level();
-        Vec3 cameraPos = event.getCamera().getPosition();
+        Vec3 cameraPos = context.camera().getPosition();
 
         BlockHitResult hitResult = level.clip(RayTraceUtil.getEntityViewContext(player, RAYTRACE_DISTANCE));
         boolean hasHit = hitResult.getType() != HitResult.Type.MISS;
@@ -127,8 +129,8 @@ public class WandPreviewRenderHelper {
     }
 
     private static List<BlockPos> computePositions(ItemStack held, Player player, Level level,
-                                                    BlockHitResult hitResult, boolean hasHit,
-                                                    BlockStateStorageComponent storage, int modeOrdinal) {
+                                                   BlockHitResult hitResult, boolean hasHit,
+                                                   BlockStateStorageComponent storage, int modeOrdinal) {
         BlockPos targetPos = hasHit ? hitResult.getBlockPos() : null;
         Direction targetFace = hasHit ? hitResult.getDirection() : null;
         BlockPos playerPos = player.blockPosition();
@@ -161,8 +163,8 @@ public class WandPreviewRenderHelper {
     }
 
     private static List<BlockPos> computeArchitectPositions(ItemStack held, Player player, Level level,
-                                                             BlockHitResult hitResult, boolean hasHit,
-                                                             BlockStateStorageComponent storage) {
+                                                            BlockHitResult hitResult, boolean hasHit,
+                                                            BlockStateStorageComponent storage) {
         ArchitectWandItem.PlaceMode mode = ArchitectWandItem.getPlaceMode(held);
         if (mode.needsOffset() && !hasHit) return Collections.emptyList();
 
@@ -180,8 +182,8 @@ public class WandPreviewRenderHelper {
     }
 
     private static List<BlockPos> computeExchangePositions(ItemStack held, Player player, Level level,
-                                                            BlockHitResult hitResult, boolean hasHit,
-                                                            BlockStateStorageComponent storage) {
+                                                           BlockHitResult hitResult, boolean hasHit,
+                                                           BlockStateStorageComponent storage) {
         if (!hasHit) return Collections.emptyList();
 
         BlockPos origin = hitResult.getBlockPos();
@@ -203,8 +205,8 @@ public class WandPreviewRenderHelper {
                 level, origin, true, -1, maxBlocks, false);
     }
 
-    private static void onRenderGuiLayer(RenderGuiLayerEvent.Post event) {
-        if (!event.getName().equals(VanillaGuiLayers.HOTBAR)) return;
+    public static void onRenderGuiLayer(GuiGraphics graphics) {
+        // if (!event.getName().equals(VanillaGuiLayers.HOTBAR)) return;
 
         Player player = Minecraft.getInstance().player;
         if (player == null) return;
@@ -218,7 +220,7 @@ public class WandPreviewRenderHelper {
         Map<BlockState, WandBlockStorageHelper.InventoryEntry> inventoryMap = WandBlockStorageHelper.getInventoryMatching(player, held);
         if (inventoryMap.isEmpty()) return;
 
-        GuiGraphics graphics = event.getGuiGraphics();
+        // GuiGraphics graphics = event.getGuiGraphics();
         Font font = Minecraft.getInstance().font;
         List<WandBlockStorageHelper.InventoryEntry> entries = new ArrayList<>(inventoryMap.values());
 

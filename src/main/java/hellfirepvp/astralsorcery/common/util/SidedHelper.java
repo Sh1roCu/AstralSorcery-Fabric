@@ -8,9 +8,10 @@
 
 package hellfirepvp.astralsorcery.common.util;
 
+
+import net.fabricmc.api.EnvType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
-import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -21,12 +22,12 @@ import net.neoforged.fml.LogicalSide;
  */
 public class SidedHelper {
 
-    public static LogicalSide getSide(Level level) {
-        return level.isClientSide() ? LogicalSide.CLIENT : LogicalSide.SERVER;
+    public static EnvType getSide(Level level) {
+        return level.isClientSide() ? EnvType.CLIENT : EnvType.SERVER;
     }
 
-    public static LogicalSide getSide(Entity entity) {
-        return entity.getCommandSenderWorld().isClientSide() ? LogicalSide.CLIENT : LogicalSide.SERVER;
+    public static EnvType getSide(Entity entity) {
+        return entity.getCommandSenderWorld().isClientSide() ? EnvType.CLIENT : EnvType.SERVER;
     }
 
 }

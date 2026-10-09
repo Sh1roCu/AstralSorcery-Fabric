@@ -38,10 +38,8 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.event.EventHooks;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -62,7 +60,7 @@ public class CelestialGatewayBlock extends BaseTickTileBlock<TileCelestialGatewa
     public static MapCodec<CelestialGatewayBlock> CODEC = simpleCodec(CelestialGatewayBlock::new);
 
     public CelestialGatewayBlock(Properties properties) {
-        super(properties, TileEntitiesAS.CELESTIAL_GATEWAY);
+        super(properties, () -> TileEntitiesAS.CELESTIAL_GATEWAY);
     }
 
     @Override
@@ -83,8 +81,8 @@ public class CelestialGatewayBlock extends BaseTickTileBlock<TileCelestialGatewa
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
-        ItemStack stack = super.getCloneItemStack(state, target, level, pos, player);
+    public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+        ItemStack stack = super.getCloneItemStack(level, pos, state);
         MiscUtil.getTileAt(level, pos, TileCelestialGateway.class, true).ifPresent(gateway -> {
             if (gateway.hasCustomName()) {
                 stack.set(DataComponents.CUSTOM_NAME, gateway.getCustomName());
@@ -121,8 +119,8 @@ public class CelestialGatewayBlock extends BaseTickTileBlock<TileCelestialGatewa
             if (data.isLocked() && data.hasOwner() && !data.isOwner(player)) {
                 return 0F;
             }
-            int hardnessMultiplier = EventHooks.doPlayerHarvestCheck(player, state, level, pos) ? 30 : 100;
-            return player.getDigSpeed(state, pos) / defaultDestroySpeed / hardnessMultiplier;
+            int hardnessMultiplier = /*EventHooks.doPlayerHarvestCheck(player, state, level, pos)*/ player.hasCorrectToolForDrops(state) ? 30 : 100;
+            return player.getDestroySpeed(state) / defaultDestroySpeed / hardnessMultiplier;
         }).orElse(0F);
     }
 

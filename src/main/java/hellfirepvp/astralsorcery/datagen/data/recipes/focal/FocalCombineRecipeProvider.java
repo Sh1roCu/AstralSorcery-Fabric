@@ -13,23 +13,16 @@ import hellfirepvp.astralsorcery.common.lib.ConstellationsAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
 import hellfirepvp.astralsorcery.common.recipe.builder.FocalCombineRecipeBuilder;
-import hellfirepvp.astralsorcery.common.recipe.builder.FocalTransmutationRecipeBuilder;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.data.PackOutput;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
-import net.neoforged.neoforge.common.Tags;
 
-import java.util.concurrent.CompletableFuture;
-
-import static hellfirepvp.astralsorcery.common.util.TimeUtil.*;
+import static hellfirepvp.astralsorcery.common.util.TimeUtil.minutes;
+import static hellfirepvp.astralsorcery.common.util.TimeUtil.seconds;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -38,11 +31,7 @@ import static hellfirepvp.astralsorcery.common.util.TimeUtil.*;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class FocalCombineRecipeProvider extends RecipeProvider {
-
-    private FocalCombineRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-        super(output, registries);
-    }
+public class FocalCombineRecipeProvider {
 
     public static void registerRecipes(RecipeOutput recipeOutput) {
         FocalCombineRecipeBuilder.builder()
@@ -62,7 +51,7 @@ public class FocalCombineRecipeProvider extends RecipeProvider {
                 .input(Ingredient.of(BlocksAS.MARBLE_RAW))
                 .input(Ingredient.of(ItemsAS.AQUAMARINE))
                 .input(Ingredient.of(ItemsAS.AQUAMARINE))
-                .input(Ingredient.of(Tags.Items.ENDER_PEARLS))
+                .input(Ingredient.of(ConventionalItemTags.ENDER_PEARLS))
                 .outputs(ItemsAS.WAND)
                 .save(recipeOutput);
         FocalCombineRecipeBuilder.builder()
@@ -83,35 +72,35 @@ public class FocalCombineRecipeProvider extends RecipeProvider {
                 .color(ColorsAS.LUMEN_AEVITAS)
                 .outputs(ItemsAS.BLOCK_HYACINTH)
                 .input(Ingredient.of(ItemTags.SMALL_FLOWERS))
-                .requiresConstellation(ConstellationsAS.AEVITAS.get())
+                .requiresConstellation(ConstellationsAS.AEVITAS)
                 .save(recipeOutput);
         FocalCombineRecipeBuilder.builder()
                 .duration(minutes(1))
                 .color(ColorsAS.LUMEN_VICIO)
                 .outputs(ItemsAS.BLOCK_IRIS)
                 .input(Ingredient.of(ItemTags.SMALL_FLOWERS))
-                .requiresConstellation(ConstellationsAS.VICIO.get())
+                .requiresConstellation(ConstellationsAS.VICIO)
                 .save(recipeOutput);
         FocalCombineRecipeBuilder.builder()
                 .duration(minutes(1))
                 .color(ColorsAS.LUMEN_ARMARA)
                 .outputs(ItemsAS.BLOCK_ORCHID)
                 .input(Ingredient.of(ItemTags.SMALL_FLOWERS))
-                .requiresConstellation(ConstellationsAS.ARMARA.get())
+                .requiresConstellation(ConstellationsAS.ARMARA)
                 .save(recipeOutput);
         FocalCombineRecipeBuilder.builder()
                 .duration(minutes(1))
                 .color(ColorsAS.LUMEN_EVORSIO)
                 .outputs(ItemsAS.BLOCK_PROTEA)
                 .input(Ingredient.of(ItemTags.SMALL_FLOWERS))
-                .requiresConstellation(ConstellationsAS.EVORSIO.get())
+                .requiresConstellation(ConstellationsAS.EVORSIO)
                 .save(recipeOutput);
         FocalCombineRecipeBuilder.builder()
                 .duration(minutes(1))
                 .color(ColorsAS.LUMEN_DISCIDIA)
                 .outputs(ItemsAS.BLOCK_THISTLE)
                 .input(Ingredient.of(ItemTags.SMALL_FLOWERS))
-                .requiresConstellation(ConstellationsAS.DISCIDIA.get())
+                .requiresConstellation(ConstellationsAS.DISCIDIA)
                 .save(recipeOutput);
     }
 }

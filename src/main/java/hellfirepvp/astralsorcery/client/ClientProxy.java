@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client;
 
+import cn.sh1rocu.astralsorcery.api.event.RegisterMaterialAtlasesEvent;
+import cn.sh1rocu.astralsorcery.api.event.RenderFrameEvent;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.config.RenderingConfig;
 import hellfirepvp.astralsorcery.client.effect.EffectHandler;
@@ -28,7 +30,6 @@ import hellfirepvp.astralsorcery.client.util.structure.StructurePreviewHelper;
 import hellfirepvp.astralsorcery.client.util.tooltip.ArtifactDecoratedClientComponent;
 import hellfirepvp.astralsorcery.client.util.tooltip.ItemStackClientComponent;
 import hellfirepvp.astralsorcery.client.util.tooltip.StoredLumenClientComponent;
-import hellfirepvp.astralsorcery.client.util.tooltip.TooltipUtil;
 import hellfirepvp.astralsorcery.common.CommonProxy;
 import hellfirepvp.astralsorcery.common.block.BlockDynamicColor;
 import hellfirepvp.astralsorcery.common.config.BaseConfiguration;
@@ -52,24 +53,38 @@ import hellfirepvp.astralsorcery.common.perk.tree.AbstractPerk;
 import hellfirepvp.astralsorcery.common.perk.tree.PerkTreePoint;
 import hellfirepvp.astralsorcery.common.perk.type.base.PerkAttributeType;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
+import hellfirepvp.astralsorcery.common.util.level.LevelEffectSeedCache;
+import hellfirepvp.astralsorcery.common.util.listener.ClientLifecycleListener;
 import hellfirepvp.astralsorcery.common.util.tick.TimeoutList;
 import hellfirepvp.astralsorcery.common.util.tooltip.ArtifactDecoratedTooltip;
 import hellfirepvp.astralsorcery.common.util.tooltip.ItemStackTooltip;
-import hellfirepvp.astralsorcery.common.util.level.LevelEffectSeedCache;
-import hellfirepvp.astralsorcery.common.util.listener.ClientLifecycleListener;
 import hellfirepvp.astralsorcery.common.util.tooltip.StoredLumenDisplayTooltip;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Unit;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.event.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -92,7 +107,7 @@ public class ClientProxy extends CommonProxy {
 
         this.clientLifecycleListeners.add(ClientLifecycleListener.disconnect(LevelEffectSeedCache::clearClient));
         this.clientLifecycleListeners.add(ClientLifecycleListener.disconnect(LevelSkyHandler.getInstance()::clientClearCache));
-        this.clientLifecycleListeners.add(ClientLifecycleListener.disconnect(() -> SyncDataManager.getInstance().clear(LogicalSide.CLIENT)));
+        this.clientLifecycleListeners.add(ClientLifecycleListener.disconnect(() -> SyncDataManager.getInstance().clear(EnvType.CLIENT)));
         this.clientLifecycleListeners.add(ClientLifecycleListener.disconnect(ClientLinkHelper::clearActiveSession));
         this.clientLifecycleListeners.add(ClientLifecycleListener.disconnect(CameraManager.getInstance()::clearTransformers));
         this.clientLifecycleListeners.add(ClientLifecycleListener.disconnect(EffectHandler.getInstance()::clearAllEffects));
@@ -102,10 +117,10 @@ public class ClientProxy extends CommonProxy {
         this.clientLifecycleListeners.add(ClientLifecycleListener.disconnect(ModifierManager::clearClientCache));
         this.clientLifecycleListeners.add(ClientLifecycleListener.disconnect(PerkManager.getInstance()::clearClient));
         this.clientLifecycleListeners.add(ClientLifecycleListener.disconnect(LumenBindingTypeLoader.getInstance()::clearClientBindings));
-        this.clientLifecycleListeners.add(ClientLifecycleListener.disconnect(() -> PerkAttributeType.clearCache(LogicalSide.CLIENT)));
-        this.clientLifecycleListeners.add(ClientLifecycleListener.disconnect(() -> PerkCooldownHelper.clearCache(LogicalSide.CLIENT)));
-        this.clientLifecycleListeners.add(ClientLifecycleListener.disconnect(() -> PerkTree.getInstance().clearCache(LogicalSide.CLIENT)));
-        this.clientLifecycleListeners.add(ClientLifecycleListener.disconnect(() -> PerkLevelManager.getInstance().clearCache(LogicalSide.CLIENT)));
+        this.clientLifecycleListeners.add(ClientLifecycleListener.disconnect(() -> PerkAttributeType.clearCache(EnvType.CLIENT)));
+        this.clientLifecycleListeners.add(ClientLifecycleListener.disconnect(() -> PerkCooldownHelper.clearCache(EnvType.CLIENT)));
+        this.clientLifecycleListeners.add(ClientLifecycleListener.disconnect(() -> PerkTree.getInstance().clearCache(EnvType.CLIENT)));
+        this.clientLifecycleListeners.add(ClientLifecycleListener.disconnect(() -> PerkLevelManager.getInstance().clearCache(EnvType.CLIENT)));
         this.clientLifecycleListeners.add(ClientLifecycleListener.disconnect(IsLumenBindableIngredient::clearDisplayCache));
         this.clientLifecycleListeners.add(ClientLifecycleListener.disconnect(IsEnchantedIngredient::clearDisplayCache));
         this.clientLifecycleListeners.add(ClientLifecycleListener.disconnect(HasStoredLumenIngredient::clearDisplayCache));
@@ -138,113 +153,130 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
-    public void initLifecycle(IEventBus modEventBus) {
-        super.initLifecycle(modEventBus);
+    public void initLifecycle() {
+        super.initLifecycle();
 
-        modEventBus.addListener(this::onRegisterClientReloadListeners);
-        modEventBus.addListener(this::onItemColorSetup);
-        modEventBus.addListener(this::onBlockColorSetup);
-        modEventBus.addListener(this::onClientSetup);
-        modEventBus.addListener(TexturesAS::registerAtlases);
-        modEventBus.addListener(ShadersAS::registerShaders);
-        modEventBus.addListener(CustomModelsAS::registerCustomModels);
-        modEventBus.addListener(RenderersAS::registerTileEntityRenders);
-        modEventBus.addListener(ModelLayersAS::registerModelLayers);
-        modEventBus.addListener(ClientExtensionsAS::registerExtensions);
-        modEventBus.addListener(RenderLumenDisplayOverlay::registerLayers);
-        modEventBus.addListener(RenderPerkExperienceOverlay::registerLayers);
-        modEventBus.addListener(MenuScreensAS::registerScreens);
+        this.onRegisterClientReloadListeners();
+        this.onItemColorSetup();
+        this.onBlockColorSetup();
+        this.onClientSetup();
+        RegisterMaterialAtlasesEvent.EVENT.register(TexturesAS::registerAtlases);
+        ShadersAS.registerShaders();
+        RenderersAS.registerTileEntityRenders();
+        ModelLayersAS.registerModelLayers();
+        ClientExtensionsAS.registerExtensions();
+        RenderLumenDisplayOverlay.registerLayers();
+        RenderPerkExperienceOverlay.registerLayers();
+        MenuScreensAS.registerScreens();
 
-        modEventBus.addListener(this::registerCustomComponents);
+        this.registerCustomComponents();
     }
 
     @Override
-    public void initListeners(IEventBus eventBus) {
-        super.initListeners(eventBus);
+    public void initListeners() {
+        super.initListeners();
 
-        eventBus.addListener(this::onClientConnect);
-        eventBus.addListener(this::onClientDisconnect);
-        eventBus.addListener(this::onClientTick);
-        eventBus.addListener(this.effectTasks::onClientTick);
+        ClientPlayConnectionEvents.JOIN.register(this::onClientConnect);
+        ClientPlayConnectionEvents.DISCONNECT.register(this::onClientDisconnect);
+        ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
+        ClientTickEvents.END_CLIENT_TICK.register(client -> this.effectTasks.onClientTick());
+        ClientTickEvents.END_CLIENT_TICK.register(EffectHandler.getInstance()::tick);
+        ClientTickEvents.END_CLIENT_TICK.register(ScreenEffectTicketManager.getInstance()::tick);
+        ScreenEvents.BEFORE_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
+            ScreenMouseEvents.allowMouseScroll(screen).register(RenderAstrolabeOverlay::astrolabeMouseScroll);
+        });
+        ClientTickEvents.START_CLIENT_TICK.register(RenderAstrolabeOverlay::overrideFov);
+        ClientTickEvents.START_CLIENT_TICK.register(FocalPointEffectHelper::onClientTick);
+        ClientTickEvents.START_CLIENT_TICK.register(CameraManager.getInstance()::onClientTick);
+        RenderFrameEvent.PRE.register(CameraManager.getInstance()::onRenderTick);
+        ClientTickEvents.END_CLIENT_TICK.register(GatewayInterfaceRenderHelper::onClientTick);
+        ClientTickEvents.START_CLIENT_TICK.register(RenderPerkExperienceOverlay::onClientTick);
+        WorldRenderEvents.END.register(StructurePreviewHelper::renderPreview);
+        ClientTickEvents.END_CLIENT_TICK.register(StructurePreviewHelper::tickPreview);
 
-        eventBus.addListener(EffectHandler.getInstance()::displayDebug);
-        eventBus.addListener(EffectHandler.getInstance()::tick);
-        eventBus.addListener(ScreenEffectTicketManager.getInstance()::tick);
-        eventBus.addListener(TooltipUtil.getInstance()::colorTooltip);
-        eventBus.addListener(TooltipUtil.getInstance()::tooltipContext);
-        eventBus.addListener(RenderAstrolabeOverlay::astrolabeMouseScroll);
-        eventBus.addListener(RenderAstrolabeOverlay::overrideFov);
-        eventBus.addListener(RenderAstrolabeOverlay::preventScreenOpen);
-        eventBus.addListener(RenderAstrolabeOverlay::overrideMouseClickDuringDrawing);
-        eventBus.addListener(FocalPointEffectHelper::onClientTick);
-        eventBus.addListener(CameraManager.getInstance()::onClientTick);
-        eventBus.addListener(CameraManager.getInstance()::onRenderTick);
-        eventBus.addListener(CameraManager.getInstance()::onMouseInput);
-        eventBus.addListener(GatewayInterfaceRenderHelper::onClientTick);
-        eventBus.addListener(RenderPerkExperienceOverlay::onClientTick);
-        eventBus.addListener(TomeLumenScreen::recipesSyncedFromServer);
-        eventBus.addListener(StructurePreviewHelper::renderPreview);
-        eventBus.addListener(StructurePreviewHelper::tickPreview);
-
-        LinkSessionEffectHelper.attachEventListeners(eventBus);
-        StarlightTransmissionEffectHelper.attachEventListeners(eventBus);
-        StoredLumenTooltipHelper.attachEventListeners(eventBus);
-        ArtifactTooltipHelper.attachEventListeners(eventBus);
-        GatewayInterfaceInteractHelper.attachEventListeners(eventBus);
-        WandPreviewRenderHelper.attachEventListeners(eventBus);
-        PatreonManagerClient.attachListeners(eventBus);
+        LinkSessionEffectHelper.attachEventListeners();
+        StarlightTransmissionEffectHelper.attachEventListeners();
+        StoredLumenTooltipHelper.attachEventListeners();
+        ArtifactTooltipHelper.attachEventListeners();
+        GatewayInterfaceInteractHelper.attachEventListeners();
+        WandPreviewRenderHelper.attachEventListeners();
+        PatreonManagerClient.attachListeners();
     }
 
-    private void onRegisterClientReloadListeners(RegisterClientReloadListenersEvent event) {
-        event.registerReloadListener(SkyConstellationPositionLoader.getInstance());
-        event.registerReloadListener(LumenDisplayPositionLoader.getInstance());
-        event.registerReloadListener(AssetLibrary.getInstance());
-        event.registerReloadListener(AssetInitializer.getInstance());
-        event.registerReloadListener(ColorExtractUtil.reload());
-        event.registerReloadListener((stage, resMgr, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor) ->
-                stage.wait(Unit.INSTANCE).thenRunAsync(() -> {
-                    PerkTree.getInstance().getPerkPoints(LogicalSide.CLIENT).stream()
+    private void onRegisterClientReloadListeners() {
+        var helper = ResourceManagerHelper.get(PackType.CLIENT_RESOURCES);
+        helper.registerReloadListener(SkyConstellationPositionLoader.getInstance());
+        helper.registerReloadListener(LumenDisplayPositionLoader.getInstance());
+        helper.registerReloadListener(AssetLibrary.getInstance());
+        helper.registerReloadListener(AssetInitializer.getInstance());
+        helper.registerReloadListener(ColorExtractUtil.reload());
+        helper.registerReloadListener(new IdentifiableResourceReloadListener() {
+            static final ResourceLocation ID = AstralSorcery.key("perk_points");
+
+            @Override
+            public ResourceLocation getFabricId() {
+                return ID;
+            }
+
+            @Override
+            public CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
+                return stage.wait(Unit.INSTANCE).thenRunAsync(() -> {
+                    PerkTree.getInstance().getPerkPoints(EnvType.CLIENT).stream()
                             .map(PerkTreePoint::getPerk)
                             .forEach(AbstractPerk::clearTooltipCache);
-        }));
-    }
-
-    private void onItemColorSetup(RegisterColorHandlersEvent.Item event) {
-        ItemsAS.ITEM_REGISTER.getEntries().forEach(item -> {
-            if (item.get() instanceof ItemDynamicColor dynamicColorItem) {
-                event.register((stack, tint) -> dynamicColorItem.getColor(stack, ClientProxy.getClientTick(), tint), dynamicColorItem);
+                });
             }
         });
     }
 
-    private void onBlockColorSetup(RegisterColorHandlersEvent.Block event) {
-        BlocksAS.BLOCK_REGISTER.getEntries().forEach(block -> {
-            if (block.get() instanceof BlockDynamicColor dynamicColorBlock) {
-                event.register((state, level, pos, tintIndex) -> dynamicColorBlock.getColor(state, ClientProxy.getClientTick(), level, pos, tintIndex), block.get());
+    private void onItemColorSetup() {
+        ItemsAS.REGISTERED_ITEMS.forEach(item -> {
+            if (item instanceof ItemDynamicColor dynamicColorItem) {
+                ColorProviderRegistry.ITEM.register((stack, tint) ->
+                        dynamicColorItem.getColor(stack, ClientProxy.getClientTick(), tint), dynamicColorItem);
             }
         });
     }
 
-    private void onClientSetup(FMLClientSetupEvent event) {
+    private void onBlockColorSetup() {
+        BlocksAS.REGISTERED_BLOCKS.forEach(block -> {
+            if (block instanceof BlockDynamicColor dynamicColorBlock) {
+                ColorProviderRegistry.BLOCK.register((state, level, pos, tintIndex) ->
+                        dynamicColorBlock.getColor(state, ClientProxy.getClientTick(), level, pos, tintIndex), block);
+            }
+        });
+    }
+
+    private void onClientSetup() {
         InitBlockRenderTypes.init();
         InitItemProperties.init();
     }
 
-    private void registerCustomComponents(RegisterClientTooltipComponentFactoriesEvent event) {
-        event.register(ItemStackTooltip.class, ItemStackClientComponent::create);
-        event.register(StoredLumenDisplayTooltip.class, StoredLumenClientComponent::create);
-        event.register(ArtifactDecoratedTooltip.class, ArtifactDecoratedClientComponent::create);
+    private void registerCustomComponents() {
+        TooltipComponentCallback.EVENT.register(data -> {
+            if (data instanceof ItemStackTooltip itemStack) {
+                return ItemStackClientComponent.create(itemStack);
+            }
+            if (data instanceof StoredLumenDisplayTooltip storedLumen) {
+                return StoredLumenClientComponent.create(storedLumen);
+            }
+            if (data instanceof ArtifactDecoratedTooltip artifactDecorated) {
+                return ArtifactDecoratedClientComponent.create(artifactDecorated);
+            }
+            return null;
+        });
+
     }
 
-    private void onClientConnect(ClientPlayerNetworkEvent.LoggingIn event) {
+    private void onClientConnect(ClientPacketListener handler, PacketSender sender, Minecraft client) {
         this.clientLifecycleListeners.forEach(ClientLifecycleListener::onClientConnect);
     }
 
-    private void onClientDisconnect(ClientPlayerNetworkEvent.LoggingOut event) {
+    private void onClientDisconnect(ClientPacketListener handler, Minecraft client) {
         this.clientLifecycleListeners.forEach(ClientLifecycleListener::onClientDisconnect);
     }
 
-    private void onClientTick(ClientTickEvent.Post event) {
+    private void onClientTick(Minecraft client) {
         clientTick++;
     }
 

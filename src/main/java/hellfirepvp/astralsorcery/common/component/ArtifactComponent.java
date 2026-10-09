@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.component;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.common.util.AttributeTooltipContext;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.artifact.*;
@@ -22,7 +23,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.util.AttributeTooltipContext;
 
 import java.util.ArrayList;
 import java.util.List;

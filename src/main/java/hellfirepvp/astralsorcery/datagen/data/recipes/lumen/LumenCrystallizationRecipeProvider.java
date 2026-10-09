@@ -8,30 +8,19 @@
 
 package hellfirepvp.astralsorcery.datagen.data.recipes.lumen;
 
-import hellfirepvp.astralsorcery.common.component.ArtifactTypeComponent;
 import hellfirepvp.astralsorcery.common.component.LumenComponent;
-import hellfirepvp.astralsorcery.common.item.LumenCrystalItem;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.LumenAS;
-import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.lib.constants.TagsAS;
-import hellfirepvp.astralsorcery.common.lumen.Lumen;
 import hellfirepvp.astralsorcery.common.recipe.builder.LumenCrystallizationRecipeBuilder;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.component.DataComponentPredicate;
-import net.minecraft.data.PackOutput;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.DefaultCustomIngredients;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.neoforged.neoforge.common.Tags;
-import net.neoforged.neoforge.common.crafting.CompoundIngredient;
-import net.neoforged.neoforge.common.crafting.DataComponentIngredient;
-
-import java.util.concurrent.CompletableFuture;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -40,11 +29,7 @@ import java.util.concurrent.CompletableFuture;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class LumenCrystallizationRecipeProvider extends RecipeProvider {
-
-    private LumenCrystallizationRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-        super(output, registries);
-    }
+public class LumenCrystallizationRecipeProvider {
 
     public static void registerRecipes(RecipeOutput recipeOutput) {
         LumenCrystallizationRecipeBuilder.builder(Ingredient.of(ItemTags.SAPLINGS), LumenAS.AEVITAS.get())
@@ -54,7 +39,7 @@ public class LumenCrystallizationRecipeProvider extends RecipeProvider {
                 .catalystShatterMultiplier(0F)
                 .save(recipeOutput);
 
-        LumenCrystallizationRecipeBuilder.builder(Ingredient.of(Tags.Items.INGOTS), LumenAS.ARMARA.get())
+        LumenCrystallizationRecipeBuilder.builder(Ingredient.of(ConventionalItemTags.INGOTS), LumenAS.ARMARA.get())
                 .catalystShatterMultiplier(2F)
                 .save(recipeOutput);
         LumenCrystallizationRecipeBuilder.builder(lumenCrystal(LumenAS.ARMARA), LumenAS.ARMARA.get(), "_crystal")
@@ -68,14 +53,14 @@ public class LumenCrystallizationRecipeProvider extends RecipeProvider {
                 .catalystShatterMultiplier(0F)
                 .save(recipeOutput);
 
-        LumenCrystallizationRecipeBuilder.builder(Ingredient.of(Tags.Items.STONES), LumenAS.EVORSIO.get())
+        LumenCrystallizationRecipeBuilder.builder(Ingredient.of(ConventionalItemTags.STONES), LumenAS.EVORSIO.get())
                 .catalystShatterMultiplier(5F)
                 .save(recipeOutput);
         LumenCrystallizationRecipeBuilder.builder(lumenCrystal(LumenAS.EVORSIO), LumenAS.EVORSIO.get(), "_crystal")
                 .catalystShatterMultiplier(0F)
                 .save(recipeOutput);
 
-        LumenCrystallizationRecipeBuilder.builder(Ingredient.of(Tags.Items.FEATHERS), LumenAS.VICIO.get())
+        LumenCrystallizationRecipeBuilder.builder(Ingredient.of(ConventionalItemTags.FEATHERS), LumenAS.VICIO.get())
                 .catalystShatterMultiplier(2F)
                 .save(recipeOutput);
         LumenCrystallizationRecipeBuilder.builder(lumenCrystal(LumenAS.VICIO), LumenAS.VICIO.get(), "_crystal")
@@ -105,7 +90,7 @@ public class LumenCrystallizationRecipeProvider extends RecipeProvider {
                 .catalystShatterMultiplier(0F)
                 .save(recipeOutput);
 
-        LumenCrystallizationRecipeBuilder.builder(Ingredient.of(Tags.Items.GEMS_QUARTZ), LumenAS.CALDOR.get())
+        LumenCrystallizationRecipeBuilder.builder(Ingredient.of(ConventionalItemTags.QUARTZ_GEMS), LumenAS.CALDOR.get())
                 .catalystShatterMultiplier(3F)
                 .save(recipeOutput);
         LumenCrystallizationRecipeBuilder.builder(lumenCrystal(LumenAS.CALDOR), LumenAS.CALDOR.get(), "_crystal")
@@ -121,7 +106,7 @@ public class LumenCrystallizationRecipeProvider extends RecipeProvider {
                 .catalystShatterMultiplier(0F)
                 .save(recipeOutput);
 
-        LumenCrystallizationRecipeBuilder.builder(Ingredient.of(Tags.Items.GEMS_AMETHYST), LumenAS.DYNAMIS.get())
+        LumenCrystallizationRecipeBuilder.builder(Ingredient.of(ConventionalItemTags.AMETHYST_GEMS), LumenAS.DYNAMIS.get())
                 .catalystShatterMultiplier(4F)
                 .save(recipeOutput);
         LumenCrystallizationRecipeBuilder.builder(lumenCrystal(LumenAS.DYNAMIS), LumenAS.DYNAMIS.get(), "_crystal")
@@ -148,10 +133,10 @@ public class LumenCrystallizationRecipeProvider extends RecipeProvider {
                 .catalystShatterMultiplier(3F)
                 .save(recipeOutput);
     }
-    
-    private static Ingredient lumenCrystal(Holder<Lumen> type) {
-        return DataComponentIngredient.of(false, DataComponentPredicate.builder()
-                .expect(DataComponentsAS.LUMEN.get(), new LumenComponent(type))
-                .build(), ItemsAS.LUMEN_CRYSTAL.asItem());
+
+    private static Ingredient lumenCrystal(LumenAS.DeferredLumen type) {
+        ItemStack stack = new ItemStack(ItemsAS.LUMEN_CRYSTAL.asItem());
+        stack.set(DataComponentsAS.LUMEN, new LumenComponent(type.holder()));
+        return DefaultCustomIngredients.components(stack);
     }
 }

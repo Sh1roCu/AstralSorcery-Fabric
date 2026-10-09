@@ -11,8 +11,8 @@ package hellfirepvp.astralsorcery.client.util.tooltip;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
-import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 
+import javax.annotation.Nullable;
 import java.util.Stack;
 
 /**
@@ -30,7 +30,8 @@ public class TooltipUtil {
 
     private ClientTooltipPositioner lastPositioner = DefaultTooltipPositioner.INSTANCE;
 
-    private TooltipUtil() {}
+    private TooltipUtil() {
+    }
 
     public static TooltipUtil getInstance() {
         return INSTANCE;
@@ -62,19 +63,23 @@ public class TooltipUtil {
         }
     }
 
-    public void colorTooltip(RenderTooltipEvent.Color colorEvent) {
+    @Nullable
+    public ColorOverride colorTooltip(/*RenderTooltipEvent.Color colorEvent*/) {
         if (!this.colorOverrides.isEmpty()) {
             ColorOverride override = this.colorOverrides.pop();
-            colorEvent.setBackgroundStart(override.backgroundStart);
-            colorEvent.setBackgroundEnd(override.backgroundEnd);
-            colorEvent.setBorderStart(override.borderStart);
-            colorEvent.setBorderEnd(override.borderEnd);
+//            colorEvent.setBackgroundStart(override.backgroundStart);
+//            colorEvent.setBackgroundEnd(override.backgroundEnd);
+//            colorEvent.setBorderStart(override.borderStart);
+//            colorEvent.setBorderEnd(override.borderEnd);
+            return override;
         }
+        return null;
     }
 
-    public void tooltipContext(RenderTooltipEvent.Pre event) {
-        this.lastPositioner = event.getTooltipPositioner();
+    public void tooltipContext(ClientTooltipPositioner positioner) {
+        this.lastPositioner = positioner;
     }
 
-    private static record ColorOverride(int backgroundStart, int backgroundEnd, int borderStart, int borderEnd) {}
+    public static record ColorOverride(int backgroundStart, int backgroundEnd, int borderStart, int borderEnd) {
+    }
 }

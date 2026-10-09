@@ -8,8 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.resource;
 
+import cn.sh1rocu.astralsorcery.api.mixin.IBlurMipmap;
 import com.mojang.blaze3d.systems.RenderSystem;
-import hellfirepvp.astralsorcery.AstralSorcery;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.texture.AbstractTexture;
@@ -72,7 +72,7 @@ public class RenderTexture extends AbstractRenderTexture.Full implements Reloada
             @Override
             public void setupRenderState() {
                 RenderTexture.this.bindTexture();
-                RenderTexture.this.resource.setBlurMipmap(false, false);
+                ((IBlurMipmap) RenderTexture.this.resource).as$setBlurMipmap(false, false);
             }
         };
     }

@@ -11,8 +11,9 @@ package hellfirepvp.astralsorcery.common.lib.types;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.research.tome.*;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.Registry;
+
+import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -23,20 +24,25 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  */
 public class TomePageTypesAS {
 
-    public static final DeferredRegister<TomePage.TomePageType<?>> PAGE_REGISTER =
-            DeferredRegister.create(RegistriesAS.KEY_TOME_PAGE_TYPES, AstralSorcery.MODID);
+    public static void init() {
 
-    public static final DeferredHolder<TomePage.TomePageType<?>, TomePage.TomePageType<TomePageEmpty>> EMPTY_PAGE =
-            PAGE_REGISTER.register("empty", () -> new TomePage.TomePageType<>(TomePageEmpty.CODEC, TomePageEmpty.STREAM_CODEC));
-    public static final DeferredHolder<TomePage.TomePageType<?>, TomePage.TomePageType<TomePageText>> TEXT_PAGE =
-            PAGE_REGISTER.register("text", () -> new TomePage.TomePageType<>(TomePageText.CODEC, TomePageText.STREAM_CODEC));
-    public static final DeferredHolder<TomePage.TomePageType<?>, TomePage.TomePageType<?>> STRUCTURE_PAGE =
-            PAGE_REGISTER.register("structure", () -> new TomePage.TomePageType<>(TomePageStructure.CODEC, TomePageStructure.STREAM_CODEC));
-    public static final DeferredHolder<TomePage.TomePageType<?>, TomePage.TomePageType<?>> RECIPE_PAGE =
-            PAGE_REGISTER.register("recipe", () -> new TomePage.TomePageType<>(TomePageRecipe.CODEC, TomePageRecipe.STREAM_CODEC));
-    public static final DeferredHolder<TomePage.TomePageType<?>, TomePage.TomePageType<?>> CONSTELLATION_PAGE =
-            PAGE_REGISTER.register("constellation", () -> new TomePage.TomePageType<>(TomePageConstellation.CODEC, TomePageConstellation.STREAM_CODEC));
-    public static final DeferredHolder<TomePage.TomePageType<?>, TomePage.TomePageType<?>> LUMEN_DESCRIPTION_PAGE =
-            PAGE_REGISTER.register("lumen_description", () -> new TomePage.TomePageType<>(TomePageLumenDescription.CODEC, TomePageLumenDescription.STREAM_CODEC));
+    }
+
+    public static final TomePage.TomePageType<TomePageEmpty> EMPTY_PAGE =
+            register("empty", () -> new TomePage.TomePageType<>(TomePageEmpty.CODEC, TomePageEmpty.STREAM_CODEC));
+    public static final TomePage.TomePageType<TomePageText> TEXT_PAGE =
+            register("text", () -> new TomePage.TomePageType<>(TomePageText.CODEC, TomePageText.STREAM_CODEC));
+    public static final TomePage.TomePageType<?> STRUCTURE_PAGE =
+            register("structure", () -> new TomePage.TomePageType<>(TomePageStructure.CODEC, TomePageStructure.STREAM_CODEC));
+    public static final TomePage.TomePageType<?> RECIPE_PAGE =
+            register("recipe", () -> new TomePage.TomePageType<>(TomePageRecipe.CODEC, TomePageRecipe.STREAM_CODEC));
+    public static final TomePage.TomePageType<?> CONSTELLATION_PAGE =
+            register("constellation", () -> new TomePage.TomePageType<>(TomePageConstellation.CODEC, TomePageConstellation.STREAM_CODEC));
+    public static final TomePage.TomePageType<?> LUMEN_DESCRIPTION_PAGE =
+            register("lumen_description", () -> new TomePage.TomePageType<>(TomePageLumenDescription.CODEC, TomePageLumenDescription.STREAM_CODEC));
+
+    private static <T extends TomePage> TomePage.TomePageType<T> register(String name, Supplier<TomePage.TomePageType<T>> supplier) {
+        return Registry.register(RegistriesAS.REGISTRY_TOME_PAGE_TYPES, AstralSorcery.key(name), supplier.get());
+    }
 
 }

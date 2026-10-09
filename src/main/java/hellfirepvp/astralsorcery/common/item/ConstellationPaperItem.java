@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.item;
 
+import cn.sh1rocu.astralsorcery.api.extension.ICustomEntityItem;
 import hellfirepvp.astralsorcery.client.screen.ScreenConstellationPaper;
 import hellfirepvp.astralsorcery.client.sound.PlayableSoundInstance;
 import hellfirepvp.astralsorcery.common.component.ConstellationPaperComponent;
@@ -22,6 +23,8 @@ import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.research.ResearchMessageHelper;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -35,9 +38,6 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.LogicalSide;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -51,7 +51,7 @@ import java.util.function.Consumer;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class ConstellationPaperItem extends ItemCustom implements ItemDynamicColor {
+public class ConstellationPaperItem extends ItemCustom implements ItemDynamicColor, ICustomEntityItem {
 
     public ConstellationPaperItem() {
         super(new Properties()
@@ -61,7 +61,7 @@ public class ConstellationPaperItem extends ItemCustom implements ItemDynamicCol
 
     @Override
     public CreativeModeTab getCreativeTab() {
-        return CreativeTabsAS.CREATIVE_TAB_AS_PAPERS.get();
+        return CreativeTabsAS.CREATIVE_TAB_AS_PAPERS;
     }
 
     @Override
@@ -91,7 +91,7 @@ public class ConstellationPaperItem extends ItemCustom implements ItemDynamicCol
         super.inventoryTick(stack, level, entity, slotId, isSelected);
 
         if (entity instanceof ServerPlayer sPlayer) {
-            PlayerProgress progress = ResearchManager.getProgress(sPlayer, LogicalSide.SERVER);
+            PlayerProgress progress = ResearchManager.getProgress(sPlayer, EnvType.SERVER);
             if (progress.isValid()) {
                 ConstellationPaperComponent cmp = stack.getOrDefault(DataComponentsAS.CONSTELLATION_PAPER, ConstellationPaperComponent.EMPTY);
                 if (cmp.getConstellation().isEmpty()) {
@@ -131,7 +131,7 @@ public class ConstellationPaperItem extends ItemCustom implements ItemDynamicCol
         }).orElse(InteractionResultHolder.pass(held));
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void openConstellationScreen(BaseConstellation cst) {
         PlayableSoundInstance.of(SoundsAS.SCREEN_TOME_PAGE).forUI().play();
         Minecraft.getInstance().setScreen(new ScreenConstellationPaper(cst));
@@ -150,10 +150,10 @@ public class ConstellationPaperItem extends ItemCustom implements ItemDynamicCol
                     .getConstellation()
                     .map(BaseConstellation::getConstellationColor)
                     .orElse(null);
-            return ItemEntityReplacement.replace(EntitiesAS.ITEM_HIGHLIGHTED.get(), itemEntity)
+            return ItemEntityReplacement.replace(EntitiesAS.ITEM_HIGHLIGHTED, itemEntity)
                     .setColor(cstColor);
         }
-        return super.createEntity(level, location, stack);
+        return null;
     }
 
     @Override

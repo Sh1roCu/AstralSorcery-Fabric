@@ -54,7 +54,7 @@ public class LiquidInteractionResultDropItem extends LiquidInteractionResult {
 
     @Override
     public Type<?> getType() {
-        return LiquidInteractionResultTypesAS.DROP_ITEM.get();
+        return LiquidInteractionResultTypesAS.DROP_ITEM;
     }
 
     @Override

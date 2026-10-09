@@ -11,7 +11,6 @@ package hellfirepvp.astralsorcery.common.block.tile;
 import com.mojang.serialization.MapCodec;
 import hellfirepvp.astralsorcery.common.block.tile.base.BaseTickTileBlock;
 import hellfirepvp.astralsorcery.common.lib.TileEntitiesAS;
-import hellfirepvp.astralsorcery.common.tile.TileLightwell;
 import hellfirepvp.astralsorcery.common.tile.TileLumenCrystallizer;
 import hellfirepvp.astralsorcery.common.util.InteractUtil;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
@@ -31,7 +30,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -46,7 +44,7 @@ public class LumenCrystallizerBlock extends BaseTickTileBlock<TileLumenCrystalli
     private static final VoxelShape SHAPE = createShape();
 
     public LumenCrystallizerBlock(Properties properties) {
-        super(properties, TileEntitiesAS.LUMEN_CRYSTALLIZER);
+        super(properties, () -> TileEntitiesAS.LUMEN_CRYSTALLIZER);
     }
 
     private static VoxelShape createShape() {
@@ -79,17 +77,18 @@ public class LumenCrystallizerBlock extends BaseTickTileBlock<TileLumenCrystalli
         }).orElse(ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION);
     }
 
-    @Override
-    public boolean hasDynamicLightEmission(BlockState state) {
-        return true;
-    }
-
-    @Override
-    public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
-        AuxiliaryLightManager lightMgr = level.getAuxLightManager(pos);
-        if (lightMgr == null) return 0;
-        return lightMgr.getLightAt(pos);
-    }
+    // TODO?
+//    @Override
+//    public boolean hasDynamicLightEmission(BlockState state) {
+//        return true;
+//    }
+//
+//    @Override
+//    public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
+//        AuxiliaryLightManager lightMgr = level.getAuxLightManager(pos);
+//        if (lightMgr == null) return 0;
+//        return lightMgr.getLightAt(pos);
+//    }
 
     @Override
     protected RenderShape getRenderShape(BlockState state) {

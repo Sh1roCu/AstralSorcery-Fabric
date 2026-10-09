@@ -19,7 +19,7 @@ import hellfirepvp.astralsorcery.common.perk.type.base.PerkAttributeType;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -36,12 +36,12 @@ import java.util.stream.Collectors;
  */
 public class PerkAttributeMap {
 
-    private final LogicalSide side;
+    private final EnvType side;
 
     private final Map<PerkAttributeType, List<PerkAttributeModifier>> modifiers = new HashMap<>();
     private final List<PerkAttributeConverter> converters = new ArrayList<>();
 
-    PerkAttributeMap(LogicalSide side) {
+    PerkAttributeMap(EnvType side) {
         this.side = side;
     }
 

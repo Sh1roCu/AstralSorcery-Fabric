@@ -8,15 +8,20 @@
 
 package hellfirepvp.astralsorcery.common.lumen.binding.usage;
 
+import cn.sh1rocu.astralsorcery.api.event.BaseEvent;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.lib.types.LumenBindingUsageTypesAS;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.event.level.BlockEvent;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -44,13 +49,13 @@ public class LumenBindingUsageBlockBreak extends LumenBindingUsage {
         return new LumenBindingUsageBlockBreak(lumenCost, consumptionChance);
     }
 
-    public static void attachEventListeners(IEventBus bus) {
-        bus.addListener(EventPriority.LOWEST, LumenBindingUsageBlockBreak::onBlockBreak);
+    public static void attachEventListeners() {
+        PlayerBlockBreakEvents.AFTER.register(BaseEvent.LOWEST, LumenBindingUsageBlockBreak::onBlockBreak);
     }
 
-    private static void onBlockBreak(BlockEvent.BreakEvent event) {
-        if (event.getLevel().isClientSide()) return;
-        drainAll(event.getPlayer(), 1F, LumenBindingUsageBlockBreak.class);
+    private static void onBlockBreak(Level world, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity) {
+        if (world.isClientSide()) return;
+        drainAll(player, 1F, LumenBindingUsageBlockBreak.class);
     }
 
     @Override

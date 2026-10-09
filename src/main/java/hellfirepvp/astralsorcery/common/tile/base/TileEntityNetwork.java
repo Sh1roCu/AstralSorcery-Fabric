@@ -21,7 +21,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.registries.DeferredHolder;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -112,9 +111,10 @@ public abstract class TileEntityNetwork<N extends TransmissionNode, T extends Ti
         }
     }
 
-    public abstract DeferredHolder<TransmissionNodeProvider<?>, ? extends TransmissionNodeProvider<N>> getNodeProvider();
+    public abstract TransmissionNodeProvider<N> getNodeProvider();
 
-    public void onNodeCreate(N newNode) {}
+    public void onNodeCreate(N newNode) {
+    }
 
     public static class Data extends TileEntityTick.Data {
 

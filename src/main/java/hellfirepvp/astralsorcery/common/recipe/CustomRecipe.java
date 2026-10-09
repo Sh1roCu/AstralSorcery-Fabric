@@ -14,10 +14,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.neoforged.neoforge.registries.DeferredHolder;
-
-import java.util.Optional;
-import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -62,7 +58,7 @@ public abstract class CustomRecipe<R extends CustomRecipe<R, T>, T extends Custo
 
     public abstract ResolvingRecipeTypeRegistryObject<R> getRecipeType();
 
-    public abstract Supplier<? extends RecipeSerializer<R>> getRecipeSerializer();
+    public abstract RecipeSerializer<R> getRecipeSerializer();
 
     @Override
     public final RecipeType<?> getType() {
@@ -71,7 +67,7 @@ public abstract class CustomRecipe<R extends CustomRecipe<R, T>, T extends Custo
 
     @Override
     public final RecipeSerializer<?> getSerializer() {
-        return this.getRecipeSerializer().get();
+        return this.getRecipeSerializer();
     }
 
     public void setGroup(String group) {

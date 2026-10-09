@@ -11,10 +11,11 @@ package hellfirepvp.astralsorcery.client.sound;
 import hellfirepvp.astralsorcery.client.util.SoundUtil;
 import hellfirepvp.astralsorcery.common.sound.CategorizedSoundEvent;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.TickableSoundInstance;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -23,8 +24,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.function.Predicate;
 
@@ -35,7 +34,7 @@ import java.util.function.Predicate;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class PlayableSoundInstance extends SimpleSoundInstance implements TickableSoundInstance {
 
     private static final RandomSource rand = RandomSource.create();

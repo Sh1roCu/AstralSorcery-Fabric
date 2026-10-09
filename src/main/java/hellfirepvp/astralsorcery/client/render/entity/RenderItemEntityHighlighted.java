@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.render.entity;
 
+import cn.sh1rocu.astralsorcery.mixin.accessor.common.ItemEntityAccessor;
 import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.util.RenderLightFanUtil;
 import hellfirepvp.astralsorcery.common.entity.ItemEntityHighlighted;
@@ -23,7 +24,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -49,7 +49,7 @@ public class RenderItemEntityHighlighted extends ItemEntityRenderer {
                 ItemStack stack = entity.getItem();
                 this.random.setSeed(getSeedForItemStack(stack));
                 BakedModel bakedmodel = this.itemRenderer.getModel(stack, entity.level(), null, entity.getId());
-                boolean shouldBob = IClientItemExtensions.of(stack).shouldBobAsEntity(stack);
+                boolean shouldBob = true /*IClientItemExtensions.of(stack).shouldBobAsEntity(stack)*/;
                 float bobOffset = shouldBob ? Mth.sin(((float) entity.tickCount + partialTicks) / 10 + entity.bobOffs) * 0.1F + 0.1F : 0;
                 float modelOffset = bakedmodel.getTransforms().getTransform(ItemDisplayContext.GROUND).scale.y();
 
@@ -61,8 +61,8 @@ public class RenderItemEntityHighlighted extends ItemEntityRenderer {
             });
         }
 
-        ItemEntityReplacement replaced = ItemEntityReplacement.replace(EntitiesAS.ITEM_HIGHLIGHTED.get(), entity);
-        replaced.age = entity.tickCount;
+        ItemEntityReplacement replaced = ItemEntityReplacement.replace(EntitiesAS.ITEM_HIGHLIGHTED, entity);
+        ((ItemEntityAccessor) replaced).as$setAge(entity.tickCount);
         super.render(replaced, entityYaw, partialTicks, poseStack, buffer, packedLight);
     }
 }

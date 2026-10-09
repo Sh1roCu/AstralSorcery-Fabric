@@ -11,6 +11,7 @@ package hellfirepvp.astralsorcery.datagen.data.artifact;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.artifact.condition.data.ArtifactConditionProvider;
 import hellfirepvp.astralsorcery.common.util.data.IntRange;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
@@ -21,12 +22,11 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
-import net.neoforged.neoforge.common.Tags;
 
 import java.util.concurrent.CompletableFuture;
 
-import static net.minecraft.advancements.critereon.BlockPredicate.Builder.*;
-import static hellfirepvp.astralsorcery.common.util.data.DescribedEntityPredicate.*;
+import static hellfirepvp.astralsorcery.common.util.data.DescribedEntityPredicate.entityFilter;
+import static net.minecraft.advancements.critereon.BlockPredicate.Builder.block;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -85,7 +85,7 @@ public class AstralArtifactConditionProvider extends ArtifactConditionProvider {
                 .build(this.blocksNear(block().of(BlockTags.FLOWERS))
                         .setBlockCountNeeded(IntRange.of(4)).setBlockConsumptionChance(0.4F).setRange(7).build());
         this.newCondition("ores")
-                .build(this.blocksNear(block().of(Tags.Blocks.ORES))
+                .build(this.blocksNear(block().of(ConventionalBlockTags.ORES))
                         .setBlockCountNeeded(IntRange.of(2)).setRange(6).build());
         this.newCondition("logs")
                 .build(this.blocksNear(block().of(BlockTags.LOGS))

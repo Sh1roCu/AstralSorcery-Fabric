@@ -79,7 +79,7 @@ public class LightwellRecipeCategory extends ASRecipeCategory<LightwellRecipe> {
 
     @Override
     public List<ItemStack> provideCatalyst() {
-        return List.of(ItemsAS.BLOCK_LIGHTWELL.toStack());
+        return List.of(ItemsAS.BLOCK_LIGHTWELL.getDefaultInstance());
     }
 
     @Override

@@ -19,16 +19,18 @@ import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.SidedHelper;
+import net.fabricmc.api.EnvType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -50,7 +52,7 @@ public class ContainerTomePapers extends ContainerItemInSlot implements DefaultQ
     }
 
     protected void addTomeSlots(Inventory inv) {
-        LogicalSide side = SidedHelper.getSide(inv.player);
+        EnvType side = SidedHelper.getSide(inv.player);
         List<BaseConstellation> seenConstellations = new ArrayList<>(ResearchManager.getProgress(inv.player, side).getSeenConstellations());
         Collections.sort(seenConstellations);
 

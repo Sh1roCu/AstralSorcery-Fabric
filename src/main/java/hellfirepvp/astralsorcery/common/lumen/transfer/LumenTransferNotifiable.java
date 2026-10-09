@@ -10,7 +10,6 @@ package hellfirepvp.astralsorcery.common.lumen.transfer;
 
 import hellfirepvp.astralsorcery.common.lumen.Lumen;
 import net.minecraft.server.level.ServerLevel;
-import net.neoforged.neoforge.common.extensions.IBlockEntityExtension;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -19,7 +18,7 @@ import net.neoforged.neoforge.common.extensions.IBlockEntityExtension;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public interface LumenTransferNotifiable extends IBlockEntityExtension {
+public interface LumenTransferNotifiable {
 
     void onTransfer(ServerLevel sLevel, Lumen type);
 

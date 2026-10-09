@@ -11,7 +11,7 @@ package hellfirepvp.astralsorcery.common.perk.type.base;
 import net.minecraft.core.Holder;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import javax.annotation.Nonnull;
 
@@ -27,7 +27,7 @@ public interface VanillaPerkAttributeType {
     @Nonnull
     Holder<Attribute> getAttribute();
 
-    void refreshAttribute(Player player, LogicalSide side);
+    void refreshAttribute(Player player, EnvType side);
 
 }
 

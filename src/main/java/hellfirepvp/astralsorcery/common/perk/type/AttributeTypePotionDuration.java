@@ -8,20 +8,17 @@
 
 package hellfirepvp.astralsorcery.common.perk.type;
 
+import cn.sh1rocu.astralsorcery.api.event.MobEffectEvent;
 import hellfirepvp.astralsorcery.common.event.AttributeEvent;
-import hellfirepvp.astralsorcery.common.lib.PerksAS;
 import hellfirepvp.astralsorcery.common.perk.PerkManager;
 import hellfirepvp.astralsorcery.common.perk.type.base.PerkAttributeType;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.SidedHelper;
-import net.minecraft.server.level.ServerPlayer;
+import net.fabricmc.api.EnvType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -37,15 +34,16 @@ public class AttributeTypePotionDuration extends PerkAttributeType {
     }
 
     @Override
-    protected void attachListeners(IEventBus eventBus) {
-        super.attachListeners(eventBus);
-        eventBus.addListener(this::onPotionAdded);
+    protected void attachListeners() {
+        super.attachListeners();
+        MobEffectEvent.ADDED.register(this::onPotionAdded);
     }
 
     private void onPotionAdded(MobEffectEvent.Added event) {
         if (!(event.getEntity() instanceof Player player)) return;
-        LogicalSide side = SidedHelper.getSide(player);
+        EnvType side = SidedHelper.getSide(player);
         if (!this.hasTypeApplied(player, side)) return;
+        if (event.getEffectInstance() == null) return;
 
         if (event.getOldEffectInstance() == null) {
             modifyPotionDuration(player, side, event.getEffectInstance(), event.getEffectInstance());
@@ -54,7 +52,7 @@ public class AttributeTypePotionDuration extends PerkAttributeType {
         }
     }
 
-    private void modifyPotionDuration(Player player, LogicalSide side, MobEffectInstance newInstance, MobEffectInstance existingInstance) {
+    private void modifyPotionDuration(Player player, EnvType side, MobEffectInstance newInstance, MobEffectInstance existingInstance) {
         if (newInstance.getEffect().value().getCategory() == MobEffectCategory.HARMFUL ||
                 existingInstance.getAmplifier() > newInstance.getAmplifier()) {
             return;

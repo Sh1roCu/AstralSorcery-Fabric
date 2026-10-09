@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.component;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.common.util.AttributeTooltipContext;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -16,7 +17,6 @@ import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.util.AttributeTooltipContext;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -29,7 +29,8 @@ import java.util.function.Consumer;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public record StoredPlayerProgressComponent(Optional<PlayerProgress> progress, Optional<GameProfile> owningPlayer, boolean creative) implements DynamicTooltipComponent {
+public record StoredPlayerProgressComponent(Optional<PlayerProgress> progress, Optional<GameProfile> owningPlayer,
+                                            boolean creative) implements DynamicTooltipComponent {
 
     public static final StoredPlayerProgressComponent EMPTY = new StoredPlayerProgressComponent(Optional.empty(), Optional.empty(), false);
     public static final StoredPlayerProgressComponent CREATIVE = new StoredPlayerProgressComponent(Optional.empty(), Optional.empty(), true);

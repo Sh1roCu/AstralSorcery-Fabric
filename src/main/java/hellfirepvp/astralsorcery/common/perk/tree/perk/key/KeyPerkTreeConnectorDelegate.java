@@ -29,7 +29,7 @@ import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.codec.CodecProducts;
 import hellfirepvp.astralsorcery.common.util.codec.SetCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -74,13 +74,13 @@ public class KeyPerkTreeConnectorDelegate extends AttributeModifierPerk<Abstract
         return Optional.ofNullable(delegateKey);
     }
 
-    public Optional<KeyPerkTreeConnector> getDelegate(LogicalSide side) {
+    public Optional<KeyPerkTreeConnector> getDelegate(EnvType side) {
         return this.getDelegateKey().flatMap(key -> PerkTree.getInstance().getPerk(side, key))
                 .filter(perk -> perk instanceof KeyPerkTreeConnector)
                 .map(perk -> (KeyPerkTreeConnector) perk);
     }
 
-    public boolean isDelegateAllocated(LogicalSide side, PlayerPerkData perkData) {
+    public boolean isDelegateAllocated(EnvType side, PlayerPerkData perkData) {
         return this.getDelegate(side).map(delegate -> {
             return (perkData.hasPerkAllocation(delegate, PerkAllocationType.UNLOCKED) ||
                     perkData.hasPerkAllocation(delegate, PerkAllocationType.UNLOCKED_NON_CONNECT)) &&
@@ -89,7 +89,7 @@ public class KeyPerkTreeConnectorDelegate extends AttributeModifierPerk<Abstract
     }
 
     @Override
-    public Collection<AbstractPerk<?>> getAlwaysDependentPerks(PlayerProgress progress, LogicalSide side) {
+    public Collection<AbstractPerk<?>> getAlwaysDependentPerks(PlayerProgress progress, EnvType side) {
         KeyPerkTreeConnector validDelegate = this.getDelegate(side)
                 .filter(connector -> progress.getPerkData().hasPerkAllocationGrantingConnections(connector))
                 .orElse(null);

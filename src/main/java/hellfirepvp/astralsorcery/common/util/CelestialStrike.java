@@ -14,6 +14,7 @@ import hellfirepvp.astralsorcery.common.util.level.DayTimeHelper;
 import hellfirepvp.astralsorcery.common.visual.type.CelestialStrikeEffect;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
@@ -39,7 +40,8 @@ public class CelestialStrike {
 
     private static final double RADIUS = 16D;
 
-    private CelestialStrike() {}
+    private CelestialStrike() {
+    }
 
     public static void play(@Nullable LivingEntity attacker, ServerLevel sLevel, Vector3 at, Vector3 displayPosition) {
         play(attacker, sLevel, at, displayPosition, 1F, 0F);
@@ -53,7 +55,7 @@ public class CelestialStrike {
         }
 
         float dmg = (25F + DayTimeHelper.getCurrentDaytimeDistribution(sLevel) * 10F) * damageMultiplier;
-        Holder<Enchantment> fireAspect = sLevel.holderOrThrow(Enchantments.FIRE_ASPECT);
+        Holder<Enchantment> fireAspect = sLevel.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.FIRE_ASPECT);
 
         for (LivingEntity living : targets) {
             if (isProtectedTarget(living)) {

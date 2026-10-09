@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.recipe.altar;
 
+import cn.sh1rocu.observerlib.ObserverLibFabric;
 import hellfirepvp.astralsorcery.common.constellation.BaseConstellation;
 import hellfirepvp.astralsorcery.common.recipe.CustomRecipeInput;
 import hellfirepvp.astralsorcery.common.tile.TileAltar;
@@ -19,7 +20,6 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -102,7 +102,7 @@ public class AltarCraftingInput extends CustomRecipeInput {
 
     public Optional<ServerPlayer> getCraftingServerPlayer() {
         if (this.getPlayerUUID() == null) return Optional.empty();
-        return Optional.ofNullable(ServerLifecycleHooks.getCurrentServer())
+        return Optional.ofNullable(ObserverLibFabric.getServer())
                 .map(srv -> srv.getPlayerList().getPlayer(this.getPlayerUUID()));
     }
 

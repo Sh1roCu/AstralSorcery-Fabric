@@ -41,7 +41,7 @@ public class ArtifactShardItem extends ItemCustom {
 
     @Override
     public CreativeModeTab getCreativeTab() {
-        return CreativeTabsAS.CREATIVE_TAB_AS_ARTIFACTS.get();
+        return CreativeTabsAS.CREATIVE_TAB_AS_ARTIFACTS;
     }
 
     @Override
@@ -61,7 +61,7 @@ public class ArtifactShardItem extends ItemCustom {
     }
 
     public static ItemStack createShard(ArtifactType type) {
-        ItemStack stack = ItemsAS.ARTIFACT_SHARD.toStack();
+        ItemStack stack = ItemsAS.ARTIFACT_SHARD.getDefaultInstance();
         stack.set(DataComponentsAS.ARTIFACT_TYPE, new ArtifactTypeComponent(type));
         return stack;
     }

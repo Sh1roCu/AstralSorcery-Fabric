@@ -18,10 +18,10 @@ import hellfirepvp.astralsorcery.datagen.data.recipes.liquid.LiquidInteractionRe
 import hellfirepvp.astralsorcery.datagen.data.recipes.liquid.LiquidStarlightRecipeProvider;
 import hellfirepvp.astralsorcery.datagen.data.recipes.lumen.LumenCrystallizationRecipeProvider;
 import hellfirepvp.astralsorcery.datagen.data.recipes.lumen.LumenGenerationRecipeProvider;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.data.recipes.RecipeProvider;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -32,15 +32,18 @@ import java.util.concurrent.CompletableFuture;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class AstralRecipeProvider extends RecipeProvider {
+public class AstralRecipeProvider extends FabricRecipeProvider {
 
-    public AstralRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-        super(output, registries);
+    private final HolderLookup.Provider registries;
+
+    public AstralRecipeProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
+        super(output, registriesFuture);
+        this.registries = registriesFuture.join();
     }
 
     @Override
-    protected void buildRecipes(RecipeOutput recipeOutput, HolderLookup.Provider provider) {
-        recipeOutput = new GeneratedRecipeBuffer.BufferedRecipeOutput(recipeOutput, provider);
+    public void buildRecipes(RecipeOutput recipeOutput) {
+        recipeOutput = new GeneratedRecipeBuffer.BufferedRecipeOutput(recipeOutput, this.registries);
 
         AltarRecipeProvider.registerRecipes(recipeOutput);
         FocalCombineRecipeProvider.registerRecipes(recipeOutput);

@@ -17,7 +17,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import java.util.function.Supplier;
 
@@ -33,7 +33,7 @@ public class ReaderVanillaAttribute extends PerkAttributeTypeReader {
     protected final Holder<Attribute> attribute;
     protected boolean formatAsDecimal = false;
 
-    public ReaderVanillaAttribute(Supplier<? extends PerkAttributeType> type, Holder<Attribute> reference) {
+    public ReaderVanillaAttribute(PerkAttributeType type, Holder<Attribute> reference) {
         super(type);
         this.attribute = reference;
     }
@@ -44,13 +44,13 @@ public class ReaderVanillaAttribute extends PerkAttributeTypeReader {
     }
 
     @Override
-    public double getDefaultValue(PerkAttributeMap statMap, Player player, LogicalSide side) {
+    public double getDefaultValue(PerkAttributeMap statMap, Player player, EnvType side) {
         AttributeInstance ai = player.getAttribute(this.attribute);
         return ai == null ? this.attribute.value().getDefaultValue() : ai.getBaseValue();
     }
 
     @Override
-    public double getModifierValueForMode(PerkAttributeMap statMap, Player player, LogicalSide side, ModifierType mode) {
+    public double getModifierValueForMode(PerkAttributeMap statMap, Player player, EnvType side, ModifierType mode) {
         return statMap.getModifier(player, ResearchManager.getProgress(player, side), this.getType(), mode);
     }
 

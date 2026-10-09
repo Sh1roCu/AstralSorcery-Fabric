@@ -9,13 +9,12 @@
 package hellfirepvp.astralsorcery.common.container.slot;
 
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
 
 import java.util.function.Supplier;
 
@@ -47,9 +46,16 @@ public class TileDisplaySlot extends ReadOnlySlot {
     public ItemStack getItem() {
         Level level = this.level.get();
         return MiscUtil.getTileAt(level, this.tilePos, this.expectedTileClass, false).map(tile -> {
-            IItemHandler handler = level.getCapability(Capabilities.ItemHandler.BLOCK, this.tilePos, null);
-            if (handler == null || handler.getSlots() <= 0) return ItemStack.EMPTY;
-            return handler.getStackInSlot(0).copy();
+            var handler = ItemStorage.SIDED.find(level, this.tilePos, null);
+            if (handler == null) return ItemStack.EMPTY;
+            ItemStack stack = ItemStack.EMPTY;
+            for (var view : handler) {
+                if (!view.isResourceBlank()) {
+                    stack = view.getResource().toStack((int) view.getAmount());
+                    break;
+                }
+            }
+            return stack.copy();
         }).orElse(ItemStack.EMPTY);
     }
 }

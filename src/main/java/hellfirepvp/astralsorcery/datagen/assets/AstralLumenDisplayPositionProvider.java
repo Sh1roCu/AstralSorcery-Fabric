@@ -11,7 +11,7 @@ package hellfirepvp.astralsorcery.datagen.assets;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.datagen.LumenDisplayPositionProvider;
 import hellfirepvp.astralsorcery.common.lib.LumenAS;
-import net.minecraft.data.PackOutput;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -22,7 +22,7 @@ import net.minecraft.data.PackOutput;
  */
 public class AstralLumenDisplayPositionProvider extends LumenDisplayPositionProvider {
 
-    public AstralLumenDisplayPositionProvider(PackOutput output) {
+    public AstralLumenDisplayPositionProvider(FabricDataOutput output) {
         super(output, AstralSorcery.MODID);
     }
 

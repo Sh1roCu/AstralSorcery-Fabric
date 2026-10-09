@@ -13,8 +13,9 @@ import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.recipe.liquid.interaction.result.LiquidInteractionResult;
 import hellfirepvp.astralsorcery.common.recipe.liquid.interaction.result.LiquidInteractionResultDropItem;
 import hellfirepvp.astralsorcery.common.recipe.liquid.interaction.result.LiquidInteractionResultSpawnEntity;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.Registry;
+
+import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -25,12 +26,17 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  */
 public class LiquidInteractionResultTypesAS {
 
-    public static final DeferredRegister<LiquidInteractionResult.Type<?>> RESULT_TYPE_REGISTER =
-            DeferredRegister.create(RegistriesAS.KEY_LIQUID_INTERACTION_RESULT_TYPES, AstralSorcery.MODID);
+    public static void init() {
 
-    public static final DeferredHolder<LiquidInteractionResult.Type<?>, LiquidInteractionResult.Type<LiquidInteractionResultDropItem>> DROP_ITEM =
-            RESULT_TYPE_REGISTER.register("drop_item", () -> LiquidInteractionResultDropItem.TYPE);
+    }
 
-    public static final DeferredHolder<LiquidInteractionResult.Type<?>, LiquidInteractionResult.Type<LiquidInteractionResultSpawnEntity>> SPAWN_ENTITY =
-            RESULT_TYPE_REGISTER.register("spawn_entity", () -> LiquidInteractionResultSpawnEntity.TYPE);
+    public static final LiquidInteractionResult.Type<LiquidInteractionResultDropItem> DROP_ITEM =
+            register("drop_item", () -> LiquidInteractionResultDropItem.TYPE);
+
+    public static final LiquidInteractionResult.Type<LiquidInteractionResultSpawnEntity> SPAWN_ENTITY =
+            register("spawn_entity", () -> LiquidInteractionResultSpawnEntity.TYPE);
+
+    private static <T extends LiquidInteractionResult> LiquidInteractionResult.Type<T> register(String name, Supplier<LiquidInteractionResult.Type<T>> supplier) {
+        return Registry.register(RegistriesAS.REGISTRY_LIQUID_INTERACTION_RESULT_TYPES, AstralSorcery.key(name), supplier.get());
+    }
 }

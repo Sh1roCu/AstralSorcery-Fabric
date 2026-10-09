@@ -38,8 +38,8 @@ public class StarlightFocusCrystalBlockItem extends BlockItemCustom {
 
     private static CrystalAttributesComponent generateEmpty(StarlightFocusCrystalBlock.Type type) {
         return switch (type) {
-            case ROCK_CRYSTAL -> ItemsAS.ROCK_CRYSTAL.asItem().components().get(DataComponentsAS.CRYSTAL_ATTRIBUTES.get());
-            case CELESTIAL_CRYSTAL -> ItemsAS.CELESTIAL_CRYSTAL.asItem().components().get(DataComponentsAS.CRYSTAL_ATTRIBUTES.get());
+            case ROCK_CRYSTAL -> ItemsAS.ROCK_CRYSTAL.asItem().components().get(DataComponentsAS.CRYSTAL_ATTRIBUTES);
+            case CELESTIAL_CRYSTAL -> ItemsAS.CELESTIAL_CRYSTAL.asItem().components().get(DataComponentsAS.CRYSTAL_ATTRIBUTES);
         };
     }
 
@@ -49,15 +49,15 @@ public class StarlightFocusCrystalBlockItem extends BlockItemCustom {
             ItemStack stack = new ItemStack(this);
             stack.set(DataComponentsAS.ATTUNED_CONSTELLATION, new AttunedConstellationComponent(cst));
             stack.set(DataComponentsAS.CRYSTAL_ATTRIBUTES, CrystalAttributesComponent.defaultEmpty()
-                    .setAttributeTier(CrystalPropertiesAS.SIZE, CrystalPropertiesAS.SIZE.get().getMaxTier())
-                    .setAttributeTier(CrystalPropertiesAS.CUT, CrystalPropertiesAS.CUT.get().getMaxTier()));
+                    .setAttributeTier(CrystalPropertiesAS.SIZE, CrystalPropertiesAS.SIZE.getMaxTier())
+                    .setAttributeTier(CrystalPropertiesAS.CUT, CrystalPropertiesAS.CUT.getMaxTier()));
             tabItems.accept(stack);
         });
     }
 
     @Override
     public CreativeModeTab getCreativeTab() {
-        return CreativeTabsAS.CREATIVE_TAB_AS_ATTUNED_CRYSTALS.get();
+        return CreativeTabsAS.CREATIVE_TAB_AS_ATTUNED_CRYSTALS;
     }
 
     @Override

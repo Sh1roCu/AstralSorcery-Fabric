@@ -99,7 +99,7 @@ public class PatreonEntitySyncData extends SyncData<PatreonEntitySyncData.Client
 
     @Override
     public Type<?, ClientSync, ClientDiffSync, PatreonEntityClientData> getType() {
-        return SyncDataTypesAS.PATREON_ENTITY.get();
+        return SyncDataTypesAS.PATREON_ENTITY;
     }
 
     public static class ClientSync extends ClientSyncData<PatreonEntityClientData> {
@@ -137,7 +137,7 @@ public class PatreonEntitySyncData extends SyncData<PatreonEntitySyncData.Client
 
         @Override
         public SyncData.Type<?, ?, ?, PatreonEntityClientData> type() {
-            return SyncDataTypesAS.PATREON_ENTITY.get();
+            return SyncDataTypesAS.PATREON_ENTITY;
         }
     }
 
@@ -183,7 +183,7 @@ public class PatreonEntitySyncData extends SyncData<PatreonEntitySyncData.Client
 
         @Override
         public SyncData.Type<?, ?, ?, PatreonEntityClientData> type() {
-            return SyncDataTypesAS.PATREON_ENTITY.get();
+            return SyncDataTypesAS.PATREON_ENTITY;
         }
     }
 }

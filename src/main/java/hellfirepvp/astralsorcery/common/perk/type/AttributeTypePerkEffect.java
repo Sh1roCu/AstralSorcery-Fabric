@@ -13,7 +13,7 @@ import hellfirepvp.astralsorcery.common.perk.source.ModifierSource;
 import hellfirepvp.astralsorcery.common.perk.type.base.PerkAttributeType;
 import hellfirepvp.astralsorcery.common.perk.type.base.VanillaPerkAttributeType;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -29,7 +29,7 @@ public class AttributeTypePerkEffect extends PerkAttributeType {
     }
 
     @Override
-    public void onApply(Player player, LogicalSide side, ModifierSource source) {
+    public void onApply(Player player, EnvType side, ModifierSource source) {
         super.onApply(player, side, source);
 
         RegistriesAS.REGISTRY_PERK_ATTRIBUTE_TYPES.stream()
@@ -38,7 +38,7 @@ public class AttributeTypePerkEffect extends PerkAttributeType {
     }
 
     @Override
-    public void onRemove(Player player, LogicalSide side, boolean removedCompletely, ModifierSource source) {
+    public void onRemove(Player player, EnvType side, boolean removedCompletely, ModifierSource source) {
         super.onRemove(player, side, removedCompletely, source);
 
         RegistriesAS.REGISTRY_PERK_ATTRIBUTE_TYPES.stream()

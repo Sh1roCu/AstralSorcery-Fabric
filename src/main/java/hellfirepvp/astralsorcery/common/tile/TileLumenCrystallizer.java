@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.tile;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
 import com.google.common.collect.Iterables;
 import com.mojang.datafixers.Products;
 import com.mojang.serialization.Codec;
@@ -18,6 +19,7 @@ import hellfirepvp.astralsorcery.client.effect.function.FXColorFunction;
 import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
 import hellfirepvp.astralsorcery.common.block.tile.LumenCrystalClusterBlock;
+import hellfirepvp.astralsorcery.common.event.RecipeEvent;
 import hellfirepvp.astralsorcery.common.lib.*;
 import hellfirepvp.astralsorcery.common.lumen.ILumenHandler;
 import hellfirepvp.astralsorcery.common.lumen.Lumen;
@@ -26,14 +28,12 @@ import hellfirepvp.astralsorcery.common.lumen.capability.LumenHandlerView;
 import hellfirepvp.astralsorcery.common.lumen.capability.LumenHandlerViewFactory;
 import hellfirepvp.astralsorcery.common.lumen.capability.LumenStackList;
 import hellfirepvp.astralsorcery.common.lumen.transfer.LumenRequestHelper;
-import hellfirepvp.astralsorcery.common.recipe.infusion.ActiveInfusionRecipe;
 import hellfirepvp.astralsorcery.common.recipe.lumen.LumenCrystallizationRecipe;
 import hellfirepvp.astralsorcery.common.tile.base.TileEntityLumenDisplay;
 import hellfirepvp.astralsorcery.common.tile.base.TileEntityTick;
 import hellfirepvp.astralsorcery.common.util.*;
 import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
-import hellfirepvp.astralsorcery.common.util.data.LazyRecipeHolder;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.inventory.FilteredInventoryView;
 import hellfirepvp.astralsorcery.common.util.inventory.FilteredInventoryViewFactory;
@@ -42,6 +42,11 @@ import hellfirepvp.astralsorcery.common.util.inventory.InventoryView;
 import hellfirepvp.astralsorcery.common.util.tank.FluidContainerList;
 import hellfirepvp.astralsorcery.common.util.tank.FluidTankView;
 import hellfirepvp.astralsorcery.common.util.tank.FluidTankViewFactory;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -53,14 +58,7 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Optional;
 
@@ -89,7 +87,7 @@ public class TileLumenCrystallizer extends TileEntityTick<TileLumenCrystallizer.
         if (this.getTileData().getTicksExisted() % 20 == 0) {
             FluidStack stack = this.getTileData().getContainedFluid();
             if (!stack.isEmpty()) {
-                this.setLight(level, stack.getFluidType().getLightLevel(stack));
+                this.setLight(level, FluidVariantAttributes.getLuminance(stack.getFluidVariant()));
             } else {
                 this.setLight(level, 0);
             }
@@ -172,12 +170,19 @@ public class TileLumenCrystallizer extends TileEntityTick<TileLumenCrystallizer.
         int liquidAmt = PASSIVE_LIQUID_STARLIGHT_DRAIN;
         if (byCatalyst) liquidAmt *= 2;
         FluidStack requested = FluidsAS.LIQUID_STARLIGHT.stack(liquidAmt);
-        FluidStack drainedFluid = this.getTileData().getFluidTank().getWithoutFilters(tank -> tank.drain(requested, IFluidHandler.FluidAction.SIMULATE));
-        if (drainedFluid.getAmount() < liquidAmt) return;
+        long drainedFluid = this.getTileData().getFluidTank().getWithoutFilters(tank ->
+                StorageUtil.simulateExtract(tank, requested.getFluidVariant(), requested.getAmount(), null));
+
+        if (drainedFluid < liquidAmt) return;
 
         if (this.getTileData().getTicksExisted() % 20 == 0) {
             this.getTileData().getLumenHandler().drain(this.activeRecipe.getLumenToCrystallize(), drainAmt, ILumenHandler.Action.EXECUTE);
-            this.getTileData().getFluidTank().withoutFilters(tank -> tank.drain(requested, IFluidHandler.FluidAction.EXECUTE));
+            this.getTileData().getFluidTank().withoutFilters(tank -> {
+                try (Transaction tx = Transaction.openOuter()) {
+                    tank.extract(requested.getFluidVariant(), requested.getAmount(), tx);
+                    tx.commit();
+                }
+            });
         }
 
         if (!catalyst.isEmpty() && this.activeRecipe.getCatalystShatterMultiplier() > 0) {
@@ -191,7 +196,8 @@ public class TileLumenCrystallizer extends TileEntityTick<TileLumenCrystallizer.
         if (storedLumen >= lumenToProvide) {
             if (above.isAir()) {
                 if (this.rand.nextInt(20 * 60) == 0) {
-                    level.setBlock(this.getBlockPos().above(), BlocksAS.LUMEN_CRYSTAL_CLUSTER.get().defaultBlockState(), Block.UPDATE_ALL);
+                    BlockState toSet = BlocksAS.LUMEN_CRYSTAL_CLUSTER.defaultBlockState();
+                    level.setBlock(this.getBlockPos().above(), toSet, Block.UPDATE_ALL);
                     MiscUtil.getTileAt(level, this.getBlockPos().above(), TileLumenCrystalCluster.class, true).ifPresent(newCluster -> {
                         newCluster.getTileData().setLumen(this.activeRecipe.getLumenToCrystallize());
                         newCluster.getTileData().markForUpdate();
@@ -201,14 +207,19 @@ public class TileLumenCrystallizer extends TileEntityTick<TileLumenCrystallizer.
                     LumenUtil.drain(this.getTileData().getLumenHandler(),
                             this.activeRecipe.getLumenToCrystallize().stack(this.activeRecipe.getLumenConsumedPerOperation()),
                             ILumenHandler.Action.EXECUTE);
+
+                    RecipeEvent.LumenCrystallization.EVENT.invoker().post(new RecipeEvent.LumenCrystallization(this.activeRecipe, this, toSet));
                 }
             } else {
                 if (this.rand.nextInt(20 * 60 * 5) == 0) {
                     int stage = above.getValue(LumenCrystalClusterBlock.STAGE);
-                    level.setBlock(this.getBlockPos().above(), above.setValue(LumenCrystalClusterBlock.STAGE, Math.min(4, stage + 1)), Block.UPDATE_ALL);
+                    BlockState toSet = above.setValue(LumenCrystalClusterBlock.STAGE, Math.min(4, stage + 1));
+                    level.setBlock(this.getBlockPos().above(), toSet, Block.UPDATE_ALL);
                     LumenUtil.drain(this.getTileData().getLumenHandler(),
                             this.activeRecipe.getLumenToCrystallize().stack(this.activeRecipe.getLumenConsumedPerOperation()),
                             ILumenHandler.Action.EXECUTE);
+
+                    RecipeEvent.LumenCrystallization.EVENT.invoker().post(new RecipeEvent.LumenCrystallization(this.activeRecipe, this, toSet));
                 }
             }
         }
@@ -224,7 +235,7 @@ public class TileLumenCrystallizer extends TileEntityTick<TileLumenCrystallizer.
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void clientTick(Level level) {
         super.clientTick(level);
 
@@ -285,7 +296,7 @@ public class TileLumenCrystallizer extends TileEntityTick<TileLumenCrystallizer.
                     CodecUtil.defaulted(FluidContainerList.CODEC, "fluidContents", FluidContainerList::create, Data::getFluidContents),
                     CodecUtil.defaulted(InventoryStackList.CODEC, "inventoryContents", InventoryStackList::create, Data::getInventoryContents),
                     CodecUtil.defaulted(LumenStackList.CODEC, "lumenContents", LumenStackList::create, Data::getLumenContents),
-                    CodecUtil.lenientDefaulted(RegistriesAS.REGISTRY_LUMEN.byNameCodec(), "recentlyTransmittedLumen", LumenAS.NONE, Data::getRecentlyTransmittedLumen),
+                    CodecUtil.lenientDefaulted(RegistriesAS.REGISTRY_LUMEN.byNameCodec(), "recentlyTransmittedLumen", LumenAS.NONE::get, Data::getRecentlyTransmittedLumen),
                     CodecUtil.defaulted(Codec.LONG, "transmittedLumenGameTime", () -> 0L, Data::getTransmittedLumenGameTime)
             ));
         }
@@ -344,9 +355,9 @@ public class TileLumenCrystallizer extends TileEntityTick<TileLumenCrystallizer.
 
         protected FluidTankViewFactory newFluidTank() {
             return FluidTankViewFactory.builder(1)
-                    .tankCapacity(tank -> 2000)
-                    .inputFilter((tank, stack, existing) -> stack.is(FluidsAS.LIQUID_STARLIGHT.getFluidType()))
-                    .extractFilter((tank, stack, existing) -> false)
+                    .tankCapacity(tank -> 2000L * 81)
+                    .inputFilter((tank, stack, existing) -> stack.isOf(FluidsAS.LIQUID_STARLIGHT.getSource()))
+                    .extractFilter((tank, existing) -> false)
                     .accessibleSides(Direction.DOWN);
         }
 
@@ -358,10 +369,9 @@ public class TileLumenCrystallizer extends TileEntityTick<TileLumenCrystallizer.
         protected FilteredInventoryViewFactory newInventoryHandler() {
             return FilteredInventoryViewFactory.filteredBuilder(1)
                     .stackSizeLimiter((slot, stack) -> 1)
-                    .extractFilter((slot, amount, existing) -> false)
-                    .inputFilter((slot, toAdd, existing) -> {
-                        if (!existing.isEmpty()) return false;
-                        var match = this.findMatchingRecipe(toAdd);
+                    .extractFilter((amount, existing) -> false)
+                    .inputFilter((amount, toAdd) -> {
+                        var match = this.findMatchingRecipe(toAdd.toStack((int) amount));
                         return match.isPresent() &&
                                 (this.getContainedLumen().isEmpty() || match.get().value().getLumenToCrystallize().equals(this.getContainedLumen().getLumen()));
                     })

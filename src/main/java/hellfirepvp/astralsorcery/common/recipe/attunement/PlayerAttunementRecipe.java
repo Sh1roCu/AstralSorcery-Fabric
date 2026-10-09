@@ -23,7 +23,6 @@ import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
 import hellfirepvp.astralsorcery.client.sound.PlayableSoundInstance;
 import hellfirepvp.astralsorcery.client.util.camera.CameraManager;
 import hellfirepvp.astralsorcery.client.util.camera.CameraTransformerPlayerFocus;
-import hellfirepvp.astralsorcery.client.util.camera.RevertableCameraTransformer;
 import hellfirepvp.astralsorcery.client.util.camera.path.CameraPathBuilder;
 import hellfirepvp.astralsorcery.common.constellation.BaseConstellation;
 import hellfirepvp.astralsorcery.common.constellation.property.AttunePlayerProperty;
@@ -31,8 +30,6 @@ import hellfirepvp.astralsorcery.common.event.helper.InvulnerabilityHelper;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.lib.SoundsAS;
 import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
-import hellfirepvp.astralsorcery.common.perk.data.PerkTree;
-import hellfirepvp.astralsorcery.common.perk.tree.AbstractPerk;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
@@ -44,18 +41,14 @@ import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.level.DayTimeHelper;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.entity.EntityTypeTest;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.LogicalSide;
 
 import java.util.*;
 
@@ -97,7 +90,7 @@ public class PlayerAttunementRecipe extends AttunementRecipe<PlayerAttunementRec
     public static Optional<ServerPlayer> findEligiblePlayer(TileAttunementAltar altar) {
         BaseConstellation cst = altar.getTileData().getActiveConstellation().orElse(null);
         if (cst == null) return Optional.empty();
-        return AttunePlayerProperty.getRootPerk(cst, LogicalSide.SERVER)
+        return AttunePlayerProperty.getRootPerk(cst, EnvType.SERVER)
                 .map(root -> {
                     Vector3 tileVec = Vector3.atCenter(altar).addY(0.5);
                     Player player = altar.getLevel().getNearestPlayer(tileVec.getX(), tileVec.getY(), tileVec.getZ(), 1, false);
@@ -112,7 +105,7 @@ public class PlayerAttunementRecipe extends AttunementRecipe<PlayerAttunementRec
 
     public static boolean isEligiblePlayer(ServerPlayer player, BaseConstellation attuneTo) {
         if (player != null && player.isAlive() && !MiscUtil.isPlayerFake(player) && !player.isShiftKeyDown()) {
-            PlayerProgress prog = ResearchManager.getProgress(player, LogicalSide.SERVER);
+            PlayerProgress prog = ResearchManager.getProgress(player, EnvType.SERVER);
 
             return prog.isValid() &&
                     attuneTo instanceof BaseConstellation &&
@@ -181,8 +174,8 @@ public class PlayerAttunementRecipe extends AttunementRecipe<PlayerAttunementRec
         }
 
         @Override
-        public void doTick(LogicalSide side, TileAttunementAltar altar) {
-            if (side.isServer()) {
+        public void doTick(EnvType side, TileAttunementAltar altar) {
+            if (side == EnvType.SERVER) {
                 Player player = altar.getLevel().getPlayerByUUID(this.playerUUID);
                 if (player != null) {
                     InvulnerabilityHelper.setInvulnerable(player);
@@ -197,7 +190,7 @@ public class PlayerAttunementRecipe extends AttunementRecipe<PlayerAttunementRec
             }
         }
 
-        @OnlyIn(Dist.CLIENT)
+        @Environment(EnvType.CLIENT)
         private void ensureNoisePlanes() {
             if (this.playerNoisePlanes.isEmpty()) {
                 this.playerNoisePlanes.add(new ClientObject<>(new RenderOffsetNoisePlane(1.0F)));
@@ -206,7 +199,7 @@ public class PlayerAttunementRecipe extends AttunementRecipe<PlayerAttunementRec
             }
         }
 
-        @OnlyIn(Dist.CLIENT)
+        @Environment(EnvType.CLIENT)
         private void ensureCameraFlight(BlockPos altarPos) {
             if (this.cameraFlight.isNull() &&
                     Minecraft.getInstance().player != null &&
@@ -215,7 +208,7 @@ public class PlayerAttunementRecipe extends AttunementRecipe<PlayerAttunementRec
             }
         }
 
-        @OnlyIn(Dist.CLIENT)
+        @Environment(EnvType.CLIENT)
         private void spawnActiveEffects(TileAttunementAltar altar, BaseConstellation cst) {
             Vector3 playerTarget = Vector3.atCenter(altar).addY(2);
             TileAttunementAltar.AttunementConstellationFinder finder = new TileAttunementAltar.AttunementConstellationFinder(Minecraft.getInstance().level, altar.getBlockPos());
@@ -398,7 +391,7 @@ public class PlayerAttunementRecipe extends AttunementRecipe<PlayerAttunementRec
             }
         }
 
-        @OnlyIn(Dist.CLIENT)
+        @Environment(EnvType.CLIENT)
         private void tickPlaySound(TileAttunementAltar altar) {
             if (this.attunementSound.isNull()) {
                 PlayableSoundInstance attuneSound = PlayableSoundInstance.of(SoundsAS.ATTUNEMENT_ALTAR_PLAYER_ATTUNE)
@@ -423,7 +416,7 @@ public class PlayerAttunementRecipe extends AttunementRecipe<PlayerAttunementRec
         }
 
         @Override
-        @OnlyIn(Dist.CLIENT)
+        @Environment(EnvType.CLIENT)
         public void stopEffects(TileAttunementAltar altar) {
             this.cameraFlight.ifPresent(transformer -> {
                 CameraManager.getInstance().removeTransformer(transformer);
@@ -446,7 +439,7 @@ public class PlayerAttunementRecipe extends AttunementRecipe<PlayerAttunementRec
 
         private static class CameraFlight {
 
-            @OnlyIn(Dist.CLIENT)
+            @Environment(EnvType.CLIENT)
             private static CameraTransformerPlayerFocus createCameraFlight(BlockPos altarPos) {
                 Vector3 altar = Vector3.atCenter(altarPos);
                 Vector3 cameraOffset = altar.copy().addY(5);
@@ -459,7 +452,7 @@ public class PlayerAttunementRecipe extends AttunementRecipe<PlayerAttunementRec
                 return builder.finishAndStart();
             }
 
-            @OnlyIn(Dist.CLIENT)
+            @Environment(EnvType.CLIENT)
             private static Runnable createTick(Vector3 offset) {
                 return () -> {
                     Player player = Minecraft.getInstance().player;

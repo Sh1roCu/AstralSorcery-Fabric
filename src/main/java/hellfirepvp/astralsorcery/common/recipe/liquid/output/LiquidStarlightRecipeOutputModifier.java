@@ -13,13 +13,13 @@ import com.mojang.serialization.MapCodec;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.recipe.liquid.LiquidStarlightRecipe;
 import hellfirepvp.astralsorcery.common.recipe.liquid.LiquidStarlightRecipeInput;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.List;
 
@@ -47,9 +47,11 @@ public abstract class LiquidStarlightRecipeOutputModifier {
 
     public abstract void createOutput(LiquidStarlightRecipe recipe, LiquidStarlightRecipeInput input);
 
-    @OnlyIn(Dist.CLIENT)
-    public void playCraftingEffects(LiquidStarlightRecipe recipe, LiquidStarlightRecipeInput input, RandomSource rand, int craftingTick) {}
+    @Environment(EnvType.CLIENT)
+    public void playCraftingEffects(LiquidStarlightRecipe recipe, LiquidStarlightRecipeInput input, RandomSource rand, int craftingTick) {
+    }
 
-    public record Type<T extends LiquidStarlightRecipeOutputModifier>(MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
+    public record Type<T extends LiquidStarlightRecipeOutputModifier>(MapCodec<T> codec,
+                                                                      StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
     }
 }

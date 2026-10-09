@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.tile;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -23,13 +24,15 @@ import hellfirepvp.astralsorcery.client.sound.PlayableSoundInstance;
 import hellfirepvp.astralsorcery.client.util.ColorExtractUtil;
 import hellfirepvp.astralsorcery.client.util.RenderSpriteUtil;
 import hellfirepvp.astralsorcery.client.util.SoundUtil;
-import hellfirepvp.astralsorcery.common.lib.*;
-import hellfirepvp.astralsorcery.common.lumen.transfer.LumenRequestHelper;
+import hellfirepvp.astralsorcery.common.event.RecipeEvent;
+import hellfirepvp.astralsorcery.common.lib.ObserversAS;
+import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
+import hellfirepvp.astralsorcery.common.lib.SoundsAS;
+import hellfirepvp.astralsorcery.common.lib.TileEntitiesAS;
 import hellfirepvp.astralsorcery.common.recipe.ActiveRecipe;
 import hellfirepvp.astralsorcery.common.recipe.infusion.ActiveInfusionRecipe;
 import hellfirepvp.astralsorcery.common.recipe.infusion.InfusionRecipe;
 import hellfirepvp.astralsorcery.common.recipe.infusion.InfusionRecipeInput;
-import hellfirepvp.astralsorcery.common.sound.CategorizedSoundEvent;
 import hellfirepvp.astralsorcery.common.tile.base.TileEntityTick;
 import hellfirepvp.astralsorcery.common.util.*;
 import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
@@ -41,6 +44,9 @@ import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.inventory.InventoryStackList;
 import hellfirepvp.astralsorcery.common.util.inventory.InventoryView;
 import hellfirepvp.astralsorcery.common.util.inventory.InventoryViewFactory;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -52,10 +58,6 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -71,20 +73,20 @@ import java.util.stream.Collectors;
 public class TileInfuser extends TileEntityTick<TileInfuser.Data> {
 
     private static final Set<BlockPos> LIQUID_OFFSETS = ImmutableSet.of(
-            new BlockPos( 1, -1,  2),
-            new BlockPos( 0, -1,  2),
-            new BlockPos(-1, -1,  2),
+            new BlockPos(1, -1, 2),
+            new BlockPos(0, -1, 2),
+            new BlockPos(-1, -1, 2),
 
-            new BlockPos( 1, -1, -2),
-            new BlockPos( 0, -1, -2),
+            new BlockPos(1, -1, -2),
+            new BlockPos(0, -1, -2),
             new BlockPos(-1, -1, -2),
 
-            new BlockPos( 2, -1,  1),
-            new BlockPos( 2, -1,  0),
-            new BlockPos( 2, -1, -1),
+            new BlockPos(2, -1, 1),
+            new BlockPos(2, -1, 0),
+            new BlockPos(2, -1, -1),
 
-            new BlockPos(-2, -1,  1),
-            new BlockPos(-2, -1,  0),
+            new BlockPos(-2, -1, 1),
+            new BlockPos(-2, -1, 0),
             new BlockPos(-2, -1, -1)
     );
 
@@ -138,6 +140,7 @@ public class TileInfuser extends TileEntityTick<TileInfuser.Data> {
             if (activeRecipe.isFinished(level) && activeRecipe.consumeInputs(this, level)) {
                 data.getInventory().setStackInSlot(0, ItemStack.EMPTY);
                 ItemUtil.dropItem(level, this.getBlockPos().above(), recipe.getOutput());
+                RecipeEvent.Infusion.End.EVENT.invoker().post(new RecipeEvent.Infusion.End(recipe, activeRecipe));
 
                 data.knownRecipes.add(activeRecipe.getRecipeId());
 
@@ -167,6 +170,10 @@ public class TileInfuser extends TileEntityTick<TileInfuser.Data> {
         }
 
         ActiveInfusionRecipe infusionRecipe = ActiveInfusionRecipe.of(recipe);
+        var start = new RecipeEvent.Infusion.Start(recipe, infusionRecipe);
+        RecipeEvent.Infusion.Start.EVENT.invoker().post(start);
+        if (start.isCanceled()) return;
+
         this.getTileData().setActiveRecipe(infusionRecipe);
         this.getTileData().markForUpdate();
 
@@ -179,7 +186,7 @@ public class TileInfuser extends TileEntityTick<TileInfuser.Data> {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void clientTick(Level level) {
         super.clientTick(level);
 
@@ -187,7 +194,7 @@ public class TileInfuser extends TileEntityTick<TileInfuser.Data> {
         if (activeRecipe == null) return;
         InfusionRecipe recipe = activeRecipe.getRecipe(level).orElse(null);
         if (recipe == null) return;
-        FluidStack requiredInput = new FluidStack(recipe.getFluidInput(), FluidType.BUCKET_VOLUME);
+        FluidStack requiredInput = new FluidStack(recipe.getFluidInput(), FluidConstants.BUCKET);
 
         this.playCraftingSound();
         this.playOrbitalEffect(activeRecipe, requiredInput);
@@ -201,7 +208,7 @@ public class TileInfuser extends TileEntityTick<TileInfuser.Data> {
         activeRecipe.getDrawInstance().playLiquidDrawEffect(level, Vector3.atCenter(this).addY(0.6F), requiredInput);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void playCraftingSound() {
         if (SoundUtil.getSoundVolume(SoundSource.BLOCKS) <= 0) return;
 
@@ -222,7 +229,7 @@ public class TileInfuser extends TileEntityTick<TileInfuser.Data> {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void playOrbitalEffect(ActiveInfusionRecipe recipe, FluidStack input) {
         if (this.orbitalLiquid.isNull() || this.orbitalLiquid.get().isRemoved()) {
             ResourceLocation recipeId = recipe.getRecipeId();
@@ -240,14 +247,22 @@ public class TileInfuser extends TileEntityTick<TileInfuser.Data> {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void playLiquidBubbleEffect(FluidStack input) {
         Vector3 offset = Vector3.atBottomCenter(this).addY(0.8F);
         switch (rand.nextInt(4)) {
-            case 0: offset.addX( 0.375); break;
-            case 1: offset.addX(-0.375); break;
-            case 2: offset.addZ( 0.375); break;
-            case 3: offset.addZ(-0.375); break;
+            case 0:
+                offset.addX(0.375);
+                break;
+            case 1:
+                offset.addX(-0.375);
+                break;
+            case 2:
+                offset.addZ(0.375);
+                break;
+            case 3:
+                offset.addZ(-0.375);
+                break;
         }
         offset = VectorUtil.withRandomOffset(offset, rand, 0.05F);
 
@@ -262,7 +277,7 @@ public class TileInfuser extends TileEntityTick<TileInfuser.Data> {
                 .setMaxAge(40);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void playLiquidPoolEffect(FluidStack requiredInput) {
         List<BlockPos> offsets = TileInfuser.getLiquidOffsets().stream()
                 .map(pos -> pos.offset(this.getBlockPos()))
@@ -279,7 +294,7 @@ public class TileInfuser extends TileEntityTick<TileInfuser.Data> {
         });
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void clearEffects() {
         if (!this.orbitalLiquid.isNull()) {
             this.orbitalLiquid.get().requestRemoval();
@@ -299,7 +314,7 @@ public class TileInfuser extends TileEntityTick<TileInfuser.Data> {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     protected void onClientDataUpdated(Data previousData) {
         super.onClientDataUpdated(previousData);
 

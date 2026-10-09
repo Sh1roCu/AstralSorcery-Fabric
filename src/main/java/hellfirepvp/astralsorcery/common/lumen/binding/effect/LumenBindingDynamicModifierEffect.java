@@ -32,7 +32,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -91,7 +91,7 @@ public class LumenBindingDynamicModifierEffect extends LumenBindingEffect implem
     }
 
     @Override
-    public List<Component> getDisplayText(LogicalSide side, ItemStack stack) {
+    public List<Component> getDisplayText(EnvType side, ItemStack stack) {
         return this.getModifiers().stream().map(modifier -> {
             return modifier.getAttributeType().getReader().map(reader -> {
                 Component cmp = reader.getDisplay(modifier, null, null);
@@ -107,7 +107,7 @@ public class LumenBindingDynamicModifierEffect extends LumenBindingEffect implem
     }
 
     @Override
-    public Collection<PerkAttributeModifier> getModifiers(ItemStack stack, Player player, LogicalSide side, boolean ignoreRequirements) {
+    public Collection<PerkAttributeModifier> getModifiers(ItemStack stack, Player player, EnvType side, boolean ignoreRequirements) {
         StoredLumenComponent storedLumenCmp = stack.getOrDefault(DataComponentsAS.STORED_LUMEN, StoredLumenComponent.EMPTY);
         if (!storedLumenCmp.isEmpty() && storedLumenCmp.hasBinding(LumenAS.PRISMATIC)) {
             float multiplier = this.getEffectMultiplier(stack, side);

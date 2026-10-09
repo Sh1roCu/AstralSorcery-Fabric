@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.perk.tree.perk.root;
 
+import cn.sh1rocu.astralsorcery.api.event.SimpleIncomingDamageCallback;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.constellation.BaseConstellation;
@@ -28,14 +29,13 @@ import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.DiminishingMultiplier;
-import hellfirepvp.astralsorcery.common.util.event.SidedEventBus;
+import net.fabricmc.api.EnvType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.CombatTracker;
-import net.neoforged.fml.LogicalSide;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
-import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -55,7 +55,7 @@ public class RootPerkDiscidia extends RootPerk<AbstractPerk.Data> {
     public static final Config CONFIG = new Config("root.discidia");
 
     private RootPerkDiscidia(ResourceLocation key, float x, float y) {
-        this(key, defaultNameKey(key), x, y, PerkCategory.ROOT, Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), ConstellationsAS.DISCIDIA.get());
+        this(key, defaultNameKey(key), x, y, PerkCategory.ROOT, Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), ConstellationsAS.DISCIDIA);
     }
 
     protected RootPerkDiscidia(ResourceLocation key, String nameKey, float x, float y, PerkCategory category, Collection<PerkRequirement> requirements, Collection<PerkAttributeConverter> converters, Collection<PerkAttributeModifier> modifiers, BaseConstellation constellation) {
@@ -78,24 +78,24 @@ public class RootPerkDiscidia extends RootPerk<AbstractPerk.Data> {
     }
 
     @Override
-    protected void attachEventListeners(SidedEventBus sidedEventBus) {
-        super.attachEventListeners(sidedEventBus);
-        sidedEventBus.addListener(LivingIncomingDamageEvent.class, SidedEventBus.entityEvent(), this::onAttack);
+    protected void attachEventListeners() {
+        super.attachEventListeners();
+        SimpleIncomingDamageCallback.MODIFY_DAMAGE.register(this::onAttack);
     }
 
-    private void onAttack(LivingIncomingDamageEvent event) {
+    private float onAttack(LivingEntity entity, DamageSource damageSource, float amount) {
         ServerPlayer sPlayer = null;
-        if (event.getSource().getDirectEntity() instanceof ServerPlayer) {
-            sPlayer = (ServerPlayer) event.getSource().getDirectEntity();
-        } else if (event.getSource().getEntity() instanceof ServerPlayer) {
-            sPlayer = (ServerPlayer) event.getSource().getEntity();
+        if (damageSource.getDirectEntity() instanceof ServerPlayer) {
+            sPlayer = (ServerPlayer) damageSource.getDirectEntity();
+        } else if (damageSource.getEntity() instanceof ServerPlayer) {
+            sPlayer = (ServerPlayer) damageSource.getEntity();
         }
-        if (sPlayer == null) return;
+        if (sPlayer == null) return amount;
 
-        LogicalSide side = this.getSide(sPlayer);
-        if (!side.isServer()) return;
+        EnvType side = this.getSide(sPlayer);
+        if (side != EnvType.SERVER) return amount;
         PlayerProgress progress = ResearchManager.getProgress(sPlayer, side);
-        if (!progress.getPerkData().hasPerkEffect(this)) return;
+        if (!progress.getPerkData().hasPerkEffect(this)) return amount;
         PerkAttributeMap perkMap = PerkManager.getOrCreateAttributes(sPlayer);
 
         float effectMultiplier = 1F;
@@ -106,7 +106,7 @@ public class RootPerkDiscidia extends RootPerk<AbstractPerk.Data> {
             }
         }
 
-        float xp = Math.min(event.getAmount(), 60F);
+        float xp = Math.min(amount, 60F);
         xp *= 4F;
         xp *= effectMultiplier;
         xp *= this.getExpMultiplier();
@@ -117,6 +117,8 @@ public class RootPerkDiscidia extends RootPerk<AbstractPerk.Data> {
         xp = AttributeEvent.postProcessModded(sPlayer, PerksAS.AttributeTypes.PERK_EXPERIENCE, xp);
 
         ResearchHelper.addPerkExp(sPlayer, xp);
+
+        return amount;
     }
 
     @Override

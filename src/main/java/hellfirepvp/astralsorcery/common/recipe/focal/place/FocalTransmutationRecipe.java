@@ -31,7 +31,6 @@ import net.minecraft.util.random.WeightedRandom;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -41,7 +40,6 @@ import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -184,7 +182,7 @@ public class FocalTransmutationRecipe extends CustomRecipe<FocalTransmutationRec
     }
 
     @Override
-    public Supplier<? extends RecipeSerializer<FocalTransmutationRecipe>> getRecipeSerializer() {
+    public RecipeSerializer<FocalTransmutationRecipe> getRecipeSerializer() {
         return RecipeTypesAS.FOCAL_TRANSMUTATION_SERIALIZER;
     }
 

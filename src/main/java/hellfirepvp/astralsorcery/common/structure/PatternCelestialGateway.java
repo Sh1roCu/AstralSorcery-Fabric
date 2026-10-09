@@ -22,18 +22,18 @@ import net.minecraft.world.level.block.state.BlockState;
 public class PatternCelestialGateway extends StructureBlockArray {
 
     public PatternCelestialGateway() {
-        this.addBlock(BlocksAS.CELESTIAL_GATEWAY.get(), 0, 0, 0);
+        this.addBlock(BlocksAS.CELESTIAL_GATEWAY, 0, 0, 0);
 
-        this.addBlockCube(BlocksAS.MARBLE_ARCH.get().defaultBlockState(), -3, -1, -3, 3, -1, 3);
-        this.addBlockCube(BlocksAS.SOOTY_MARBLE_RAW.get().defaultBlockState(), -2, -1, -2, 2, -1, 2);
+        this.addBlockCube(BlocksAS.MARBLE_ARCH.defaultBlockState(), -3, -1, -3, 3, -1, 3);
+        this.addBlockCube(BlocksAS.SOOTY_MARBLE_RAW.defaultBlockState(), -2, -1, -2, 2, -1, 2);
 
-        BlockState runed = BlocksAS.MARBLE_RUNED.get().defaultBlockState();
+        BlockState runed = BlocksAS.MARBLE_RUNED.defaultBlockState();
         this.addBlock(runed, -3, -1, -3);
         this.addBlock(runed,  3, -1, -3);
         this.addBlock(runed,  3, -1,  3);
         this.addBlock(runed, -3, -1,  3);
 
-        BlockState engraved = BlocksAS.MARBLE_ENGRAVED.get().defaultBlockState();
+        BlockState engraved = BlocksAS.MARBLE_ENGRAVED.defaultBlockState();
         this.addBlock(engraved, -3, 0, -3);
         this.addBlock(engraved,  3, 0, -3);
         this.addBlock(engraved,  3, 0,  3);

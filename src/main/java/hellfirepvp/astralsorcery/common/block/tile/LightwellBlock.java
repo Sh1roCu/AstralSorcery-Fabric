@@ -27,12 +27,9 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -47,7 +44,7 @@ public class LightwellBlock extends BaseTickTileBlock<TileLightwell> {
     private static final VoxelShape SHAPE = createShape();
 
     public LightwellBlock(Properties properties) {
-        super(properties, TileEntitiesAS.LIGHTWELL);
+        super(properties, () -> TileEntitiesAS.LIGHTWELL);
     }
 
     private static VoxelShape createShape() {
@@ -81,17 +78,18 @@ public class LightwellBlock extends BaseTickTileBlock<TileLightwell> {
         }).orElse(ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION);
     }
 
-    @Override
-    public boolean hasDynamicLightEmission(BlockState state) {
-        return true;
-    }
-
-    @Override
-    public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
-        AuxiliaryLightManager lightMgr = level.getAuxLightManager(pos);
-        if (lightMgr == null) return 0;
-        return lightMgr.getLightAt(pos);
-    }
+    // TODO?
+//    @Override
+//    public boolean hasDynamicLightEmission(BlockState state) {
+//        return true;
+//    }
+//
+//    @Override
+//    public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
+//        AuxiliaryLightManager lightMgr = level.getAuxLightManager(pos);
+//        if (lightMgr == null) return 0;
+//        return lightMgr.getLightAt(pos);
+//    }
 
     @Override
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {

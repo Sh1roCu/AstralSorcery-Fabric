@@ -20,19 +20,21 @@ import hellfirepvp.astralsorcery.common.perk.data.PerkTree;
 import hellfirepvp.astralsorcery.common.perk.source.ModifierSource;
 import hellfirepvp.astralsorcery.common.perk.source.ModifierSourceProvider;
 import hellfirepvp.astralsorcery.common.perk.tick.PerkCooldownHelper;
+import hellfirepvp.astralsorcery.common.research.PlayerPerkData;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.research.perk.PerkAllocation;
 import hellfirepvp.astralsorcery.common.research.perk.PerkAllocationStatus;
 import hellfirepvp.astralsorcery.common.research.perk.PerkAllocationType;
-import hellfirepvp.astralsorcery.common.research.PlayerPerkData;
-import hellfirepvp.astralsorcery.common.util.SidedHelper;
-import hellfirepvp.astralsorcery.common.util.event.CachedEventBus;
-import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
+import hellfirepvp.astralsorcery.common.util.SidedHelper;
+import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
 import hellfirepvp.astralsorcery.common.util.data.FloatPoint;
-import hellfirepvp.astralsorcery.common.util.event.SidedEventBus;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
+import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.Util;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -44,16 +46,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.ModList;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforgespi.language.IModInfo;
 
 import javax.annotation.Nullable;
 import java.util.*;
-
-import static hellfirepvp.astralsorcery.common.util.SidedHelper.getSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -68,8 +63,9 @@ public abstract class AbstractPerk<T extends AbstractPerk.Data> implements Modif
             .dispatch(AbstractPerk::getType, PerkType::perkCodec);
     public static final StreamCodec<RegistryFriendlyByteBuf, AbstractPerk<?>> TO_CLIENT_PERKTREE_CODEC = StreamCodec.of(
             (buf, perk) -> buf.writeResourceLocation(perk.getKey()),
-            buf -> PerkTree.getInstance().getPerk(LogicalSide.CLIENT, buf.readResourceLocation()).orElseThrow()
+            buf -> PerkTree.getInstance().getPerk(EnvType.CLIENT, buf.readResourceLocation()).orElseThrow()
     );
+
     protected static <T extends AbstractPerk<?>> Products.P5<RecordCodecBuilder.Mu<T>, ResourceLocation, String, Float, Float, PerkCategory> perkFields(RecordCodecBuilder.Instance<T> instance) {
         return instance.group(
                 ResourceLocation.CODEC.fieldOf("registry_name").forGetter(AbstractPerk::getKey),
@@ -88,7 +84,6 @@ public abstract class AbstractPerk<T extends AbstractPerk.Data> implements Modif
     private PerkCategory category;
     private String nameKey;
 
-    private final CachedEventBus busWrapper;
     private PerkTreePoint<?> perkTreePoint = null;
 
     private List<MutableComponent> tooltipCache = null;
@@ -100,8 +95,6 @@ public abstract class AbstractPerk<T extends AbstractPerk.Data> implements Modif
         this.x = x;
         this.y = y;
         this.category = category;
-
-        this.busWrapper = CachedEventBus.of(NeoForge.EVENT_BUS);
     }
 
     public <P extends AbstractPerk<?>> P setNameKey(String nameKey) {
@@ -124,7 +117,8 @@ public abstract class AbstractPerk<T extends AbstractPerk.Data> implements Modif
         return Component.translatable(Util.makeDescriptionId("perk.info", AstralSorcery.key(key)));
     }
 
-    public void clearCaches(LogicalSide side) {}
+    public void clearCaches(EnvType side) {
+    }
 
     public final void clearTooltipCache() {
         this.tooltipCache = null;
@@ -135,7 +129,7 @@ public abstract class AbstractPerk<T extends AbstractPerk.Data> implements Modif
         this.tooltipCache = null;
     }
 
-    public final Collection<MutableComponent> getTooltip(PlayerProgress progress, @Nullable Player player, LogicalSide side) {
+    public final Collection<MutableComponent> getTooltip(PlayerProgress progress, @Nullable Player player, EnvType side) {
         if (this.cacheTooltip && this.tooltipCache != null) {
             return this.tooltipCache;
         }
@@ -154,20 +148,20 @@ public abstract class AbstractPerk<T extends AbstractPerk.Data> implements Modif
         return this.tooltipCache;
     }
 
-    protected boolean addTooltip(Collection<MutableComponent> tooltip, PlayerProgress progress, @Nullable Player player, LogicalSide side) {
+    protected boolean addTooltip(Collection<MutableComponent> tooltip, PlayerProgress progress, @Nullable Player player, EnvType side) {
         return false;
     }
 
-    public void invalidate(LogicalSide side) {
-        this.busWrapper.unregisterAll();
+    public void invalidate(EnvType side) {
         PerkCooldownHelper.removePerkCooldowns(side, this);
     }
 
-    public void validate(LogicalSide side) {
-        this.attachEventListeners(SidedEventBus.of(this.busWrapper, side));
+    public void validate(EnvType side) {
+        this.attachEventListeners();
     }
 
-    protected void attachEventListeners(SidedEventBus sidedEventBus) {}
+    protected void attachEventListeners() {
+    }
 
     protected PerkTreePoint<?> initPerkTreePoint() {
         return new PerkTreePoint<>(this.getOffset(), this);
@@ -220,38 +214,42 @@ public abstract class AbstractPerk<T extends AbstractPerk.Data> implements Modif
     }
 
     @Override
-    public boolean canApplySource(Player player, LogicalSide dist) {
+    public boolean canApplySource(Player player, EnvType dist) {
         return !this.getPerkData(player, dist).map(Data::isSealed).orElse(false);
     }
 
     @Override
-    public final void onApply(Player player, LogicalSide dist) {
+    public final void onApply(Player player, EnvType dist) {
         this.applyPerkLogic(player, dist);
     }
 
     @Override
-    public final void onRemove(Player player, LogicalSide dist) {
+    public final void onRemove(Player player, EnvType dist) {
         this.removePerkLogic(player, dist);
     }
 
-    protected void applyPerkLogic(Player player, LogicalSide dist) {}
+    protected void applyPerkLogic(Player player, EnvType dist) {
+    }
 
-    protected void removePerkLogic(Player player, LogicalSide dist) {}
+    protected void removePerkLogic(Player player, EnvType dist) {
+    }
 
     /**
      * Called ONCE when the perk is unlocked
      * You may use the CompoundNBT to save data to remove it again later
      */
-    public void onUnlockPerkServer(@Nullable Player player, PerkAllocationType allocation, PlayerProgress progress, T data) {}
+    public void onUnlockPerkServer(@Nullable Player player, PerkAllocationType allocation, PlayerProgress progress, T data) {
+    }
 
     /**
      * Clean up and remove the perk from that single player.
      * Data in the dataStorage is filled with the data set in onUnlockPerkServer
      * Called after the perk is already removed from the player, but still in the player's perkData
      */
-    public void onRemovePerkServer(ServerPlayer player, PerkAllocationType allocation, PlayerProgress progress, T data) {}
+    public void onRemovePerkServer(ServerPlayer player, PerkAllocationType allocation, PlayerProgress progress, T data) {
+    }
 
-    public PerkAllocationStatus getPerkStatus(@Nullable Player player, LogicalSide side) {
+    public PerkAllocationStatus getPerkStatus(@Nullable Player player, EnvType side) {
         if (player == null) {
             return PerkAllocationStatus.UNALLOCATED;
         }
@@ -311,10 +309,10 @@ public abstract class AbstractPerk<T extends AbstractPerk.Data> implements Modif
     }
 
     public List<MutableComponent> getPerkSource() {
-        return ModList.get()
-                .getModContainerById(this.getKey().getNamespace())
-                .map(ModContainer::getModInfo)
-                .map(IModInfo::getDisplayName)
+        return FabricLoader.getInstance()
+                .getModContainer(this.getKey().getNamespace())
+                .map(ModContainer::getMetadata)
+                .map(ModMetadata::getName)
                 .map(Component::literal)
                 .map(List::of)
                 .orElse(Collections.emptyList());
@@ -322,24 +320,24 @@ public abstract class AbstractPerk<T extends AbstractPerk.Data> implements Modif
 
     @Override
     public final ModifierSourceProvider<?> getSourceProvider() {
-        return PerksAS.Sources.PERKS.get();
+        return PerksAS.Sources.PERKS;
     }
 
     public abstract PerkType<?> getType();
 
-    public Optional<T> getPerkData(Player player, LogicalSide side) {
+    public Optional<T> getPerkData(Player player, EnvType side) {
         return ResearchManager.getProgress(player, side).getPerkData().getPerkData(this);
     }
 
-    protected LogicalSide getSide(Entity entity) {
+    protected EnvType getSide(Entity entity) {
         return SidedHelper.getSide(entity);
     }
 
-    public Collection<AbstractPerk<?>> getConnectedPerks(PlayerProgress progress, LogicalSide side, boolean direct) {
+    public Collection<AbstractPerk<?>> getConnectedPerks(PlayerProgress progress, EnvType side, boolean direct) {
         return PerkTree.getInstance().getConnectedPerks(side, this);
     }
 
-    public Collection<AbstractPerk<?>> getAlwaysDependentPerks(PlayerProgress progress, LogicalSide side) {
+    public Collection<AbstractPerk<?>> getAlwaysDependentPerks(PlayerProgress progress, EnvType side) {
         return Collections.emptyList();
     }
 
@@ -350,6 +348,7 @@ public abstract class AbstractPerk<T extends AbstractPerk.Data> implements Modif
                     CodecUtil.defaulted(Codec.BOOL, "sealed", () -> false, Data::isSealed)
             );
         }
+
         public static final MapCodec<Data> CODEC = RecordCodecBuilder.mapCodec(inst -> dataFields(inst).apply(inst, Data::new));
         public static final StreamCodec<RegistryFriendlyByteBuf, Data> SYNC_CODEC = StreamCodec.composite(
                 ByteBufCodecs.BOOL,
@@ -368,7 +367,7 @@ public abstract class AbstractPerk<T extends AbstractPerk.Data> implements Modif
         }
 
         public PerkDataType<?> getType() {
-            return PerkDataTypesAS.DEFAULT_DATA.get();
+            return PerkDataTypesAS.DEFAULT_DATA;
         }
 
         public boolean isSealed() {

@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.resource;
 
+import cn.sh1rocu.astralsorcery.mixin.accessor.client.TextureStateShardAccessor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
 import net.minecraft.client.Minecraft;
@@ -46,7 +47,10 @@ public class AtlasSpriteTexture extends AbstractRenderTexture {
             @Override
             public void setupRenderState() {
                 TextureManager texturemanager = Minecraft.getInstance().getTextureManager();
-                texturemanager.getTexture(AtlasSpriteTexture.this.sprite.atlasLocation()).setFilter(this.blur, this.mipmap);
+                var accessor = (TextureStateShardAccessor) (Object) this;
+                texturemanager.getTexture(AtlasSpriteTexture.this.sprite.atlasLocation()).setFilter(
+                        accessor.as$isBlur(),
+                        accessor.as$isMipmap());
                 AtlasSpriteTexture.this.bindTexture();
             }
         };

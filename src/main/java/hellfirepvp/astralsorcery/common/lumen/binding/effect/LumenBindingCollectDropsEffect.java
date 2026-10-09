@@ -14,17 +14,14 @@ import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.types.LumenBindingEffectTypesAS;
 import hellfirepvp.astralsorcery.common.util.ItemUtil;
-import hellfirepvp.astralsorcery.common.util.data.MapStream;
+import net.fabricmc.api.EnvType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.level.BlockDropsEvent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -41,18 +38,19 @@ public class LumenBindingCollectDropsEffect extends LumenBindingEffect {
     public static final MapCodec<LumenBindingCollectDropsEffect> CODEC = MapCodec.unit(INSTANCE);
     public static final StreamCodec<RegistryFriendlyByteBuf, LumenBindingCollectDropsEffect> STREAM_CODEC = StreamCodec.unit(INSTANCE);
 
-    public static void attachEventListeners(IEventBus bus) {
-        bus.addListener(EventPriority.LOWEST, LumenBindingCollectDropsEffect::onBlockDrops);
+    public static void attachEventListeners() {
+        // impl via mixin
+        // BlockDropsEvent.EVENT.register(BaseEvent.LOWEST, LumenBindingCollectDropsEffect::onBlockDrops);
     }
 
-    private static void onBlockDrops(BlockDropsEvent event) {
-        if (event.getBreaker() instanceof ServerPlayer sPlayer) {
+    public static void onBlockDrops(/*BlockDropsEvent event*/ @Nullable Entity breaker, List<ItemStack> toDrop) {
+        if (breaker instanceof ServerPlayer sPlayer) {
             forEachEffect(sPlayer, LumenBindingCollectDropsEffect.class, (stack, effect) -> {
                 int slotId = ItemUtil.findItemsInInventory(sPlayer, s -> s.is(ItemsAS.AKASHIC_SINGULARITY)).keySet()
                         .stream().findFirst().orElse(-1);
                 ItemStack singularity;
                 if (slotId == -1) {
-                    singularity = ItemsAS.AKASHIC_SINGULARITY.toStack();
+                    singularity = ItemsAS.AKASHIC_SINGULARITY.getDefaultInstance();
                     slotId = sPlayer.getInventory().getFreeSlot();
                     if (slotId == -1) {
                         return; // Well, I GUESS we can't do fck all here. Player error or something.
@@ -62,11 +60,16 @@ public class LumenBindingCollectDropsEffect extends LumenBindingEffect {
                 }
 
                 StoredItemsComponent cmp = singularity.getOrDefault(DataComponentsAS.STORED_ITEMS, StoredItemsComponent.EMPTY);
-                for (ItemEntity itemEntity : event.getDrops()) {
-                    if (itemEntity.isRemoved()) continue;
-
-                    cmp = cmp.accept(itemEntity.getItem());
-                    itemEntity.discard();
+                // for (ItemEntity itemEntity : event.getDrops()) {
+                // if (itemEntity.isRemoved()) continue;
+                // cmp = cmp.accept(itemEntity.getItem());
+                // itemEntity.discard();
+                // }
+                var copied = List.copyOf(toDrop);
+                for (ItemStack itemStack : copied) {
+                    if (itemStack.isEmpty()) continue;
+                    cmp = cmp.accept(itemStack);
+                    toDrop.remove(itemStack);
                 }
                 singularity.set(DataComponentsAS.STORED_ITEMS, cmp);
                 sPlayer.getInventory().setItem(slotId, singularity);
@@ -75,7 +78,7 @@ public class LumenBindingCollectDropsEffect extends LumenBindingEffect {
     }
 
     @Override
-    public List<Component> getDisplayText(LogicalSide side, ItemStack stack) {
+    public List<Component> getDisplayText(EnvType side, ItemStack stack) {
         return List.of(Component.translatable("lumen.binding.astralsorcery.collect_drops"));
     }
 

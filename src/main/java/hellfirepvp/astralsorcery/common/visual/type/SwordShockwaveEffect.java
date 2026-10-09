@@ -19,6 +19,8 @@ import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.visual.VectorPosEffect;
 import hellfirepvp.astralsorcery.common.visual.VisualEffectTypes;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -27,8 +29,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 
@@ -66,7 +66,7 @@ public class SwordShockwaveEffect extends VectorPosEffect {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void playEffect(RandomSource rand) {
         Level level = Minecraft.getInstance().level;
         if (level == null) {
@@ -78,7 +78,7 @@ public class SwordShockwaveEffect extends VectorPosEffect {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void playRing(Level level, Vector3 center, int ring, int delay, RandomSource rand) {
         for (Vector3 at : VectorUtil.getCircleOffsets(center, Vector3.RotAxis.Y_AXIS, ring, ring * 10)) {
             BlockPos pos = findGround(level, at.toBlockPos());
@@ -102,7 +102,7 @@ public class SwordShockwaveEffect extends VectorPosEffect {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private static FXMotionFunction<EntityFX> delayedMotion(int delay, Vector3 motion) {
         return (fx, currentMotion) -> {
             int age = fx.getAge();
@@ -113,7 +113,7 @@ public class SwordShockwaveEffect extends VectorPosEffect {
         };
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     @Nullable
     private static BlockPos findGround(Level level, BlockPos at) {
         for (int dy = 1; dy >= -2; dy--) {

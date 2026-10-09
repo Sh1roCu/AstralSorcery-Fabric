@@ -20,7 +20,6 @@ import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.data.ModelData;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -34,7 +33,7 @@ public class TilePrismRenderer implements BlockEntityRenderer<TilePrism> {
     @Override
     public void render(TilePrism prism, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
         BlockRenderDispatcher brd = Minecraft.getInstance().getBlockRenderer();
-        BlockState render = BlocksAS.STARLIGHT_FOCUS_ROCK_CRYSTAL.get().defaultBlockState();
+        BlockState render = BlocksAS.STARLIGHT_FOCUS_ROCK_CRYSTAL.defaultBlockState();
         float scale = 0.4F;
         long tick = ClientProxy.getClientTick() + MiscUtil.getBlockPosSeed(prism.getBlockPos());
 
@@ -46,7 +45,7 @@ public class TilePrismRenderer implements BlockEntityRenderer<TilePrism> {
         poseStack.translate(-0.5F, -0.5F, -0.5F);
         poseStack.translate(0, Mth.sin((tick % 150) / 150F * 2 * Mth.PI) * 0.03F, 0);
 
-        brd.renderSingleBlock(render, poseStack, bufferSource, packedLight, packedOverlay, ModelData.EMPTY, null);
+        brd.renderSingleBlock(render, poseStack, bufferSource, packedLight, packedOverlay/*, ModelData.EMPTY, null*/);
 
         poseStack.popPose();
     }

@@ -8,15 +8,14 @@
 
 package hellfirepvp.astralsorcery.common.data.sync;
 
+import cn.sh1rocu.astralsorcery.api.event.LevelEvent;
+import cn.sh1rocu.astralsorcery.util.neoforge.network.PacketDistributor;
 import hellfirepvp.astralsorcery.common.network.play.PktSyncData;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.level.LevelEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,27 +33,21 @@ public class SyncDataManager {
 
     private static final SyncDataManager INSTANCE = new SyncDataManager();
 
-    private final Map<SyncData.Type<?, ?, ?, ?>, SyncData<?, ? ,?>> dataMap = new HashMap<>();
+    private final Map<SyncData.Type<?, ?, ?, ?>, SyncData<?, ?, ?>> dataMap = new HashMap<>();
     private final Map<SyncData.Type<?, ?, ?, ?>, ClientData> clientDataMap = new HashMap<>();
 
     private final Set<SyncData.Type<?, ?, ?, ?>> dirtyData = new HashSet<>();
 
-    private SyncDataManager() {}
+    private SyncDataManager() {
+    }
 
     public static SyncDataManager getInstance() {
         return INSTANCE;
     }
 
-    public <D extends SyncData<SA, SD, C>, SA extends ClientSyncData<C>, SD extends ClientSyncDiffData<C>, C extends ClientData> D getData(DeferredHolder<SyncData.Type<?, ?, ?, ?>, SyncData.Type<D, SA, SD, C>> type) {
-        return this.getData(type.get());
-    }
 
     public <T extends SyncData<?, ?, ?>> T getData(SyncData.Type<T, ?, ?, ?> type) {
         return MiscUtil.cast(this.dataMap.computeIfAbsent(type, t -> t.dataProvider().get()));
-    }
-
-    public <D extends SyncData<SA, SD, C>, SA extends ClientSyncData<C>, SD extends ClientSyncDiffData<C>, C extends ClientData> C getClientData(DeferredHolder<SyncData.Type<?, ?, ?, ?>, SyncData.Type<D, SA, SD, C>> type) {
-        return this.getClientData(type.get());
     }
 
     public <D extends ClientData> D getClientData(SyncData.Type<?, ?, ?, D> type) {
@@ -69,22 +62,22 @@ public class SyncDataManager {
         this.dataMap.values().forEach(data -> data.clearLevel(sLevel));
     }
 
-    public void clear(LogicalSide side) {
-        if (side.isClient()) {
+    public void clear(EnvType side) {
+        if (side == EnvType.CLIENT) {
             this.clientDataMap.values().forEach(ClientData::clear);
         } else {
             this.dataMap.values().forEach(SyncData::clearAll);
         }
     }
 
-    public void attachEventListeners(IEventBus bus) {
-        bus.addListener(this::onServerTick);
-        bus.addListener(this::onWorldUnload);
+    public void attachEventListeners() {
+        ServerTickEvents.END_SERVER_TICK.register(this::onServerTick);
+        LevelEvent.UNLOAD.register(this::onWorldUnload);
     }
 
-    private void onServerTick(ServerTickEvent.Post event) {
+    private void onServerTick(MinecraftServer server) {
         if (this.dirtyData.isEmpty()) return;
-        PacketDistributor.sendToAllPlayers(PktSyncData.syncDiff(this, this.dirtyData));
+        PacketDistributor.sendToAllPlayers(PktSyncData.syncDiff(this, this.dirtyData), server);
         this.dirtyData.clear();
     }
 

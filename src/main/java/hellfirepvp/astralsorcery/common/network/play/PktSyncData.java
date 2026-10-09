@@ -15,11 +15,13 @@ import hellfirepvp.astralsorcery.common.data.sync.SyncDataManager;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.network.PlayPacketHandler;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.Collection;
 import java.util.List;
@@ -67,9 +69,10 @@ public class PktSyncData extends PlayPacketHandler.ToClient<PktSyncData.Request>
         return CODEC;
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
-    public void handle(Request payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
+    public void receive(Request payload, ClientPlayNetworking.Context context) {
+        context.client().execute(() -> {
             if (payload.syncAll()) {
                 payload.syncPayload().forEach(syncData -> {
                     syncData.updateClientData(MiscUtil.cast(SyncDataManager.getInstance().getClientData(syncData.type())));
@@ -82,7 +85,8 @@ public class PktSyncData extends PlayPacketHandler.ToClient<PktSyncData.Request>
         });
     }
 
-    public static record Request(boolean syncAll, List<ClientSyncData<?>> syncPayload, List<ClientSyncDiffData<?>> syncDiffPayload) implements CustomPacketPayload {
+    public static record Request(boolean syncAll, List<ClientSyncData<?>> syncPayload,
+                                 List<ClientSyncDiffData<?>> syncDiffPayload) implements CustomPacketPayload {
 
         public static Request all(List<ClientSyncData<?>> syncPayload) {
             return new Request(true, syncPayload, List.of());

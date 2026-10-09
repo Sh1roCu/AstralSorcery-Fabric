@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.perk.tree.perk.key;
 
+import cn.sh1rocu.astralsorcery.api.event.SimpleIncomingDamageCallback;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.config.ConfigEntry;
@@ -22,15 +23,14 @@ import hellfirepvp.astralsorcery.common.perk.tree.perk.KeyPerk;
 import hellfirepvp.astralsorcery.common.perk.tree.requirement.PerkRequirement;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
-import hellfirepvp.astralsorcery.common.util.event.SidedEventBus;
+import net.fabricmc.api.EnvType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.neoforged.fml.LogicalSide;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -58,21 +58,20 @@ public class KeyPerkProjectileDistance extends KeyPerk {
     }
 
     @Override
-    protected void attachEventListeners(SidedEventBus sidedEventBus) {
-        super.attachEventListeners(sidedEventBus);
-        sidedEventBus.addListener(LivingIncomingDamageEvent.class, SidedEventBus.entityEvent(), this::onDamage);
+    protected void attachEventListeners() {
+        super.attachEventListeners();
+        SimpleIncomingDamageCallback.MODIFY_DAMAGE.register(this::onDamage);
     }
 
-    private void onDamage(LivingIncomingDamageEvent event) {
-        if (!event.getSource().is(DamageTypeTags.IS_PROJECTILE)) return;
-        Entity source = event.getSource().getEntity();
-        if (!(source instanceof ServerPlayer sPlayer)) return;
-        if (event.getSource().isDirect()) return;
-        LogicalSide side = this.getSide(sPlayer);
-        if (!side.isServer()) return;
+    private float onDamage(LivingEntity target, DamageSource damageSource, float amount) {
+        if (!damageSource.is(DamageTypeTags.IS_PROJECTILE)) return amount;
+        Entity source = damageSource.getEntity();
+        if (!(source instanceof ServerPlayer sPlayer)) return amount;
+        if (damageSource.isDirect()) return amount;
+        EnvType side = this.getSide(sPlayer);
+        if (side != EnvType.SERVER) return amount;
         PlayerProgress progress = ResearchManager.getProgress(sPlayer, side);
-        if (!progress.getPerkData().hasPerkEffect(this)) return;
-        LivingEntity target = event.getEntity();
+        if (!progress.getPerkData().hasPerkEffect(this)) return amount;
 
         double dist = sPlayer.distanceTo(target) / CONFIG.distanceCap.getAsDouble();
         dist = Math.min(Math.pow(dist, 1.5F), 1);
@@ -80,9 +79,10 @@ public class KeyPerkProjectileDistance extends KeyPerk {
         float mult = PerkManager.getOrCreateAttributes(sPlayer)
                 .modifyValue(sPlayer, progress, PerksAS.AttributeTypes.PERK_EFFECT, CONFIG.additionalDamageMultiplier.get().floatValue());
 
-        float amount = event.getAmount();
-        amount *= (float) (1 + mult * dist);
-        event.setAmount(amount);
+        float result = amount;
+        result *= (float) (1 + mult * dist);
+
+        return result;
     }
 
     @Override

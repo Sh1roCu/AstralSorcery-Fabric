@@ -33,7 +33,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import java.nio.charset.StandardCharsets;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -65,7 +65,7 @@ public class KeyPerkTreeConnector extends AttributeModifierPerk<KeyPerkTreeConne
             return false;
         }
 
-        LogicalSide side = this.getSide(player);
+        EnvType side = this.getSide(player);
         PlayerPerkData perkData = progress.getPerkData();
         if (perkData.getPerks().keySet().stream()
                 .filter(perkData::hasPerkAllocationGrantingConnections)
@@ -101,7 +101,7 @@ public class KeyPerkTreeConnector extends AttributeModifierPerk<KeyPerkTreeConne
         super.onUnlockPerkServer(player, allocation, progress, data);
 
         if (allocation == PerkAllocationType.UNLOCKED && player instanceof ServerPlayer sPlayer) {
-            for (AbstractPerk<?> otherPerk : this.getConnectedPerks(progress, LogicalSide.SERVER, true)) {
+            for (AbstractPerk<?> otherPerk : this.getConnectedPerks(progress, EnvType.SERVER, true)) {
                 ResourceLocation perkToken = AstralSorcery.key("connector_tk_" + otherPerk.getKey().getPath());
                 UUID tokenId = this.seededId(perkToken);
                 ResearchHelper.applyPerk(sPlayer, otherPerk, PerkAllocation.grantedConnections(tokenId));
@@ -114,7 +114,7 @@ public class KeyPerkTreeConnector extends AttributeModifierPerk<KeyPerkTreeConne
         super.onRemovePerkServer(player, allocation, progress, data);
 
         if (allocation == PerkAllocationType.UNLOCKED || allocation == PerkAllocationType.UNLOCKED_NON_CONNECT) {
-            for (AbstractPerk<?> otherPerk : this.getConnectedPerks(progress, LogicalSide.SERVER, true)) {
+            for (AbstractPerk<?> otherPerk : this.getConnectedPerks(progress, EnvType.SERVER, true)) {
                 ResourceLocation perkToken = AstralSorcery.key("connector_tk_" + otherPerk.getKey().getPath());
                 UUID tokenId = this.seededId(perkToken);
                 ResearchHelper.removePerk(player, otherPerk, PerkAllocation.grantedConnections(tokenId));
@@ -140,7 +140,7 @@ public class KeyPerkTreeConnector extends AttributeModifierPerk<KeyPerkTreeConne
     }
 
     @Override
-    public Collection<AbstractPerk<?>> getConnectedPerks(PlayerProgress progress, LogicalSide side, boolean direct) {
+    public Collection<AbstractPerk<?>> getConnectedPerks(PlayerProgress progress, EnvType side, boolean direct) {
         Set<AbstractPerk<?>> connected = new HashSet<>(super.getConnectedPerks(progress, side, direct));
         if (direct) return connected;
 
@@ -200,7 +200,7 @@ public class KeyPerkTreeConnector extends AttributeModifierPerk<KeyPerkTreeConne
 
         @Override
         public PerkDataType<?> getType() {
-            return PerkDataTypesAS.KEY_TREE_CONNECTOR_DATA.get();
+            return PerkDataTypesAS.KEY_TREE_CONNECTOR_DATA;
         }
 
         public List<ResourceLocation> getPerkTokens() {

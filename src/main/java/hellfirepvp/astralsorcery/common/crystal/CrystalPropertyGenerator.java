@@ -63,9 +63,9 @@ public class CrystalPropertyGenerator {
 
     private static List<WeightedEntry.Wrapper<CrystalProperty>> getPropertiesToGenerate() {
         return Lists.newArrayList(
-                new WeightedEntry.Wrapper<>(CrystalPropertiesAS.SIZE.get(), Weight.of(4)),
-                new WeightedEntry.Wrapper<>(CrystalPropertiesAS.PURITY.get(), Weight.of(1)),
-                new WeightedEntry.Wrapper<>(CrystalPropertiesAS.CUT.get(), Weight.of(2))
+                new WeightedEntry.Wrapper<>(CrystalPropertiesAS.SIZE, Weight.of(4)),
+                new WeightedEntry.Wrapper<>(CrystalPropertiesAS.PURITY, Weight.of(1)),
+                new WeightedEntry.Wrapper<>(CrystalPropertiesAS.CUT, Weight.of(2))
         );
     }
 

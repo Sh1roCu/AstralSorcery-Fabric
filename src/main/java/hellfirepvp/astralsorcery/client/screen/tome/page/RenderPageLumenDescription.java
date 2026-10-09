@@ -8,9 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen.tome.page;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.client.ClientHooks;
 import com.mojang.datafixers.util.Either;
-import hellfirepvp.astralsorcery.client.util.tooltip.StoredLumenClientComponent;
-import hellfirepvp.astralsorcery.common.component.IdentifierComponent;
 import hellfirepvp.astralsorcery.common.component.StoredLumenComponent;
 import hellfirepvp.astralsorcery.common.lumen.Lumen;
 import hellfirepvp.astralsorcery.common.lumen.binding.LumenBinding;
@@ -19,14 +18,13 @@ import hellfirepvp.astralsorcery.common.lumen.binding.data.LumenBindingTypeLoade
 import hellfirepvp.astralsorcery.common.research.ResearchNode;
 import hellfirepvp.astralsorcery.common.research.tome.TomePage;
 import hellfirepvp.astralsorcery.common.util.tooltip.StoredLumenDisplayTooltip;
+import net.fabricmc.api.EnvType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.client.ClientHooks;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -55,8 +53,8 @@ public class RenderPageLumenDescription extends RenderPage {
     @Override
     public void render(GuiGraphics guiGraphics, int x, int y, float pTicks, float mouseX, float mouseY) {
         this.lumen.getRegistryKey().ifPresent(key -> {
-            LumenBindingTypeLoader.getInstance().getLumenBindingType(LogicalSide.CLIENT, key).ifPresent(bindingKey -> {
-                LumenBindingTypeLoader.getInstance().getBindingType(LogicalSide.CLIENT, bindingKey).ifPresent(bindingType -> {
+            LumenBindingTypeLoader.getInstance().getLumenBindingType(EnvType.CLIENT, key).ifPresent(bindingKey -> {
+                LumenBindingTypeLoader.getInstance().getBindingType(EnvType.CLIENT, bindingKey).ifPresent(bindingType -> {
                     int offsetY = y;
                     for (LumenBindingType.SlotType slotType : slotTypes) {
                         LumenBinding binding = bindingType.getBinding(slotType).orElse(null);

@@ -8,14 +8,13 @@
 
 package hellfirepvp.astralsorcery.common.perk.tick;
 
+import cn.sh1rocu.astralsorcery.api.event.PlayerTickEvent;
 import hellfirepvp.astralsorcery.common.perk.tree.AbstractPerk;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.SidedHelper;
+import net.fabricmc.api.EnvType;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -26,15 +25,16 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
  */
 public class PerkTickHelper {
 
-    private PerkTickHelper() {}
+    private PerkTickHelper() {
+    }
 
-    public static void attachEventListeners(IEventBus bus) {
-        bus.addListener(PerkTickHelper::onPlayerTick);
+    public static void attachEventListeners() {
+        PlayerTickEvent.POST.register(PerkTickHelper::onPlayerTick);
     }
 
     private static void onPlayerTick(PlayerTickEvent.Post event) {
         Player player = event.getEntity();
-        LogicalSide side = SidedHelper.getSide(player);
+        EnvType side = SidedHelper.getSide(player);
         PlayerProgress prog = ResearchManager.getProgress(player, side);
         if (prog.isValid()) {
             for (AbstractPerk<?> perk : prog.getPerkData().getEffectGrantingPerks()) {

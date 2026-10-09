@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.screen.tome;
 
+import cn.sh1rocu.astralsorcery.util.GuiGraphicsUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.ClientProxy;
 import hellfirepvp.astralsorcery.client.effect.EntityVisualFX;
@@ -29,7 +30,6 @@ import hellfirepvp.astralsorcery.client.sound.PlayableSoundInstance;
 import hellfirepvp.astralsorcery.client.util.RenderingDrawUtil;
 import hellfirepvp.astralsorcery.client.util.tooltip.TooltipUtil;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
-import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.lib.SoundsAS;
 import hellfirepvp.astralsorcery.common.lumen.Lumen;
 import hellfirepvp.astralsorcery.common.recipe.lumen.LumenGenerationRecipe;
@@ -51,9 +51,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.client.event.RecipesUpdatedEvent;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -101,14 +99,15 @@ public class TomeLumenScreen extends TomeScreen implements TomeStarParallaxLayer
         this.previousMousePoint = ScalingPoint.copy(this.mousePoint);
     }
 
-    public static void recipesSyncedFromServer(RecipesUpdatedEvent event) {
+    public static void recipesSyncedFromServer() {
+
         lumenConnections.clear();
     }
 
     private static void buildLumenConnections() {
         ClientPacketListener connection = Minecraft.getInstance().getConnection();
         if (connection == null) return;
-        connection.getRecipeManager().getAllRecipesFor(RecipeTypesAS.LUMEN_GENERATION_TYPE.get()).forEach(recipeHolder -> {
+        connection.getRecipeManager().getAllRecipesFor(RecipeTypesAS.LUMEN_GENERATION_TYPE.type()).forEach(recipeHolder -> {
             LumenGenerationRecipe recipe = recipeHolder.value();
             Lumen generated = recipe.getProducedLumen();
             recipe.getLumenCombinationInputs().keySet().forEach(lumenInput -> {
@@ -285,8 +284,8 @@ public class TomeLumenScreen extends TomeScreen implements TomeStarParallaxLayer
 
             FXAlphaFunction<?> hoverAlpha = (FXAlphaFunction<EntityVisualFX>) (fx, alphaIn, pTicks) -> {
                 if (this.hoveredLumen == null ||
-                    this.hoveredLumen == connection.source() ||
-                    this.hoveredLumen == connection.target()) return alphaIn;
+                        this.hoveredLumen == connection.source() ||
+                        this.hoveredLumen == connection.target()) return alphaIn;
                 return alphaIn * 0.1F;
             };
 
@@ -334,13 +333,14 @@ public class TomeLumenScreen extends TomeScreen implements TomeStarParallaxLayer
 
             color = color.darker();
             TooltipUtil.changeColor(0xFF000011, 0xFF000011, color.getColor(), color.getColor(), () -> {
-                guiGraphics.renderComponentTooltip(Minecraft.getInstance().font, List.of(name), mouseX, mouseY, ItemStack.EMPTY);
+                GuiGraphicsUtil.renderComponentTooltip(guiGraphics, Minecraft.getInstance().font, List.of(name), mouseX, mouseY, ItemStack.EMPTY);
             });
         }
     }
 
     @Override
-    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {}
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    }
 
     @Override
     protected void mouseDragTick(double mouseX, double mouseY, double mouseDiffX, double mouseDiffY, double mouseOffsetX, double mouseOffsetY) {
@@ -361,7 +361,7 @@ public class TomeLumenScreen extends TomeScreen implements TomeStarParallaxLayer
             this.rescaleMouse();
             return true;
         }
-        if (scrollY > 0)  {
+        if (scrollY > 0) {
             this.sizeHandler.handleZoomIn();
             this.rescaleMouse();
             return true;

@@ -9,10 +9,9 @@
 package hellfirepvp.astralsorcery.common.config;
 
 import com.google.common.base.Splitter;
+import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeConfigRegistry;
 import hellfirepvp.astralsorcery.AstralSorcery;
-import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.ArrayList;
@@ -48,10 +47,12 @@ public abstract class BaseConfiguration {
     }
 
     public static BaseConfiguration simple(ModConfig.Type configType) {
-        return new BaseConfiguration(configType) {};
+        return new BaseConfiguration(configType) {
+        };
     }
 
-    protected void onReload() {}
+    protected void onReload() {
+    }
 
     public <T extends ConfigEntry> T addConfigEntry(T configEntry) {
         configEntry.setConfigType(this.configType);
@@ -83,14 +84,12 @@ public abstract class BaseConfiguration {
         String fileName = this.configType == ModConfig.Type.SERVER ?
                 String.format("%s.toml", this.fileName) :
                 String.format("%s-%s.toml", this.fileName, this.configType.extension());
-        ModContainer ct = AstralSorcery.getModContainer();
-        ct.registerConfig(this.configType, spec, fileName);
+        NeoForgeConfigRegistry.INSTANCE.register(AstralSorcery.MODID, this.configType, spec, fileName);
 
         REGISTERED_CONFIGS.put(this.configType, this);
     }
 
-    public static void reloadConfigurations(ModConfigEvent.Reloading cfgLoadEvent) {
-        ModConfig config = cfgLoadEvent.getConfig();
+    public static void reloadConfigurations(ModConfig config) {
         if (config.getModId().equals(AstralSorcery.MODID)) {
             BaseConfiguration cfg = REGISTERED_CONFIGS.get(config.getType());
             if (cfg != null) {

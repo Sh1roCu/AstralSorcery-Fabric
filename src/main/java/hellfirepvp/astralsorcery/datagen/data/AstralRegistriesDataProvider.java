@@ -11,7 +11,11 @@ package hellfirepvp.astralsorcery.datagen.data;
 import hellfirepvp.astralsorcery.common.lib.DamageTypesAS;
 import hellfirepvp.astralsorcery.common.lib.EnchantmentsAS;
 import hellfirepvp.astralsorcery.datagen.data.world.AstralWorldGenProvider;
+import hellfirepvp.astralsorcery.datagen.data.world.structure.AstralStructureProvider;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricDynamicRegistryProvider;
 import net.minecraft.core.HolderGetter;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.registries.Registries;
@@ -22,7 +26,9 @@ import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.neoforged.neoforge.registries.NeoForgeRegistries;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -31,21 +37,38 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class AstralRegistriesDataProvider {
+public class AstralRegistriesDataProvider extends FabricDynamicRegistryProvider {
+    public AstralRegistriesDataProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> provider) {
+        super(output, provider);
+    }
 
-    private static final RegistrySetBuilder BUILDER = new RegistrySetBuilder()
-            .add(Registries.DAMAGE_TYPE, AstralRegistriesDataProvider::generateDamageTypes)
-            .add(Registries.ENCHANTMENT, AstralRegistriesDataProvider::generateEnchantments)
-            .add(Registries.CONFIGURED_FEATURE, AstralWorldGenProvider::generateConfiguredFeatures)
-            .add(Registries.PLACED_FEATURE, AstralWorldGenProvider::generatePlacedFeatures)
-            .add(NeoForgeRegistries.Keys.BIOME_MODIFIERS, AstralWorldGenProvider::generateBiomeModifiers)
-            .add(Registries.STRUCTURE, AstralWorldGenProvider::generateStructures)
-            .add(Registries.STRUCTURE_SET, AstralWorldGenProvider::generateStructureSets)
-            .add(Registries.TEMPLATE_POOL, AstralWorldGenProvider::generateStructurePools)
-            .add(Registries.PROCESSOR_LIST, AstralWorldGenProvider::generateStructureProcessorLists);
+    @Override
+    protected void configure(HolderLookup.Provider registries, Entries entries) {
+        entries.addAll(registries.lookupOrThrow(Registries.DAMAGE_TYPE));
+        entries.addAll(registries.lookupOrThrow(Registries.ENCHANTMENT));
+        entries.addAll(registries.lookupOrThrow(Registries.CONFIGURED_FEATURE));
+        entries.addAll(registries.lookupOrThrow(Registries.PLACED_FEATURE));
+        entries.addAll(registries.lookupOrThrow(Registries.STRUCTURE));
+        entries.addAll(registries.lookupOrThrow(Registries.STRUCTURE_SET));
+        entries.addAll(registries.lookupOrThrow(Registries.TEMPLATE_POOL));
+        entries.addAll(registries.lookupOrThrow(Registries.PROCESSOR_LIST));
+    }
 
-    public static RegistrySetBuilder getRegistryBuilder() {
-        return BUILDER;
+    @Override
+    public @NotNull String getName() {
+        return "AstralSorcery Dynamic Provider";
+    }
+
+    public static void addRegistries(RegistrySetBuilder builder) {
+        builder
+                .add(Registries.DAMAGE_TYPE, AstralRegistriesDataProvider::generateDamageTypes)
+                .add(Registries.ENCHANTMENT, AstralRegistriesDataProvider::generateEnchantments)
+                .add(Registries.CONFIGURED_FEATURE, AstralWorldGenProvider::generateConfiguredFeatures)
+                .add(Registries.PLACED_FEATURE, AstralWorldGenProvider::generatePlacedFeatures)
+                .add(Registries.STRUCTURE, AstralStructureProvider::generateStructures)
+                .add(Registries.STRUCTURE_SET, AstralStructureProvider::generateStructureSets)
+                .add(Registries.TEMPLATE_POOL, AstralStructureProvider::generateStructurePools)
+                .add(Registries.PROCESSOR_LIST, AstralStructureProvider::generateStructureProcessorLists);
     }
 
     private static void generateDamageTypes(BootstrapContext<DamageType> context) {

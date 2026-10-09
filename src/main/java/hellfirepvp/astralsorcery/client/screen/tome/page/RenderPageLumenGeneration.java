@@ -11,7 +11,6 @@ package hellfirepvp.astralsorcery.client.screen.tome.page;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
 import hellfirepvp.astralsorcery.client.screen.effect.ticket.StaticIdentifierTicket;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
-import hellfirepvp.astralsorcery.common.lib.LumenAS;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
 import hellfirepvp.astralsorcery.common.lumen.Lumen;
 import hellfirepvp.astralsorcery.common.recipe.lumen.LumenGenerationRecipe;
@@ -26,7 +25,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -47,11 +49,11 @@ public class RenderPageLumenGeneration extends RenderPageRecipe<LumenGenerationR
 
         this.resolveRecipeOrWriteError(guiGraphics, x, y).map(RecipeHolder::value).ifPresent(recipe -> {
             List<Lumen> requiredLumen = new ArrayList<>(recipe.getLumenCombinationInputs().keySet());
-            requiredLumen.sort(Comparator.comparing(lumen -> lumen.getRegistryKey().orElse(LumenAS.NONE.getKey())));
+            requiredLumen.sort(Lumen::compareTo);
             Lumen producedLumen = recipe.getProducedLumen();
             int yOffset = 113;
 
-            ItemStack display = requiredLumen.isEmpty() ? ItemsAS.BLOCK_LUMEN_ARRAY.toStack() : ItemsAS.BLOCK_LUMEN_ALCHEMY_ARRAY.toStack();
+            ItemStack display = requiredLumen.isEmpty() ? ItemsAS.BLOCK_LUMEN_ARRAY.getDefaultInstance() : ItemsAS.BLOCK_LUMEN_ALCHEMY_ARRAY.getDefaultInstance();
 
             this.renderPageOverlay(guiGraphics, x, y, TexturesAS.SCREEN_TOME_PAGE_GRID_LUMEN_GENERATION);
             this.renderRecipeHeader(guiGraphics, x, y, false);
@@ -75,7 +77,7 @@ public class RenderPageLumenGeneration extends RenderPageRecipe<LumenGenerationR
                 int offsetY = y + yOffset + Mth.floor(offset.getY());
                 this.renderLumen(offsetX, offsetY, lumen);
                 lumenInputEffects.put(new IntPoint(offsetX, offsetY), lumen);
-                this.renderScaledItem(guiGraphics, offsetX - 8, offsetY + 12 - 8, ItemsAS.BLOCK_LUMEN_ARRAY.toStack(), 1F);
+                this.renderScaledItem(guiGraphics, offsetX - 8, offsetY + 12 - 8, ItemsAS.BLOCK_LUMEN_ARRAY.getDefaultInstance(), 1F);
             }
 
             StaticIdentifierTicket.Container container = this.getEffectContainer();

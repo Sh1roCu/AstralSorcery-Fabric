@@ -8,9 +8,9 @@
 
 package hellfirepvp.astralsorcery.common.util.inventory;
 
+import cn.sh1rocu.astralsorcery.util.transfer.FabricItemStackHandler;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandlerModifiable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -26,7 +26,7 @@ import java.util.function.Consumer;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class InventoryView implements IItemHandlerModifiable, Iterable<ItemStack> {
+public class InventoryView extends FabricItemStackHandler {
 
     private final int size;
     private final InventoryStackList contents;
@@ -39,6 +39,7 @@ public class InventoryView implements IItemHandlerModifiable, Iterable<ItemStack
                             Set<Direction> applicableSides,
                             Consumer<Integer> changeListener,
                             BiFunction<Integer, ItemStack, Integer> stackSizeLimiter) {
+        super(size, contents);
         this.size = size;
         this.contents = contents;
         this.applicableSides = applicableSides;
@@ -50,99 +51,14 @@ public class InventoryView implements IItemHandlerModifiable, Iterable<ItemStack
         return this.size;
     }
 
-    @Override
     @Nonnull
-    public Iterator<ItemStack> iterator() {
+    public Iterator<ItemStack> iteratorStacks() {
         return this.contents.iterator();
-    }
-
-    @Override
-    public void setStackInSlot(int slot, ItemStack stack) {
-        this.contents.setStackInSlot(slot, stack);
-        this.onContentsChanged(slot);
-    }
-
-    @Override
-    public ItemStack getStackInSlot(int slot) {
-        return this.contents.getStackInSlot(slot);
-    }
-
-    @Override
-    public int getSlots() {
-        return this.getSize();
     }
 
     protected void validateViewSize(int slot) {
         if (slot >= this.getSize()) {
             throw new IndexOutOfBoundsException("Slot " + slot + " not in valid range - [0, " + this.getSize() + ")");
-        }
-    }
-
-    @Override
-    public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-        if (stack.isEmpty()) return ItemStack.EMPTY;
-
-        int insertable = Math.min(stack.getCount(), this.stackSizeLimiter.apply(slot, stack));
-        if (insertable <= 0) return stack;
-
-        int leftOver = stack.getCount() - insertable;
-        ItemStack notInserted = this.internalInsertItem(slot, stack.copyWithCount(insertable), simulate);
-        int remaining = leftOver + notInserted.getCount();
-        return remaining <= 0 ? ItemStack.EMPTY : stack.copyWithCount(remaining);
-    }
-
-    protected ItemStack internalInsertItem(int slot, ItemStack stack, boolean simulate) {
-        if (stack.isEmpty()) return ItemStack.EMPTY;
-        if (!this.isItemValid(slot, stack)) return stack;
-        this.validateViewSize(slot);
-
-        ItemStack existing = this.getStackInSlot(slot);
-        int transferLimit = Math.min(this.getSlotLimit(slot), stack.getMaxStackSize());
-
-        if (!existing.isEmpty()) {
-            if (!ItemStack.isSameItemSameComponents(stack, existing)) return stack;
-            transferLimit -= existing.getCount();
-        }
-
-        if (transferLimit <= 0) return stack;
-
-        boolean reachedLimit = stack.getCount() > transferLimit;
-        if (!simulate) {
-            if (existing.isEmpty()) {
-                ItemStack insertedStack = reachedLimit ? stack.copyWithCount(transferLimit) : stack;
-                this.setStackInSlot(slot, insertedStack);
-            } else {
-                existing.grow(reachedLimit ? transferLimit : stack.getCount());
-            }
-            this.onContentsChanged(slot);
-        }
-
-        return reachedLimit ? stack.copyWithCount(stack.getCount() - transferLimit) : ItemStack.EMPTY;
-    }
-
-    @Override
-    public ItemStack extractItem(int slot, int amount, boolean simulate) {
-        if (amount == 0) return ItemStack.EMPTY;
-        this.validateViewSize(slot);
-
-        ItemStack existing = this.getStackInSlot(slot);
-        if (existing.isEmpty()) return ItemStack.EMPTY;
-
-        int toExtract = Math.min(amount, existing.getMaxStackSize());
-        if (existing.getCount() <= toExtract) {
-            if (!simulate) {
-                this.setStackInSlot(slot, ItemStack.EMPTY);
-                this.onContentsChanged(slot);
-                return existing;
-            } else {
-                return existing.copy();
-            }
-        } else {
-            if (!simulate) {
-                this.setStackInSlot(slot, existing.copyWithCount(existing.getCount() - toExtract));
-                this.onContentsChanged(slot);
-            }
-            return existing.copyWithCount(toExtract);
         }
     }
 
@@ -157,13 +73,17 @@ public class InventoryView implements IItemHandlerModifiable, Iterable<ItemStack
     }
 
     public void clearInventory() {
-        for (int i = 0; i < getSlots(); i++) {
+        super.setSize(getSize());
+        for (int i = 0; i < getSlotCount(); i++) {
             this.setStackInSlot(i, ItemStack.EMPTY);
             this.onContentsChanged(i);
         }
     }
 
+    @Override
     protected void onContentsChanged(int slot) {
+        super.onContentsChanged(slot);
+        this.contents.setStackInSlot(slot, super.getStackInSlot(slot));
         this.changeListener.accept(slot);
     }
 

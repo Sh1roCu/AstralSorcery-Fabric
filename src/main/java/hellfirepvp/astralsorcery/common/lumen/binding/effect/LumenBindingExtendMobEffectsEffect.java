@@ -13,18 +13,19 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.lib.types.LumenBindingEffectTypesAS;
 import hellfirepvp.astralsorcery.common.util.MobEffectUtil;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 
 import java.util.*;
 
@@ -70,12 +71,12 @@ public class LumenBindingExtendMobEffectsEffect extends LumenBindingEffect {
         cooldowns.clear();
     }
 
-    public static void attachEventListeners(IEventBus bus) {
-        bus.addListener(LumenBindingExtendMobEffectsEffect::onDamageTaken);
+    public static void attachEventListeners() {
+        ServerLivingEntityEvents.AFTER_DAMAGE.register(LumenBindingExtendMobEffectsEffect::onDamageTaken);
     }
 
-    private static void onDamageTaken(LivingDamageEvent.Post event) {
-        if (!(event.getEntity() instanceof ServerPlayer sPlayer)) return;
+    private static void onDamageTaken(LivingEntity entity, DamageSource source, float baseDamageTaken, float damageTaken, boolean blocked) {
+        if (!(entity instanceof ServerPlayer sPlayer)) return;
 
         long gameTime = sPlayer.level().getGameTime();
         UUID uuid = sPlayer.getUUID();
@@ -104,7 +105,7 @@ public class LumenBindingExtendMobEffectsEffect extends LumenBindingEffect {
     }
 
     @Override
-    public List<Component> getDisplayText(LogicalSide side, ItemStack stack) {
+    public List<Component> getDisplayText(EnvType side, ItemStack stack) {
         return List.of(Component.translatable("lumen.binding.astralsorcery.extend_mob_effects", Mth.floor(this.extensionTicks / 20F)));
     }
 

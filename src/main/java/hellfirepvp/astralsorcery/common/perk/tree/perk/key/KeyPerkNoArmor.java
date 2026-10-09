@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.perk.tree.perk.key;
 
+import cn.sh1rocu.astralsorcery.api.event.SimpleDamageCallback;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.config.ConfigEntry;
@@ -22,14 +23,14 @@ import hellfirepvp.astralsorcery.common.perk.tree.perk.KeyPerk;
 import hellfirepvp.astralsorcery.common.perk.tree.requirement.PerkRequirement;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
-import hellfirepvp.astralsorcery.common.util.event.SidedEventBus;
+import net.fabricmc.api.EnvType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.LogicalSide;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -57,27 +58,31 @@ public class KeyPerkNoArmor extends KeyPerk {
     }
 
     @Override
-    protected void attachEventListeners(SidedEventBus sidedEventBus) {
-        super.attachEventListeners(sidedEventBus);
-        sidedEventBus.addListener(LivingDamageEvent.Pre.class, SidedEventBus.entityEvent(), this::onDamagePre);
+    protected void attachEventListeners() {
+        super.attachEventListeners();
+        SimpleDamageCallback.PRE.register(this::onDamagePre);
     }
 
-    private void onDamagePre(LivingDamageEvent.Pre event) {
-        if (!(event.getEntity() instanceof ServerPlayer sPlayer)) return;
-        LogicalSide side = this.getSide(sPlayer);
-        if (!side.isServer()) return;
+    private float onDamagePre(LivingEntity entity, DamageSource damageSource, float vanillaAmount, float newAmount) {
+        if (!(entity instanceof ServerPlayer sPlayer)) return newAmount;
+        EnvType side = this.getSide(sPlayer);
+        if (side != EnvType.SERVER) return newAmount;
         PlayerProgress progress = ResearchManager.getProgress(sPlayer, side);
-        if (!progress.getPerkData().hasPerkEffect(this)) return;
+        if (!progress.getPerkData().hasPerkEffect(this)) return newAmount;
 
         int foundArmorPieces = 0;
         for (ItemStack stack : sPlayer.getArmorSlots()) {
             if (!stack.isEmpty()) foundArmorPieces++;
         }
-        if (foundArmorPieces > 1) return;
+        if (foundArmorPieces > 1) return newAmount;
+
+        float result = newAmount;
 
         float mult = PerkManager.getOrCreateAttributes(sPlayer)
                 .modifyValue(sPlayer, progress, PerksAS.AttributeTypes.PERK_EFFECT, 1F - CONFIG.damageTakenMultiplier.get().floatValue());
-        event.setNewDamage(event.getNewDamage() * Mth.clamp(1F - mult, 0F, 1F));
+        result = newAmount * Mth.clamp(1F - mult, 0F, 1F);
+
+        return result;
     }
 
     @Override

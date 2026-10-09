@@ -22,17 +22,17 @@ import hellfirepvp.astralsorcery.common.perk.tree.requirement.PerkRequirement;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.ServerSoundHelper;
-import hellfirepvp.astralsorcery.common.util.event.SidedEventBus;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
-import net.neoforged.fml.LogicalSide;
+import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -60,26 +60,30 @@ public class KeyPerkCheatDeath extends KeyPerk {
     }
 
     @Override
-    protected void attachEventListeners(SidedEventBus sidedEventBus) {
-        super.attachEventListeners(sidedEventBus);
-        sidedEventBus.addListener(LivingDeathEvent.class, SidedEventBus.entityEvent(), this::onDeath);
+    protected void attachEventListeners() {
+        super.attachEventListeners();
+        ServerLivingEntityEvents.ALLOW_DEATH.register(this::onDeath);
     }
 
-    private void onDeath(LivingDeathEvent event) {
-        Entity died = event.getEntity();
-        if (!(died instanceof ServerPlayer sPlayer)) return;
-        if (PerkCooldownHelper.isCooldownActiveForPlayer(sPlayer, this)) return;
-        LogicalSide side = this.getSide(sPlayer);
-        if (!side.isServer()) return;
+    private boolean onDeath(LivingEntity died, DamageSource damageSource, float damageAmount) {
+        if (!(died instanceof ServerPlayer sPlayer)) return true;
+        if (PerkCooldownHelper.isCooldownActiveForPlayer(sPlayer, this)) return true;
+        EnvType side = this.getSide(sPlayer);
+        if (side != EnvType.SERVER) return true;
         PlayerProgress progress = ResearchManager.getProgress(sPlayer, side);
-        if (!progress.getPerkData().hasPerkEffect(this)) return;
+        if (!progress.getPerkData().hasPerkEffect(this)) return true;
+
+        boolean cancelled = false;
 
         //Yea this doesn't scale with perk effect. it's intentional. rip whoever is reading this looking for this information.
         PerkCooldownHelper.setCooldownActiveForPlayer(sPlayer, this, CONFIG.cooldownTicks.getAsInt());
         ServerSoundHelper.playSoundAround(SoundEvents.TOTEM_USE, SoundSource.PLAYERS, sPlayer.level(), sPlayer.position(), 1F, 1F);
         sPlayer.setHealth(1F);
         sPlayer.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 400, 2));
-        event.setCanceled(true);
+        // event.setCanceled(true);
+        cancelled = true;
+
+        return !cancelled;
     }
 
     @Override

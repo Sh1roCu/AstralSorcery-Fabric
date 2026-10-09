@@ -28,11 +28,16 @@ import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.DiminishingMultiplier;
-import hellfirepvp.astralsorcery.common.util.event.SidedEventBus;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.level.BlockEvent;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -52,7 +57,7 @@ public class RootPerkEvorsio extends RootPerk<AbstractPerk.Data> {
     public static final Config CONFIG = new Config("root.evorsio");
 
     private RootPerkEvorsio(ResourceLocation key, float x, float y) {
-        this(key, defaultNameKey(key), x, y, PerkCategory.ROOT, Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), ConstellationsAS.EVORSIO.get());
+        this(key, defaultNameKey(key), x, y, PerkCategory.ROOT, Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), ConstellationsAS.EVORSIO);
     }
 
     protected RootPerkEvorsio(ResourceLocation key, String nameKey, float x, float y, PerkCategory category, Collection<PerkRequirement> requirements, Collection<PerkAttributeConverter> converters, Collection<PerkAttributeModifier> modifiers, BaseConstellation constellation) {
@@ -75,20 +80,20 @@ public class RootPerkEvorsio extends RootPerk<AbstractPerk.Data> {
     }
 
     @Override
-    protected void attachEventListeners(SidedEventBus sidedEventBus) {
-        super.attachEventListeners(sidedEventBus);
-        sidedEventBus.addListener(BlockEvent.BreakEvent.class, SidedEventBus.blockEvent(), this::onBreak);
+    protected void attachEventListeners() {
+        super.attachEventListeners();
+        PlayerBlockBreakEvents.AFTER.register(this::onBreak);
     }
 
-    protected void onBreak(BlockEvent.BreakEvent event) {
-        if (!(event.getPlayer() instanceof ServerPlayer sPlayer)) return;
-        LogicalSide side = this.getSide(sPlayer);
-        if (!side.isServer()) return;
+    protected void onBreak(Level world, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity) {
+        if (!(player instanceof ServerPlayer sPlayer)) return;
+        EnvType side = this.getSide(sPlayer);
+        if (side != EnvType.SERVER) return;
         PlayerProgress progress = ResearchManager.getProgress(sPlayer, side);
         if (!progress.getPerkData().hasPerkEffect(this)) return;
         PerkAttributeMap perkMap = PerkManager.getOrCreateAttributes(sPlayer);
 
-        float breakSpeed = event.getState().getDestroySpeed(event.getLevel(), event.getPos());
+        float breakSpeed = sPlayer.getDestroySpeed(state);
         if (breakSpeed < 0) return;
         breakSpeed = Math.max(0.005F, breakSpeed);
 

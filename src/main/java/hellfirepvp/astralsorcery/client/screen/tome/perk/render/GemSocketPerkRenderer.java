@@ -17,7 +17,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -30,7 +29,8 @@ public class GemSocketPerkRenderer<T extends PerkTreePoint<A>, A extends Abstrac
 
     public static final GemSocketPerkRenderer<?, ?> GEM_SOCKET = new GemSocketPerkRenderer<>();
 
-    protected GemSocketPerkRenderer() {}
+    protected GemSocketPerkRenderer() {
+    }
 
     @Override
     public boolean needsImmediateRender(PerkTreePoint<?> point) {
@@ -44,7 +44,7 @@ public class GemSocketPerkRenderer<T extends PerkTreePoint<A>, A extends Abstrac
         if (point.getPerk() instanceof GemSocketPerk gemSocketPerk) {
             ItemStack socketedStack = gemSocketPerk.getGemStack(ResearchManager.getClientProgress());
             if (!socketedStack.isEmpty()) {
-                Font fr = IClientItemExtensions.of(socketedStack).getFont(socketedStack, IClientItemExtensions.FontContext.ITEM_COUNT);
+                Font fr = null/*IClientItemExtensions.of(socketedStack).getFont(socketedStack, IClientItemExtensions.FontContext.ITEM_COUNT)*/;
                 if (fr == null) fr = Minecraft.getInstance().font;
 
                 float socketX = x - (8 * scale);

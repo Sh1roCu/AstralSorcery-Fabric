@@ -12,8 +12,6 @@ import hellfirepvp.astralsorcery.common.lib.CreativeTabsAS;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.function.Consumer;
 
@@ -27,7 +25,7 @@ import java.util.function.Consumer;
 public interface CreativeTabItem extends ItemLike {
 
     default CreativeModeTab getCreativeTab() {
-        return CreativeTabsAS.CREATIVE_TAB_AS.get();
+        return CreativeTabsAS.CREATIVE_TAB_AS;
     }
 
     default boolean isInTab(CreativeModeTab tab) {

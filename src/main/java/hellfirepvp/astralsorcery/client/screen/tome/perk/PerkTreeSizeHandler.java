@@ -14,7 +14,7 @@ import hellfirepvp.astralsorcery.common.perk.tree.PerkTreePoint;
 import hellfirepvp.astralsorcery.common.util.data.FloatPoint;
 import hellfirepvp.astralsorcery.common.util.data.FloatRectangle;
 import hellfirepvp.astralsorcery.common.util.data.IntRectangle;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -37,7 +37,7 @@ public class PerkTreeSizeHandler extends ScalingSizeHandler {
     @Nullable
     @Override
     public FloatRectangle buildRequiredRectangle() {
-        Collection<FloatPoint> points = PerkTree.getInstance().getPerkPoints(LogicalSide.CLIENT)
+        Collection<FloatPoint> points = PerkTree.getInstance().getPerkPoints(EnvType.CLIENT)
                 .stream().map(PerkTreePoint::getOffset).toList();
 
         double minX = points.stream().mapToDouble(FloatPoint::x).min().orElse(0);

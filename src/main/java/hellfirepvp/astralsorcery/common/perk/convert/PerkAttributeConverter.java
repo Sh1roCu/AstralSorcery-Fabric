@@ -22,7 +22,7 @@ import hellfirepvp.astralsorcery.common.util.data.FloatPoint;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -73,8 +73,8 @@ public abstract class PerkAttributeConverter extends MutableIdentity {
                 .toList();
     }
 
-    public void onApply(Player player, LogicalSide side) {}
+    public void onApply(Player player, EnvType side) {}
 
-    public void onRemove(Player player, LogicalSide side) {}
+    public void onRemove(Player player, EnvType side) {}
 
 }

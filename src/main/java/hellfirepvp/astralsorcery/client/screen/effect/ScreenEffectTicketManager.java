@@ -10,7 +10,6 @@ package hellfirepvp.astralsorcery.client.screen.effect;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -31,7 +30,8 @@ public class ScreenEffectTicketManager {
     private boolean clear = false;
     private final Set<ScreenEffectTicket<?, ?>> thisTickUsedTickets = new HashSet<>();
 
-    private ScreenEffectTicketManager() {}
+    private ScreenEffectTicketManager() {
+    }
 
     public static ScreenEffectTicketManager getInstance() {
         return INSTANCE;
@@ -55,7 +55,7 @@ public class ScreenEffectTicketManager {
                 });
     }
 
-    public void tick(ClientTickEvent.Post event) {
+    public void tick(Minecraft client) {
         this.thisTickUsedTickets.clear();
 
         if (this.clear) {
@@ -65,8 +65,8 @@ public class ScreenEffectTicketManager {
             return;
         }
 
-        Entity view = Minecraft.getInstance().getCameraEntity();
-        if (view == null) view = Minecraft.getInstance().player;
+        Entity view = client.getCameraEntity();
+        if (view == null) view = client.player;
         if (view == null) {
             clearAllEffects();
             return;

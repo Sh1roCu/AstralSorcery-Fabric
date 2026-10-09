@@ -8,17 +8,18 @@
 
 package hellfirepvp.astralsorcery.common.perk.type;
 
+import cn.sh1rocu.astralsorcery.api.event.SimpleIncomingDamageCallback;
 import hellfirepvp.astralsorcery.common.event.AttributeEvent;
 import hellfirepvp.astralsorcery.common.perk.PerkManager;
 import hellfirepvp.astralsorcery.common.perk.type.base.PerkAttributeType;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.SidedHelper;
+import net.fabricmc.api.EnvType;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -34,23 +35,25 @@ public class AttributeTypeProjectileDamage extends PerkAttributeType {
     }
 
     @Override
-    protected void attachListeners(IEventBus eventBus) {
-        super.attachListeners(eventBus);
-        eventBus.addListener(this::onProjectileHurt);
+    protected void attachListeners() {
+        super.attachListeners();
+        SimpleIncomingDamageCallback.MODIFY_DAMAGE.register(this::onProjectileHurt);
     }
 
-    private void onProjectileHurt(LivingIncomingDamageEvent event) {
-        if (event.getSource().is(DamageTypeTags.IS_PROJECTILE) && event.getSource().getEntity() instanceof Player player) {
-            LogicalSide side = SidedHelper.getSide(player);
-            if (!this.hasTypeApplied(player, side)) return;
+    private float onProjectileHurt(LivingEntity entity, DamageSource damageSource, float amount) {
+        if (damageSource.is(DamageTypeTags.IS_PROJECTILE) && damageSource.getEntity() instanceof Player player) {
+            EnvType side = SidedHelper.getSide(player);
+            if (!this.hasTypeApplied(player, side)) return amount;
 
             PlayerProgress progress = ResearchManager.getProgress(player, side);
-            if (!progress.isValid()) return;
+            if (!progress.isValid()) return amount;
 
             float dmg = PerkManager.getOrCreateAttributes(player)
-                    .modifyValue(player, progress, this, event.getAmount());
+                    .modifyValue(player, progress, this, amount);
             dmg = AttributeEvent.postProcessModded(player, this, dmg);
-            event.setAmount(dmg);
+            // event.setAmount(dmg);
+            return dmg;
         }
+        return amount;
     }
 }

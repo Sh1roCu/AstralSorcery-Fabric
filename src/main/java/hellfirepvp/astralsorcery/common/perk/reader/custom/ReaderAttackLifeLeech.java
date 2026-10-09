@@ -14,8 +14,6 @@ import hellfirepvp.astralsorcery.common.perk.reader.ReaderAddedPercentage;
 import hellfirepvp.astralsorcery.common.perk.type.base.PerkAttributeType;
 import net.minecraft.Util;
 
-import java.util.function.Supplier;
-
 /**
  * This class is part of the Astral Sorcery Mod
  * The complete source code for this mod can be found on GitHub.
@@ -25,7 +23,7 @@ import java.util.function.Supplier;
  */
 public class ReaderAttackLifeLeech extends ReaderAddedPercentage {
 
-    public ReaderAttackLifeLeech(Supplier<? extends PerkAttributeType> type) {
+    public ReaderAttackLifeLeech(PerkAttributeType type) {
         super(type, true);
     }
 

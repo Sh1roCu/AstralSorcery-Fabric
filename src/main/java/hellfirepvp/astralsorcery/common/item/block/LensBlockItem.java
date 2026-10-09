@@ -35,7 +35,7 @@ public class LensBlockItem extends BlockItemCustom {
     public void fillCreativeTab(Consumer<ItemStack> tabItems) {
         ItemStack stack = new ItemStack(this);
         stack.set(DataComponentsAS.CRYSTAL_ATTRIBUTES, CrystalAttributesComponent.defaultEmpty()
-                .setAttributeTier(CrystalPropertiesAS.PURITY, CrystalPropertiesAS.PURITY.get().getMaxTier()));
+                .setAttributeTier(CrystalPropertiesAS.PURITY, CrystalPropertiesAS.PURITY.getMaxTier()));
         tabItems.accept(stack);
     }
 }

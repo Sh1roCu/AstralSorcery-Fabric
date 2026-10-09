@@ -17,7 +17,7 @@ import hellfirepvp.astralsorcery.common.lumen.Lumen;
 import hellfirepvp.astralsorcery.common.perk.tree.AbstractPerk;
 import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
 import hellfirepvp.astralsorcery.common.util.codec.SetCodec;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -176,7 +176,7 @@ public class PlayerProgress {
         return Optional.ofNullable(this.attunedConstellation);
     }
 
-    public Collection<AbstractPerk<?>> getDependentPerks(AbstractPerk<?> perk, LogicalSide side) {
+    public Collection<AbstractPerk<?>> getDependentPerks(AbstractPerk<?> perk, EnvType side) {
         return AttunePlayerProperty.getRootPerk(this.getAttunedConstellation(), side)
                 .map(rootPerk -> this.perkData.getDependentPerks(this, perk, rootPerk, side))
                 .orElse(Collections.emptyList());

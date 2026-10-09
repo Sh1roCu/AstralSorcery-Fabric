@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.data.sync.server;
 
+import cn.sh1rocu.astralsorcery.api.event.LevelEvent;
 import hellfirepvp.astralsorcery.common.data.level.CelestialGatewayData;
 import hellfirepvp.astralsorcery.common.data.sync.ClientSyncData;
 import hellfirepvp.astralsorcery.common.data.sync.ClientSyncDiffData;
@@ -25,8 +26,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.event.level.LevelEvent;
 
 import java.util.*;
 
@@ -62,8 +61,8 @@ public class CelestialGatewaySyncData extends SyncData<CelestialGatewaySyncData.
         }
     }
 
-    public static void attachListeners(IEventBus bus) {
-        bus.addListener(CelestialGatewaySyncData::onWorldLoad);
+    public static void attachListeners() {
+        LevelEvent.LOAD.register(CelestialGatewaySyncData::onWorldLoad);
     }
 
     private static void onWorldLoad(LevelEvent.Load event) {
@@ -101,7 +100,7 @@ public class CelestialGatewaySyncData extends SyncData<CelestialGatewaySyncData.
 
     @Override
     public Type<?, ClientSync, ClientDiffSync, CelestialGatewayClientData> getType() {
-        return SyncDataTypesAS.CELESTIAL_GATEWAY.get();
+        return SyncDataTypesAS.CELESTIAL_GATEWAY;
     }
 
     public static class ClientSync extends ClientSyncData<CelestialGatewayClientData> {
@@ -127,7 +126,7 @@ public class CelestialGatewaySyncData extends SyncData<CelestialGatewaySyncData.
 
         @Override
         public Type<?, ?, ?, CelestialGatewayClientData> type() {
-            return SyncDataTypesAS.CELESTIAL_GATEWAY.get();
+            return SyncDataTypesAS.CELESTIAL_GATEWAY;
         }
     }
 
@@ -151,7 +150,8 @@ public class CelestialGatewaySyncData extends SyncData<CelestialGatewaySyncData.
                     .add(new DiffEntry<>(entry, type));
         }
 
-        private ClientDiffSync() {}
+        private ClientDiffSync() {
+        }
 
         private ClientDiffSync(Set<ResourceKey<Level>> removedLevels,
                                Map<ResourceKey<Level>, List<DiffEntry<CelestialGatewayData.GatewayEntry>>> entryChanges) {
@@ -166,7 +166,7 @@ public class CelestialGatewaySyncData extends SyncData<CelestialGatewaySyncData.
 
         @Override
         public Type<?, ?, ?, CelestialGatewayClientData> type() {
-            return SyncDataTypesAS.CELESTIAL_GATEWAY.get();
+            return SyncDataTypesAS.CELESTIAL_GATEWAY;
         }
     }
 }

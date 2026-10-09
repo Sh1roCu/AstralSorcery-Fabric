@@ -14,18 +14,14 @@ import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.LumenAS;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.recipe.builder.LumenGenerationRecipeBuilder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.data.PackOutput;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.DefaultCustomIngredients;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.neoforged.neoforge.common.Tags;
-import net.neoforged.neoforge.common.crafting.CompoundIngredient;
-import net.neoforged.neoforge.common.crafting.DataComponentIngredient;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.Objects;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -34,11 +30,7 @@ import java.util.concurrent.CompletableFuture;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class LumenGenerationRecipeProvider extends RecipeProvider {
-
-    private LumenGenerationRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-        super(output, registries);
-    }
+public class LumenGenerationRecipeProvider {
 
     public static void registerRecipes(RecipeOutput recipeOutput) {
         LumenGenerationRecipeBuilder.builder(Ingredient.of(ItemsAS.BLOCK_HYACINTH), LumenAS.AEVITAS.get())
@@ -78,7 +70,7 @@ public class LumenGenerationRecipeProvider extends RecipeProvider {
                 .addLumenCombinationInput(LumenAS.AEVITAS.asLumen(), 5)
                 .addLumenCombinationInput(LumenAS.ARMARA.asLumen(), 8)
                 .save(recipeOutput);
-        LumenGenerationRecipeBuilder.builder(Ingredient.of(Tags.Items.GEMS_QUARTZ), LumenAS.CALDOR.get())
+        LumenGenerationRecipeBuilder.builder(Ingredient.of(ConventionalItemTags.QUARTZ_GEMS), LumenAS.CALDOR.get())
                 .producedLumenAmount(3)
                 .productionAttemptMultiplier(4F)
                 .catalystShatterMultiplier(1.2F)
@@ -114,7 +106,7 @@ public class LumenGenerationRecipeProvider extends RecipeProvider {
                 .addLumenCombinationInput(LumenAS.CALDOR.asLumen(), 7)
                 .addLumenCombinationInput(LumenAS.EVORSIO.asLumen(), 12)
                 .save(recipeOutput);
-        LumenGenerationRecipeBuilder.builder(Ingredient.of(Tags.Items.GEMS_AMETHYST), LumenAS.DYNAMIS.get())
+        LumenGenerationRecipeBuilder.builder(Ingredient.of(ConventionalItemTags.AMETHYST_GEMS), LumenAS.DYNAMIS.get())
                 .producedLumenAmount(2)
                 .productionAttemptMultiplier(3F)
                 .catalystShatterMultiplier(1.5F)
@@ -133,11 +125,14 @@ public class LumenGenerationRecipeProvider extends RecipeProvider {
                 .addLumenCombinationInput(LumenAS.DISCIDIA.asLumen(), 16)
                 .save(recipeOutput);
 
-        CompoundIngredient matchAnyArtifactShard = new CompoundIngredient(RegistriesAS.REGISTRY_ARTIFACT_TYPES.stream()
+        Ingredient matchAnyArtifactShard = DefaultCustomIngredients.any(RegistriesAS.REGISTRY_ARTIFACT_TYPES.stream()
                 .map(ArtifactTypeComponent::new)
-                .map(typeCmp -> DataComponentIngredient.of(false, DataComponentsAS.ARTIFACT_TYPE, typeCmp, ItemsAS.ARTIFACT_SHARD))
-                .toList());
-        LumenGenerationRecipeBuilder.builder(matchAnyArtifactShard.toVanilla(), LumenAS.PRISMATIC.get())
+                .map(typeCmp -> {
+                    ItemStack stack = new ItemStack(ItemsAS.ARTIFACT_SHARD);
+                    stack.set(DataComponentsAS.ARTIFACT_TYPE, typeCmp);
+                    return DefaultCustomIngredients.components(stack);
+                }).toArray(Ingredient[]::new));
+        LumenGenerationRecipeBuilder.builder(Objects.requireNonNull(matchAnyArtifactShard.getCustomIngredient()).toVanilla(), LumenAS.PRISMATIC.get())
                 .producedLumenAmount(2)
                 .productionAttemptMultiplier(2.5F)
                 .catalystShatterMultiplier(2F)

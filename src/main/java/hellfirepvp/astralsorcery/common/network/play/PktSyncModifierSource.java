@@ -8,18 +8,19 @@
 
 package hellfirepvp.astralsorcery.common.network.play;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.network.codec.NeoForgeStreamCodecs;
 import hellfirepvp.astralsorcery.common.network.PlayPacketHandler;
 import hellfirepvp.astralsorcery.common.perk.PerkApplicationManager;
 import hellfirepvp.astralsorcery.common.perk.PerkManager;
 import hellfirepvp.astralsorcery.common.perk.source.ModifierSource;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.network.codec.NeoForgeStreamCodecs;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.Optional;
 
@@ -66,32 +67,34 @@ public class PktSyncModifierSource extends PlayPacketHandler.ToClient<PktSyncMod
         return CODEC;
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
-    public void handle(Request payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
+    public void receive(Request payload, ClientPlayNetworking.Context context) {
+        context.client().execute(() -> {
             Player player = context.player();
 
             switch (payload.action()) {
                 case ADD -> {
                     payload.newSource().ifPresent(newSource -> {
-                        PerkApplicationManager.modifySource(player, LogicalSide.CLIENT, newSource, PerkManager.Action.ADD);
+                        PerkApplicationManager.modifySource(player, EnvType.CLIENT, newSource, PerkManager.Action.ADD);
                     });
                 }
                 case REMOVE -> {
                     payload.existingSource().ifPresent(existingSource -> {
-                        PerkApplicationManager.modifySource(player, LogicalSide.CLIENT, existingSource, PerkManager.Action.REMOVE);
+                        PerkApplicationManager.modifySource(player, EnvType.CLIENT, existingSource, PerkManager.Action.REMOVE);
                     });
                 }
                 case UPDATE -> {
                     if (payload.existingSource().isPresent() && payload.newSource().isPresent()) {
-                        PerkApplicationManager.updateSource(player, LogicalSide.CLIENT, payload.existingSource().get(), payload.newSource().get());
+                        PerkApplicationManager.updateSource(player, EnvType.CLIENT, payload.existingSource().get(), payload.newSource().get());
                     }
                 }
             }
         });
     }
 
-    public static record Request(ActionType action, Optional<ModifierSource> existingSource, Optional<ModifierSource> newSource) implements CustomPacketPayload {
+    public static record Request(ActionType action, Optional<ModifierSource> existingSource,
+                                 Optional<ModifierSource> newSource) implements CustomPacketPayload {
 
         @Override
         public Type<? extends CustomPacketPayload> type() {

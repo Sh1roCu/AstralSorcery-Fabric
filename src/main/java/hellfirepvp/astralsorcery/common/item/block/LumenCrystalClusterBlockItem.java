@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.item.block;
 
+import cn.sh1rocu.astralsorcery.api.extension.IMaxDamageItem;
+import cn.sh1rocu.astralsorcery.api.extension.INoRepairItem;
 import hellfirepvp.astralsorcery.common.block.tile.LumenCrystalClusterBlock;
 import hellfirepvp.astralsorcery.common.component.LumenComponent;
 import hellfirepvp.astralsorcery.common.item.base.BlockItemCustom;
@@ -30,7 +32,7 @@ import java.util.function.Consumer;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class LumenCrystalClusterBlockItem extends BlockItemCustom implements ItemDynamicColor {
+public class LumenCrystalClusterBlockItem extends BlockItemCustom implements ItemDynamicColor, IMaxDamageItem, INoRepairItem {
 
     public LumenCrystalClusterBlockItem(Block block) {
         super(block, new Properties()
@@ -39,27 +41,27 @@ public class LumenCrystalClusterBlockItem extends BlockItemCustom implements Ite
 
     @Override
     public CreativeModeTab getCreativeTab() {
-        return CreativeTabsAS.CREATIVE_TAB_AS_LUMEN.get();
+        return CreativeTabsAS.CREATIVE_TAB_AS_LUMEN;
     }
 
     @Override
     public void fillCreativeTab(Consumer<ItemStack> tabItems) {
         RegistriesAS.REGISTRY_LUMEN.holders().forEach(lumenRef -> {
-            if (lumenRef.is(LumenAS.NONE)) return;
+            if (lumenRef.is(LumenAS.NONE.getKey())) return;
             tabItems.accept(getCluster(lumenRef, 4));
         });
     }
 
     public static List<ItemStack> getStageVariants() {
         return LumenCrystalClusterBlock.STAGE.getPossibleValues().stream().map(stage -> {
-            ItemStack stack = ItemsAS.BLOCK_LUMEN_CRYSTAL_CLUSTER.toStack();
+            ItemStack stack = ItemsAS.BLOCK_LUMEN_CRYSTAL_CLUSTER.getDefaultInstance();
             setStage(stack, stage);
             return stack;
         }).toList();
     }
 
     public static ItemStack getCluster(Holder<Lumen> lumen, int stage) {
-        ItemStack stack = ItemsAS.BLOCK_LUMEN_CRYSTAL_CLUSTER.toStack();
+        ItemStack stack = ItemsAS.BLOCK_LUMEN_CRYSTAL_CLUSTER.getDefaultInstance();
         setStage(stack, stage);
         stack.set(DataComponentsAS.LUMEN, new LumenComponent(lumen));
         return stack;
@@ -77,10 +79,11 @@ public class LumenCrystalClusterBlockItem extends BlockItemCustom implements Ite
         return super.getName(stack);
     }
 
-    @Override
-    public boolean isDamageable(ItemStack stack) {
-        return false;
-    }
+    // the same as INoRepairItem
+//    @Override
+//    public boolean isDamageable(ItemStack stack) {
+//        return false;
+//    }
 
     @Override
     public int getMaxDamage(ItemStack stack) {

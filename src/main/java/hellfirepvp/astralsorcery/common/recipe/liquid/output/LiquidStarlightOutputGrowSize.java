@@ -15,22 +15,22 @@ import hellfirepvp.astralsorcery.client.effect.function.FXColorFunction;
 import hellfirepvp.astralsorcery.client.effect.function.FXMotionFunction;
 import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
 import hellfirepvp.astralsorcery.common.component.CrystalAttributesComponent;
+import hellfirepvp.astralsorcery.common.event.CrystalPropertyEvent;
 import hellfirepvp.astralsorcery.common.lib.CrystalPropertiesAS;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
-import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
 import hellfirepvp.astralsorcery.common.lib.types.LiquidStarlightRecipeOutputTypesAS;
 import hellfirepvp.astralsorcery.common.recipe.liquid.LiquidStarlightRecipe;
 import hellfirepvp.astralsorcery.common.recipe.liquid.LiquidStarlightRecipeInput;
 import hellfirepvp.astralsorcery.common.util.ItemUtil;
 import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -46,7 +46,8 @@ public class LiquidStarlightOutputGrowSize extends LiquidStarlightRecipeOutputMo
     public static final StreamCodec<RegistryFriendlyByteBuf, LiquidStarlightOutputGrowSize> STREAM_CODEC = StreamCodec.unit(INSTANCE);
     public static final Type<LiquidStarlightOutputGrowSize> TYPE = new Type<>(CODEC, STREAM_CODEC);
 
-    private LiquidStarlightOutputGrowSize() {}
+    private LiquidStarlightOutputGrowSize() {
+    }
 
     public static LiquidStarlightOutputGrowSize getInstance() {
         return INSTANCE;
@@ -54,7 +55,7 @@ public class LiquidStarlightOutputGrowSize extends LiquidStarlightRecipeOutputMo
 
     @Override
     public Type<?> getType() {
-        return LiquidStarlightRecipeOutputTypesAS.GROW_SIZE.get();
+        return LiquidStarlightRecipeOutputTypesAS.GROW_SIZE;
     }
 
     @Override
@@ -75,10 +76,17 @@ public class LiquidStarlightOutputGrowSize extends LiquidStarlightRecipeOutputMo
         }
 
         if (RandomSource.create().nextFloat() < chance) {
+            CrystalAttributesComponent prev = cmp;
+
             int current = cmp.getAttributeTier(CrystalPropertiesAS.SIZE);
-            if (current >= CrystalPropertiesAS.SIZE.get().getMaxTier()) return;
+            if (current >= CrystalPropertiesAS.SIZE.getMaxTier()) return;
             cmp = cmp.setAttributeTier(CrystalPropertiesAS.SIZE, current + 1);
-            crystal.set(DataComponentsAS.CRYSTAL_ATTRIBUTES, cmp);
+
+            var growSize = new CrystalPropertyEvent.Change(crystal,
+                    CrystalPropertyEvent.Change.Type.GROW_SIZE, prev, cmp);
+            CrystalPropertyEvent.Change.EVENT.invoker().post(growSize);
+
+            crystal.set(DataComponentsAS.CRYSTAL_ATTRIBUTES, growSize.getResultComponent());
         }
 
         ItemEntity trigger = input.getTriggerEntity();
@@ -87,7 +95,7 @@ public class LiquidStarlightOutputGrowSize extends LiquidStarlightRecipeOutputMo
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void playCraftingEffects(LiquidStarlightRecipe recipe, LiquidStarlightRecipeInput input, RandomSource rand, int craftingTick) {
         super.playCraftingEffects(recipe, input, rand, craftingTick);
 

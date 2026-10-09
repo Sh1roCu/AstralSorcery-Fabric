@@ -12,9 +12,9 @@ import com.mojang.serialization.MapCodec;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.lumen.binding.usage.*;
+import net.minecraft.core.Registry;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -25,8 +25,9 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  */
 public class LumenBindingUsageTypesAS {
 
-    public static final DeferredRegister<LumenBindingUsage.Type<?>> LUMEN_BINDING_USAGE_TYPES_REGISTER =
-            DeferredRegister.create(RegistriesAS.KEY_LUMEN_BINDING_USAGE_TYPES, AstralSorcery.MODID);
+    public static void init() {
+
+    }
 
     public static final LumenBindingUsage.DeferredType<LumenBindingUsage> NONE =
             register("none", MapCodec.unit(LumenBindingUsage.NONE), StreamCodec.unit(LumenBindingUsage.NONE));
@@ -46,7 +47,8 @@ public class LumenBindingUsageTypesAS {
     private static <T extends LumenBindingUsage> LumenBindingUsage.DeferredType<T> register(String name,
                                                                                             MapCodec<T> codec,
                                                                                             StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
-        return new LumenBindingUsage.DeferredType<>(LUMEN_BINDING_USAGE_TYPES_REGISTER.register(name,
-                () -> new LumenBindingUsage.Type<>(codec, streamCodec)));
+        var usage = Registry.register(RegistriesAS.REGISTRY_LUMEN_BINDING_USAGE_TYPES, AstralSorcery.key(name),
+                new LumenBindingUsage.Type<>(codec, streamCodec));
+        return new LumenBindingUsage.DeferredType<>(usage);
     }
 }

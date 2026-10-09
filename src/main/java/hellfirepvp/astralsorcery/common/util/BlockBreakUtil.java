@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.util;
 
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -15,20 +16,15 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.neoforge.common.CommonHooks;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.level.BlockDropsEvent;
-import net.neoforged.neoforge.event.level.BlockEvent;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -45,8 +41,8 @@ public class BlockBreakUtil {
         BlockState state = sLevel.getBlockState(pos);
 
         try {
-            BlockEvent.BreakEvent event = CommonHooks.fireBlockBreak(sLevel, GameType.SURVIVAL, fakePlayer, pos, state);
-            if (event.isCanceled()) {
+            boolean canceled = !PlayerBlockBreakEvents.BEFORE.invoker().beforeBlockBreak(sLevel, fakePlayer, pos, state, sLevel.getBlockEntity(pos));
+            if (canceled) {
                 return Result.failure();
             }
         } catch (Exception exc) {
@@ -58,7 +54,8 @@ public class BlockBreakUtil {
             harvestable = true;
         } else {
             try {
-                harvestable = state.canHarvestBlock(sLevel, pos, fakePlayer);
+                // harvestable = state.canHarvestBlock(sLevel, pos, fakePlayer);
+                harvestable = fakePlayer.hasCorrectToolForDrops(state);
             } catch (Exception exc) {
                 return Result.failure();
             }
@@ -68,46 +65,58 @@ public class BlockBreakUtil {
             try {
                 heldItem.copy().mineBlock(sLevel, state, pos, fakePlayer);
 
-                BlockDropsEvent event = captureBreak(() -> {
-                    boolean removed = state.onDestroyedByPlayer(sLevel, pos, fakePlayer, harvestable, Fluids.EMPTY.defaultFluidState());
-                    if (removed) {
-                        state.getBlock().destroy(sLevel, pos, state);
-                        if (harvestable) {
-                            state.getBlock().playerDestroy(sLevel, fakePlayer, pos, state, sLevel.getBlockEntity(pos), heldItem);
-                        }
+                // BlockDropsEvent event = captureBreak(() -> {
+                boolean removed = onDestroyedByPlayer(state, sLevel, pos, fakePlayer, harvestable, Fluids.EMPTY.defaultFluidState());
+                if (removed) {
+                    state.getBlock().destroy(sLevel, pos, state);
+                    if (harvestable) {
+                        state.getBlock().playerDestroy(sLevel, fakePlayer, pos, state, sLevel.getBlockEntity(pos), heldItem);
                     }
-                });
-
-                //Break drops event didn't fire, so nothing got broken/harvested
-                if (event == null) {
-                    return BlockUtil.ChangeResult.revert(Result.failure());
                 }
+                // });
 
-                return BlockUtil.ChangeResult.apply(Result.success(event.getDrops(), event.getDroppedExperience()));
+                PlayerBlockBreakEvents.AFTER.invoker().afterBlockBreak(sLevel, fakePlayer, pos, state, sLevel.getBlockEntity(pos));
+                //Break drops event didn't fire, so nothing got broken/harvested
+//                if (event == null) {
+//                    return BlockUtil.ChangeResult.revert(Result.failure());
+//                }
+
+                // return BlockUtil.ChangeResult.apply(Result.success(event.getDrops(), event.getDroppedExperience()));
+                return BlockUtil.ChangeResult.apply(Result.success(List.of(), 0));
             } catch (Exception exc) {
                 return BlockUtil.ChangeResult.revert(Result.failure());
             }
         }).value();
     }
 
-    @Nullable
-    private static BlockDropsEvent captureBreak(Runnable run) {
-        ClientObject<BlockDropsEvent> eventObj = new ClientObject<>(null);
-        Consumer<BlockDropsEvent> eventHandler = event -> {
-            if (!event.isCanceled()) {
-                eventObj.set(event);
-            }
-            event.setCanceled(true);
-        };
-
-        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, BlockDropsEvent.class, eventHandler);
-        try {
-            run.run();
-        } finally {
-            NeoForge.EVENT_BUS.unregister(eventHandler);
+    private static boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
+        if (level.isClientSide()) {
+            // On the client, vanilla calls Level#setBlock, per MultiPlayerGameMode#destroyBlock
+            return level.setBlock(pos, fluid.createLegacyBlock(), 11);
+        } else {
+            // On the server, vanilla calls Level#removeBlock, per ServerPlayerGameMode#destroyBlock
+            return level.removeBlock(pos, false);
         }
-        return eventObj.get();
     }
+
+//    @Nullable
+//    private static BlockDropsEvent captureBreak(Runnable run) {
+//        ClientObject<BlockDropsEvent> eventObj = new ClientObject<>(null);
+//        Consumer<BlockDropsEvent> eventHandler = event -> {
+//            if (!event.isCanceled()) {
+//                eventObj.set(event);
+//            }
+//            event.setCanceled(true);
+//        };
+//
+//        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, BlockDropsEvent.class, eventHandler);
+//        try {
+//            run.run();
+//        } finally {
+//            NeoForge.EVENT_BUS.unregister(eventHandler);
+//        }
+//        return eventObj.get();
+//    }
 
     public static class Result {
 

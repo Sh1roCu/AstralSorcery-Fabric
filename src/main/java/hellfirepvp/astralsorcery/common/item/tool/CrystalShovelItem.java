@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.item.tool;
 
+import cn.sh1rocu.astralsorcery.api.extension.IMaxDamageItem;
+import cn.sh1rocu.astralsorcery.api.extension.INoRepairItem;
 import hellfirepvp.astralsorcery.common.crystal.CrystalPropertyCalculator;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import net.minecraft.core.component.DataComponents;
@@ -25,11 +27,11 @@ import net.minecraft.world.level.block.state.BlockState;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class CrystalShovelItem extends ShovelItem implements CrystalToolItem {
+public class CrystalShovelItem extends ShovelItem implements CrystalToolItem, IMaxDamageItem, INoRepairItem {
 
     public CrystalShovelItem() {
         this(ItemsAS.CRYSTAL_TOOL_TIER, new Properties()
-                .setNoRepair()
+                // .setNoRepair() impl via mixin
                 .attributes(shovelAttributes()));
     }
 
@@ -52,7 +54,7 @@ public class CrystalShovelItem extends ShovelItem implements CrystalToolItem {
 
     @Override
     public int getMaxDamage(ItemStack stack) {
-        return CrystalPropertyCalculator.getToolDurability(super.getMaxDamage(stack), stack, 3);
+        return CrystalPropertyCalculator.getToolDurability(stack.getOrDefault(DataComponents.MAX_DAMAGE, 0), stack, 3);
     }
 
     @Override

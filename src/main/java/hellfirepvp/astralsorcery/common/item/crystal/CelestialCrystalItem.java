@@ -42,6 +42,6 @@ public class CelestialCrystalItem extends RockCrystalItem {
 
     @Override
     public Item getAttunedItem() {
-        return ItemsAS.ATTUNED_CELESTIAL_CRYSTAL.get();
+        return ItemsAS.ATTUNED_CELESTIAL_CRYSTAL;
     }
 }

@@ -58,6 +58,6 @@ public class CopyConstellationFunction extends LootItemConditionalFunction {
 
     @Override
     public LootItemFunctionType<? extends LootItemConditionalFunction> getType() {
-        return LootAS.COPY_CONSTELLATION_FUNCTION.get();
+        return LootAS.COPY_CONSTELLATION_FUNCTION;
     }
 }

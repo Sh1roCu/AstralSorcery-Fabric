@@ -31,7 +31,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -46,7 +45,7 @@ public class ChaliceBlock extends BaseTickTileBlock<TileChalice> {
     private static final VoxelShape SHAPE = Shapes.box(2D / 16D, 0D / 16D, 2D / 16D, 14D / 16D, 14D / 16D, 14D / 16D);
 
     public ChaliceBlock(Properties properties) {
-        super(properties, TileEntitiesAS.CHALICE);
+        super(properties, () -> TileEntitiesAS.CHALICE);
     }
 
     @Override
@@ -83,17 +82,18 @@ public class ChaliceBlock extends BaseTickTileBlock<TileChalice> {
         }).orElse(ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION);
     }
 
-    @Override
-    public boolean hasDynamicLightEmission(BlockState state) {
-        return true;
-    }
-
-    @Override
-    public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
-        AuxiliaryLightManager lightMgr = level.getAuxLightManager(pos);
-        if (lightMgr == null) return 0;
-        return lightMgr.getLightAt(pos);
-    }
+    // TODO?
+//    @Override
+//    public boolean hasDynamicLightEmission(BlockState state) {
+//        return true;
+//    }
+//
+//    @Override
+//    public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
+//        AuxiliaryLightManager lightMgr = level.getAuxLightManager(pos);
+//        if (lightMgr == null) return 0;
+//        return lightMgr.getLightAt(pos);
+//    }
 
     @Override
     protected boolean hasAnalogOutputSignal(BlockState state) {

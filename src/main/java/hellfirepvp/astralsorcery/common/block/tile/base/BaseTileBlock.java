@@ -14,21 +14,20 @@ import hellfirepvp.astralsorcery.common.tile.base.*;
 import hellfirepvp.astralsorcery.common.util.ItemUtil;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.data.TileRegistryObject;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Containers;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.HitResult;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -39,15 +38,15 @@ import org.jetbrains.annotations.Nullable;
  */
 public abstract class BaseTileBlock<T extends BlockEntity> extends BaseEntityBlock {
 
-    private final TileRegistryObject<T> tileType;
+    private final Supplier<TileRegistryObject<T>> tileType;
 
-    protected BaseTileBlock(Properties properties, TileRegistryObject<T> tileType) {
+    protected BaseTileBlock(Properties properties, Supplier<TileRegistryObject<T>> tileType) {
         super(properties);
         this.tileType = tileType;
     }
 
     public final TileRegistryObject<T> getTileType() {
-        return this.tileType;
+        return this.tileType.get();
     }
 
     @Override
@@ -77,7 +76,7 @@ public abstract class BaseTileBlock<T extends BlockEntity> extends BaseEntityBlo
     protected void dropTileContents(BlockState state, Level level, BlockPos pos) {
         MiscUtil.getTileAt(level, pos, BlockEntity.class, true).ifPresent(tile -> {
             //Drop items from inventory/inventories
-            IItemHandler handler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, state, tile, null);
+            var handler = ItemStorage.SIDED.find(level, pos, state, tile, null);
             if (handler != null) {
                 Containers.dropContents(level, pos, ItemUtil.listContents(handler));
             }
@@ -85,8 +84,8 @@ public abstract class BaseTileBlock<T extends BlockEntity> extends BaseEntityBlo
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
-        ItemStack stack = super.getCloneItemStack(state, target, level, pos, player);
+    public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+        ItemStack stack = super.getCloneItemStack(level, pos, state);
         MiscUtil.getTileAt(level, pos, TileEntitySynchronized.class, true).ifPresent(tile -> {
             if (tile.getTileData() instanceof TileDataCrystalAttributeContainer attributeContainer) {
                 if (stack.has(DataComponentsAS.CRYSTAL_ATTRIBUTES)) {

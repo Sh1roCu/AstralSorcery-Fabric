@@ -12,19 +12,18 @@ import hellfirepvp.astralsorcery.client.screen.tome.TomePerkTreeScreen;
 import hellfirepvp.astralsorcery.common.item.PerkSealItem;
 import hellfirepvp.astralsorcery.common.network.PlayPacketHandler;
 import hellfirepvp.astralsorcery.common.perk.data.PerkTree;
-import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchHelper;
-import hellfirepvp.astralsorcery.common.research.ResearchManager;
-import hellfirepvp.astralsorcery.common.research.perk.PerkAllocation;
 import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -58,10 +57,11 @@ public class PktRequestPerkSealAction extends PlayPacketHandler.BiDirectional<Pk
         return new Request(Action.SEAL, perkKey);
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
-    public void handleClient(Request payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            PerkTree.getInstance().getPerk(LogicalSide.CLIENT, payload.perkKey()).ifPresent(perk -> {
+    public void handleClient(Request payload, ClientPlayNetworking.Context context) {
+        context.client().execute(() -> {
+            PerkTree.getInstance().getPerk(EnvType.CLIENT, payload.perkKey()).ifPresent(perk -> {
                 if (Minecraft.getInstance().screen instanceof TomePerkTreeScreen perkTreeScreen) {
                     switch (payload.action()) {
                         case SEAL -> perkTreeScreen.playSealApplyAnimation(perk);
@@ -73,16 +73,16 @@ public class PktRequestPerkSealAction extends PlayPacketHandler.BiDirectional<Pk
     }
 
     @Override
-    public void handleServer(Request payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
+    public void handleServer(Request payload, ServerPlayNetworking.Context context) {
+        context.server().execute(() -> {
             if (context.player() instanceof ServerPlayer sPlayer) {
-                PerkTree.getInstance().getPerk(LogicalSide.SERVER, payload.perkKey()).ifPresent(perk -> {
+                PerkTree.getInstance().getPerk(EnvType.SERVER, payload.perkKey()).ifPresent(perk -> {
                     switch (payload.action()) {
                         case SEAL -> {
                             if (PerkSealItem.consumePerkSeal(sPlayer, true) && ResearchHelper.applyPerkSeal(sPlayer, perk)) {
 
                                 if (PerkSealItem.consumePerkSeal(sPlayer, false)) {
-                                    context.reply(sealPerk(payload.perkKey()));
+                                    context.responseSender().sendPacket(sealPerk(payload.perkKey()));
                                 } else {
                                     // Rollback if seal item is somehow gone
                                     ResearchHelper.breakPerkSeal(sPlayer, perk);
@@ -91,7 +91,7 @@ public class PktRequestPerkSealAction extends PlayPacketHandler.BiDirectional<Pk
                         }
                         case UNSEAL -> {
                             if (ResearchHelper.breakPerkSeal(sPlayer, perk)) {
-                                context.reply(unsealPerk(payload.perkKey()));
+                                context.responseSender().sendPacket(unsealPerk(payload.perkKey()));
                             }
                         }
                     }

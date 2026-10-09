@@ -13,10 +13,10 @@ import hellfirepvp.astralsorcery.client.screen.tome.page.RenderPage;
 import hellfirepvp.astralsorcery.client.screen.tome.page.RenderPageEmpty;
 import hellfirepvp.astralsorcery.common.lib.types.TomePageTypesAS;
 import hellfirepvp.astralsorcery.common.research.ResearchNode;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 
@@ -34,7 +34,8 @@ public final class TomePageEmpty implements TomePage {
 
     private static final TomePageEmpty INSTANCE = new TomePageEmpty();
 
-    private TomePageEmpty() {}
+    private TomePageEmpty() {
+    }
 
     public static TomePageEmpty getInstance() {
         return INSTANCE;
@@ -42,11 +43,11 @@ public final class TomePageEmpty implements TomePage {
 
     @Override
     public TomePageType<?> getType() {
-        return TomePageTypesAS.EMPTY_PAGE.get();
+        return TomePageTypesAS.EMPTY_PAGE;
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public RenderPage createPage(@Nullable ResearchNode node, int page) {
         return new RenderPageEmpty(node, page);
     }

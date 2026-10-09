@@ -8,28 +8,12 @@
 
 package hellfirepvp.astralsorcery.client.screen.container.altar;
 
-import com.mojang.blaze3d.pipeline.RenderTarget;
-import hellfirepvp.astralsorcery.client.ClientProxy;
-import hellfirepvp.astralsorcery.client.lib.ShaderProgramsAS;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
 import hellfirepvp.astralsorcery.client.resource.AbstractRenderTexture;
-import hellfirepvp.astralsorcery.client.shader.DrawChainRenderType;
-import hellfirepvp.astralsorcery.client.shader.WrappedBufferSource;
-import hellfirepvp.astralsorcery.client.util.RenderUtil;
-import hellfirepvp.astralsorcery.common.container.ContainerAltar;
 import hellfirepvp.astralsorcery.common.container.ContainerAltarIllumination;
-import hellfirepvp.astralsorcery.common.recipe.altar.AltarRecipe;
-import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.level.Level;
-
-import java.util.List;
 
 /**
  * This class is part of the Astral Sorcery Mod

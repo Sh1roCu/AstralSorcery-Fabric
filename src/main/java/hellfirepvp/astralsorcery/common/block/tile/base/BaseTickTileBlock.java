@@ -18,6 +18,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Supplier;
+
 /**
  * This class is part of the Astral Sorcery Mod
  * The complete source code for this mod can be found on GitHub.
@@ -27,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public abstract class BaseTickTileBlock<T extends TileEntityTick<?>> extends BaseTileBlock<T> {
 
-    protected BaseTickTileBlock(Properties properties, TileRegistryObject<T> tileType) {
+    protected BaseTickTileBlock(Properties properties, Supplier<TileRegistryObject<T>> tileType) {
         super(properties, tileType);
     }
 

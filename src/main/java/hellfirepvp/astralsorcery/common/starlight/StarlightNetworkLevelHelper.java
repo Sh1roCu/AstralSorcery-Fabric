@@ -65,7 +65,7 @@ public class StarlightNetworkLevelHelper {
     }
 
     public <N extends TransmissionNode> void createNetworkNode(TileEntityNetwork<N, ?> tile) {
-        tile.getNodeProvider().asOptional().ifPresent(provider -> {
+        Optional.of(tile.getNodeProvider()).ifPresent(provider -> {
             N newNode = provider.provideNewNode(tile.getBlockPos());
             this.networkData.addTransmissionNode(newNode);
 

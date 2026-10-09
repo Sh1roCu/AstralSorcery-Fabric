@@ -14,18 +14,18 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.lib.types.LumenBindingEffectTypesAS;
 import hellfirepvp.astralsorcery.common.util.RandomMobEffectInstance;
 import hellfirepvp.astralsorcery.common.util.data.IntRange;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 
 import java.util.List;
 
@@ -74,24 +74,24 @@ public class LumenBindingHitAddEffectEffect extends LumenBindingEffect {
     }
 
     @Override
-    public List<Component> getDisplayText(LogicalSide side, ItemStack stack) {
+    public List<Component> getDisplayText(EnvType side, ItemStack stack) {
         if (this.getChance() >= 1F) {
             return List.of(Component.translatable("lumen.binding.astralsorcery.on_hit_effect", this.getEffect().getDisplay()));
         }
         return List.of(Component.translatable("lumen.binding.astralsorcery.on_hit_effect.chance", this.getEffect().getDisplay()));
     }
 
-    public static void attachEventListeners(IEventBus bus) {
-        bus.addListener(LumenBindingHitAddEffectEffect::onDamageDealt);
+    public static void attachEventListeners() {
+        ServerLivingEntityEvents.AFTER_DAMAGE.register(LumenBindingHitAddEffectEffect::onDamageDealt);
     }
 
-    private static void onDamageDealt(LivingDamageEvent.Post event) {
-        if (event.getSource().getDirectEntity() instanceof LivingEntity attacker) {
+    private static void onDamageDealt(LivingEntity entity, DamageSource source, float baseDamageTaken, float damageTaken, boolean blocked) {
+        if (source.getDirectEntity() instanceof LivingEntity attacker) {
             if (attacker.level().isClientSide()) return;
 
             RandomSource rand = RandomSource.create();
             forEachEffect(attacker, LumenBindingHitAddEffectEffect.class, (stack, effect) -> {
-                event.getEntity().addEffect(effect.getEffect().createEffect(rand));
+                entity.addEffect(effect.getEffect().createEffect(rand));
             });
         }
     }

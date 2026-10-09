@@ -9,8 +9,8 @@
 package hellfirepvp.astralsorcery.client.lib;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
-import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.neoforged.neoforge.client.event.ModelEvent;
+import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -19,11 +19,18 @@ import net.neoforged.neoforge.client.event.ModelEvent;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class CustomModelsAS {
+public class CustomModelsAS implements ModelLoadingPlugin {
 
-    public static final ModelResourceLocation ASTROLABE_IN_HAND = ModelResourceLocation.standalone(AstralSorcery.key("item/astrolabe_in_hand"));
+    public static final CustomModelsAS INSTANCE = new CustomModelsAS();
 
-    public static void registerCustomModels(ModelEvent.RegisterAdditional event) {
-        event.register(ASTROLABE_IN_HAND);
+    public static final ResourceLocation ASTROLABE_IN_HAND = AstralSorcery.key("item/astrolabe_in_hand");
+
+    public static CustomModelsAS getInstance() {
+        return INSTANCE;
+    }
+
+    @Override
+    public void onInitializeModelLoader(Context pluginContext) {
+        pluginContext.addModels(ASTROLABE_IN_HAND);
     }
 }

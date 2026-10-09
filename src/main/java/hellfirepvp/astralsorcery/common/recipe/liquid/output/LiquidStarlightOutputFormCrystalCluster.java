@@ -15,6 +15,7 @@ import hellfirepvp.astralsorcery.client.effect.function.FXColorFunction;
 import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
 import hellfirepvp.astralsorcery.common.component.CrystalAttributesComponent;
 import hellfirepvp.astralsorcery.common.crystal.CrystalPropertyGenerator;
+import hellfirepvp.astralsorcery.common.event.CrystalPropertyEvent;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
@@ -26,14 +27,14 @@ import hellfirepvp.astralsorcery.common.tile.TileCelestialCrystalCluster;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -49,7 +50,8 @@ public class LiquidStarlightOutputFormCrystalCluster extends LiquidStarlightReci
     public static final StreamCodec<RegistryFriendlyByteBuf, LiquidStarlightOutputFormCrystalCluster> STREAM_CODEC = StreamCodec.unit(INSTANCE);
     public static final Type<LiquidStarlightOutputFormCrystalCluster> TYPE = new Type<>(CODEC, STREAM_CODEC);
 
-    private LiquidStarlightOutputFormCrystalCluster() {}
+    private LiquidStarlightOutputFormCrystalCluster() {
+    }
 
     public static LiquidStarlightOutputFormCrystalCluster getInstance() {
         return INSTANCE;
@@ -57,7 +59,7 @@ public class LiquidStarlightOutputFormCrystalCluster extends LiquidStarlightReci
 
     @Override
     public Type<?> getType() {
-        return LiquidStarlightRecipeOutputTypesAS.FORM_CRYSTAL_CLUSTER.get();
+        return LiquidStarlightRecipeOutputTypesAS.FORM_CRYSTAL_CLUSTER;
     }
 
     @Override
@@ -70,14 +72,21 @@ public class LiquidStarlightOutputFormCrystalCluster extends LiquidStarlightReci
         Level level = input.getTriggerEntity().level();
         BlockPos pos = input.getTriggerEntity().blockPosition();
 
-        if (level.setBlockAndUpdate(pos, BlocksAS.CELESTIAL_CRYSTAL_CLUSTER.get().defaultBlockState())) {
+        if (level.setBlockAndUpdate(pos, BlocksAS.CELESTIAL_CRYSTAL_CLUSTER.defaultBlockState())) {
             MiscUtil.getTileAt(level, pos, TileCelestialCrystalCluster.class, true).ifPresent(tile -> {
-                CrystalAttributesComponent defaultCelestialComponent = ItemsAS.CELESTIAL_CRYSTAL.get().components()
-                        .getOrDefault(DataComponentsAS.CRYSTAL_ATTRIBUTES.get(), CrystalAttributesComponent.defaultEmpty());
+                CrystalAttributesComponent defaultCelestialComponent = ItemsAS.CELESTIAL_CRYSTAL.components()
+                        .getOrDefault(DataComponentsAS.CRYSTAL_ATTRIBUTES, CrystalAttributesComponent.defaultEmpty());
                 CrystalAttributesComponent cmp = input.getTriggerEntity().getItem().getOrDefault(DataComponentsAS.CRYSTAL_ATTRIBUTES, CrystalAttributesComponent.defaultEmpty());
+                CrystalAttributesComponent prev = cmp;
+
                 cmp = cmp.setProperties(defaultCelestialComponent.getProperties());
                 cmp = CrystalPropertyGenerator.generateRandomProperties(cmp);
-                tile.getTileData().setCrystalAttributes(cmp);
+
+                var formCluster = new CrystalPropertyEvent.Change(input.getTriggerEntity().getItem(),
+                        CrystalPropertyEvent.Change.Type.FORM_CRYSTAL_CLUSTER, prev, cmp);
+                CrystalPropertyEvent.Change.EVENT.invoker().post(formCluster);
+
+                tile.getTileData().setCrystalAttributes(formCluster.getResultComponent());
                 tile.markForUpdate();
 
                 recipe.consumeItemInputs(input);
@@ -86,7 +95,7 @@ public class LiquidStarlightOutputFormCrystalCluster extends LiquidStarlightReci
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void playCraftingEffects(LiquidStarlightRecipe recipe, LiquidStarlightRecipeInput input, RandomSource rand, int craftingTick) {
         super.playCraftingEffects(recipe, input, rand, craftingTick);
 

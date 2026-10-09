@@ -16,6 +16,7 @@ import hellfirepvp.astralsorcery.common.linking.session.ActiveLinkSession;
 import hellfirepvp.astralsorcery.common.linking.session.LinkSessionHelper;
 import hellfirepvp.astralsorcery.common.starlight.StarlightNetworkLevelHelper;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
+import net.fabricmc.api.EnvType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -26,14 +27,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.fml.LogicalSide;
 
 import java.util.function.Function;
 
@@ -52,13 +47,13 @@ public class LinkingToolItem extends ItemCustom implements InterceptInteractItem
     }
 
     @Override
-    public boolean shouldInterceptBlockInteract(LogicalSide side, Player player, InteractionHand hand, BlockPos pos, BlockHitResult hitResult, Direction blockFace) {
+    public boolean shouldInterceptBlockInteract(EnvType side, Player player, InteractionHand hand, BlockPos pos, BlockHitResult hitResult, Direction blockFace) {
         return true;
     }
 
     @Override
-    public boolean doBlockInteract(LogicalSide side, Player player, InteractionHand hand, BlockPos pos, BlockHitResult hitResult, Direction blockFace) {
-        if (side.isServer() && player instanceof ServerPlayer sPlayer) {
+    public boolean doBlockInteract(EnvType side, Player player, InteractionHand hand, BlockPos pos, BlockHitResult hitResult, Direction blockFace) {
+        if (side == EnvType.SERVER && player instanceof ServerPlayer sPlayer) {
             ServerLevel sLevel = sPlayer.serverLevel();
             ActiveLinkSession session = LinkSessionHelper.getActiveSession(sPlayer).orElse(null);
             if (session == null) {
@@ -122,13 +117,13 @@ public class LinkingToolItem extends ItemCustom implements InterceptInteractItem
     }
 
     @Override
-    public boolean shouldInterceptEntityInteract(LogicalSide side, Player player, InteractionHand hand, LivingEntity interacted) {
+    public boolean shouldInterceptEntityInteract(EnvType side, Player player, InteractionHand hand, LivingEntity interacted) {
         return interacted.isAlive();
     }
 
     @Override
-    public boolean doEntityInteract(LogicalSide side, Player player, InteractionHand hand, LivingEntity interacted) {
-        if (side.isServer() && player instanceof ServerPlayer sPlayer) {
+    public boolean doEntityInteract(EnvType side, Player player, InteractionHand hand, LivingEntity interacted) {
+        if (side==EnvType.SERVER && player instanceof ServerPlayer sPlayer) {
             ServerLevel sLevel = sPlayer.serverLevel();
             ActiveLinkSession session = LinkSessionHelper.getActiveSession(sPlayer).orElse(null);
             if (session == null) {

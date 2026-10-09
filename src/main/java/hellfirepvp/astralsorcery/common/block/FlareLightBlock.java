@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.block;
 
+import cn.sh1rocu.astralsorcery.api.extension.ILandingEffectsBlock;
+import cn.sh1rocu.astralsorcery.api.extension.IRunningEffectsBlock;
 import com.mojang.serialization.MapCodec;
 import hellfirepvp.astralsorcery.client.effect.EffectHelper;
 import hellfirepvp.astralsorcery.client.effect.function.FXAlphaFunction;
@@ -16,6 +18,8 @@ import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
 import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -32,8 +36,6 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -42,7 +44,7 @@ import net.neoforged.api.distmarker.OnlyIn;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class FlareLightBlock extends Block {
+public class FlareLightBlock extends Block implements ILandingEffectsBlock, IRunningEffectsBlock {
 
     private static final VoxelShape SHAPE = Block.box(6, 6, 6, 10, 10, 10);
 
@@ -61,7 +63,7 @@ public class FlareLightBlock extends Block {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
         ColorWrapper color = ColorsAS.DYE_COLORS[state.getValue(COLOR).getId()];
 

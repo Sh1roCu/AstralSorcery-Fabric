@@ -24,6 +24,8 @@ import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
 import hellfirepvp.astralsorcery.common.lumen.ILumenHandler;
 import hellfirepvp.astralsorcery.common.util.*;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -42,8 +44,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -124,7 +124,7 @@ public class BlinkWandItem extends ItemCustom {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void playParticles(ItemStack stack, LivingEntity entity, float perc) {
         if (!(entity instanceof Player player)) return;
         if (player.getCooldowns().isOnCooldown(this)) return;
@@ -136,7 +136,7 @@ public class BlinkWandItem extends ItemCustom {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void playLaunchParticles(LivingEntity entity, float usagePercent, RandomSource rand) {
         Vector3 look = new Vector3(entity.getViewVector(1F)).normalize().multiply(20);
         Vector3 pos = new Vector3(entity).addY(entity.getEyeHeight());
@@ -167,7 +167,7 @@ public class BlinkWandItem extends ItemCustom {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void playTeleportParticles(ItemStack stack, LivingEntity entity, float usagePercent) {
         float dist = 30F;
         if (hasLumenBoost(stack, 40)) dist *= 2F;

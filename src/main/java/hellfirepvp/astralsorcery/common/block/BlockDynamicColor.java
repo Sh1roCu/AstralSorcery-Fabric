@@ -11,7 +11,6 @@ package hellfirepvp.astralsorcery.common.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.common.extensions.IBlockExtension;
 
 import javax.annotation.Nullable;
 
@@ -23,7 +22,7 @@ import javax.annotation.Nullable;
  * Date: 07.09.2026 / 10:00
  */
 //Mirror for BlockColor
-public interface BlockDynamicColor extends IBlockExtension {
+public interface BlockDynamicColor {
 
     int getColor(BlockState state, long tick, @Nullable BlockAndTintGetter level, @Nullable BlockPos pos, int tintIndex);
 

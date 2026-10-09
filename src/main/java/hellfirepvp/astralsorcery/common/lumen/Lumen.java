@@ -21,6 +21,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -33,7 +34,7 @@ import java.util.Set;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class Lumen implements LumenLike {
+public class Lumen implements LumenLike, Comparable<Lumen> {
 
     private final ColorWrapper color;
     private final boolean isElementary;
@@ -118,5 +119,14 @@ public class Lumen implements LumenLike {
     @Nonnull
     public Component getHoverName() {
         return Component.translatable("lumen.astralsorcery.hover.title", this.getName());
+    }
+
+    @Override
+    public int compareTo(@NotNull Lumen o) {
+        var reg1 = this.getRegistryKey().orElseThrow();
+        var reg2 = o.getRegistryKey().orElseThrow();
+        int ret = reg1.registry().compareTo(reg2.registry());
+        if (ret == 0) ret = reg1.location().compareTo(reg2.location());
+        return ret;
     }
 }

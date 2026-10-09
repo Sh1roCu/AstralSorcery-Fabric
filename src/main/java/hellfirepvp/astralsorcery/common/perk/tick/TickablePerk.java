@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.perk.tick;
 
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.fml.LogicalSide;
+import net.fabricmc.api.EnvType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -20,6 +20,6 @@ import net.neoforged.fml.LogicalSide;
  */
 public interface TickablePerk {
 
-    void tick(Player player, LogicalSide side);
+    void tick(Player player, EnvType side);
 
 }

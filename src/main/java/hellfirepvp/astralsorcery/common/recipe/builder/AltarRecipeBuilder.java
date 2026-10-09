@@ -8,10 +8,12 @@
 
 package hellfirepvp.astralsorcery.common.recipe.builder;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
+import cn.sh1rocu.astralsorcery.util.neoforge.common.crafting.SizedIngredient;
+import cn.sh1rocu.astralsorcery.util.neoforge.fluids.crafing.SizedFluidIngredient;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.constellation.BaseConstellation;
 import hellfirepvp.astralsorcery.common.ingredient.IngredientBridge;
-import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.lib.types.AltarEffectsAS;
 import hellfirepvp.astralsorcery.common.lumen.LumenStack;
 import hellfirepvp.astralsorcery.common.recipe.altar.AltarRecipe;
@@ -20,12 +22,14 @@ import hellfirepvp.astralsorcery.common.recipe.altar.effect.AltarEffect;
 import hellfirepvp.astralsorcery.common.recipe.altar.output.AltarRecipeOutputModifier;
 import hellfirepvp.astralsorcery.common.tile.TileAltar;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
@@ -35,11 +39,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
-import net.neoforged.neoforge.common.crafting.ICustomIngredient;
-import net.neoforged.neoforge.common.crafting.SizedIngredient;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
-import net.neoforged.neoforge.registries.DeferredHolder;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -103,12 +102,12 @@ public class AltarRecipeBuilder implements RecipeBuilder {
         return this;
     }
 
-    public AltarRecipeBuilder setRecipeId(DeferredHolder<?, ?> identifiable) {
-        return this.setRecipeId(identifiable.getKey().location());
+    public AltarRecipeBuilder setRecipeId(Item identifiable) {
+        return this.setRecipeId(BuiltInRegistries.ITEM.getKey(identifiable));
     }
 
-    public AltarRecipeBuilder setRecipeId(DeferredHolder<?, ?> identifiable, String suffix) {
-        return this.setRecipeId(NameUtil.suffixPath(identifiable.getKey().location(), suffix));
+    public AltarRecipeBuilder setRecipeId(Item identifiable, String suffix) {
+        return this.setRecipeId(NameUtil.suffixPath(BuiltInRegistries.ITEM.getKey(identifiable), suffix));
     }
 
     public AltarRecipeBuilder setGridLines(String line0, String line1, String line2) {
@@ -139,7 +138,7 @@ public class AltarRecipeBuilder implements RecipeBuilder {
         return this;
     }
 
-    public AltarRecipeBuilder addInput(Character key, ICustomIngredient input) {
+    public AltarRecipeBuilder addInput(Character key, CustomIngredient input) {
         return this.addInput(key, input.toVanilla());
     }
 
@@ -240,7 +239,7 @@ public class AltarRecipeBuilder implements RecipeBuilder {
         return this;
     }
 
-    public AltarRecipeBuilder addRequiredAdditionalInput(int count, ICustomIngredient ingredient) {
+    public AltarRecipeBuilder addRequiredAdditionalInput(int count, CustomIngredient ingredient) {
         return this.addRequiredAdditionalInput(count, ingredient.toVanilla());
     }
 

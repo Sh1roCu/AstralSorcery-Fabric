@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.lumen.binding.usage;
 
+import cn.sh1rocu.astralsorcery.api.event.PlayerTickEvent;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -19,8 +20,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.stats.StatsCounter;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.*;
 
@@ -82,8 +81,8 @@ public class LumenBindingUsageMovement extends LumenBindingUsage {
         return this.statMultiplier;
     }
 
-    public static void attachEventListeners(IEventBus bus) {
-        bus.addListener(LumenBindingUsageMovement::onPlayerTick);
+    public static void attachEventListeners() {
+        PlayerTickEvent.POST.register(LumenBindingUsageMovement::onPlayerTick);
     }
 
     private static void onPlayerTick(PlayerTickEvent.Post event) {

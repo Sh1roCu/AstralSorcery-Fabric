@@ -11,10 +11,12 @@ package hellfirepvp.astralsorcery.common.network.play;
 import hellfirepvp.astralsorcery.common.item.TomeItem;
 import hellfirepvp.astralsorcery.common.network.PlayPacketHandler;
 import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class PktOpenClientScreen extends PlayPacketHandler.ToClient<PktOpenClientScreen.Request> {
 
@@ -37,9 +39,10 @@ public class PktOpenClientScreen extends PlayPacketHandler.ToClient<PktOpenClien
         return CODEC;
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
-    public void handle(Request payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
+    public void receive(Request payload, ClientPlayNetworking.Context context) {
+        context.client().execute(() -> {
             switch (payload.screenType()) {
                 case TOME -> TomeItem.openTomeScreen();
             }

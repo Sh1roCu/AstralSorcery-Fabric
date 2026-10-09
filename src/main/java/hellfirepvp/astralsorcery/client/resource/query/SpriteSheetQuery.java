@@ -10,8 +10,8 @@ package hellfirepvp.astralsorcery.client.resource.query;
 
 import hellfirepvp.astralsorcery.client.resource.AssetLocation;
 import hellfirepvp.astralsorcery.client.resource.SpriteSheet;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import javax.annotation.Nonnull;
 
@@ -43,7 +43,7 @@ public class SpriteSheetQuery extends TextureQuery {
     }
 
     @Nonnull
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public SpriteSheet resolveSprite() {
         if (this.spriteResource == null) {
             this.spriteResource = new SpriteSheet(this.resolve(), getRows(), getColumns());

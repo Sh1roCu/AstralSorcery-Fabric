@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.visual.type;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.effect.EffectHelper;
 import hellfirepvp.astralsorcery.client.effect.function.FXAlphaFunction;
@@ -17,14 +18,13 @@ import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.visual.VisualEffectTypes;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.fluids.FluidStack;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -89,7 +89,7 @@ public class ChaliceLiquidInteractionEffect implements VisualEffectTypes.Effect 
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void playEffect(RandomSource rand) {
         drawSegment(rand, this.first);
         if (this.second != null) {
@@ -97,9 +97,9 @@ public class ChaliceLiquidInteractionEffect implements VisualEffectTypes.Effect 
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private static void drawSegment(RandomSource rand, Segment segment) {
-        int tint = IClientFluidTypeExtensions.of(segment.fluid.getFluid()).getTintColor(segment.fluid);
+        int tint = FluidVariantRendering.getColor(segment.fluid.getFluidVariant());
         ColorWrapper base = ColorWrapper.opaque(tint);
         ColorWrapper accent = base.brighter();
 

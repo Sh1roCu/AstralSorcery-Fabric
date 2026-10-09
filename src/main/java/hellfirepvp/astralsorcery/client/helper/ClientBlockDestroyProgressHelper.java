@@ -55,7 +55,7 @@ public class ClientBlockDestroyProgressHelper {
         }
 
         BlockDestructionProgress newProgress = new BlockDestructionProgress(entityId, breakPos);
-        newProgress.updateTick(renderer.getTicks());
+        newProgress.updateTick(renderer.ticks);
         newProgress.setProgress(progress);
 
         List<BlockDestructionProgress> progresses = adjacentProgressMap.computeIfAbsent(ref, k -> new ArrayList<>());

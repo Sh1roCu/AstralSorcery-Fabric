@@ -8,27 +8,27 @@
 
 package hellfirepvp.astralsorcery.common.perk;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.network.PacketDistributor;
 import hellfirepvp.astralsorcery.common.network.play.PktSyncPerkActivity;
 import hellfirepvp.astralsorcery.common.perk.source.ModifierManager;
 import hellfirepvp.astralsorcery.common.perk.source.ModifierSource;
 import hellfirepvp.astralsorcery.common.perk.tick.PerkCooldownHelper;
 import hellfirepvp.astralsorcery.common.perk.tree.AbstractPerk;
+import hellfirepvp.astralsorcery.common.research.PlayerPerkData;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
-import hellfirepvp.astralsorcery.common.research.PlayerPerkData;
 import hellfirepvp.astralsorcery.common.util.SidedHelper;
 import hellfirepvp.astralsorcery.common.util.data.SidedReference;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -43,105 +43,106 @@ public class PerkManager {
 
     private final SidedReference<Map<UUID, PerkAttributeMap>> perkMap = SidedReference.create(HashMap::new);
 
-    private PerkManager() {}
+    private PerkManager() {
+    }
 
     public static PerkManager getInstance() {
         return INSTANCE;
     }
 
     public static PerkAttributeMap getOrCreateAttributes(Player player) {
-        LogicalSide side = SidedHelper.getSide(player);
+        EnvType side = SidedHelper.getSide(player);
         return getInstance().perkMap.getData(side)
                 .map(dataMap -> dataMap.computeIfAbsent(player.getUUID(), id -> new PerkAttributeMap(side)))
                 .orElseThrow();
     }
 
-    public void attachEventListeners(IEventBus bus) {
-        bus.addListener(this::onPlayerConnect);
-        bus.addListener(this::onPlayerDisconnect);
-        bus.addListener(this::onPlayerRecreate);
+    public void attachEventListeners() {
+        ServerPlayerEvents.JOIN.register(this::onPlayerConnect);
+        ServerPlayerEvents.LEAVE.register(this::onPlayerDisconnect);
+        ServerPlayerEvents.COPY_FROM.register(this::onPlayerRecreate);
     }
 
-    private void onPlayerConnect(PlayerEvent.PlayerLoggedInEvent event) {
-        modifyAllPerks(event.getEntity(), LogicalSide.SERVER, Action.ADD);
+    private void onPlayerConnect(Player player) {
+        modifyAllPerks(player, EnvType.SERVER, Action.ADD);
 
-        if (event.getEntity() instanceof ServerPlayer sPlayer) {
+        if (player instanceof ServerPlayer sPlayer) {
             PacketDistributor.sendToPlayer(sPlayer, PktSyncPerkActivity.applyAll());
         }
     }
 
-    private void onPlayerDisconnect(PlayerEvent.PlayerLoggedOutEvent event) {
-        modifyAllPerks(event.getEntity(), LogicalSide.SERVER, Action.REMOVE);
+    private void onPlayerDisconnect(Player player) {
+        modifyAllPerks(player, EnvType.SERVER, Action.REMOVE);
     }
 
-    private void onPlayerRecreate(PlayerEvent.Clone event) {
-        modifyAllPerks(event.getOriginal(), LogicalSide.SERVER, Action.REMOVE);
-        modifyAllPerks(event.getEntity(), LogicalSide.SERVER, Action.ADD);
+    private void onPlayerRecreate(Player oldPlayer, Player newPlayer, boolean alive) {
+        modifyAllPerks(oldPlayer, EnvType.SERVER, Action.REMOVE);
+        modifyAllPerks(newPlayer, EnvType.SERVER, Action.ADD);
 
-        PerkCooldownHelper.removeAllCooldowns(event.getOriginal(), LogicalSide.SERVER);
-        if (event.getEntity() instanceof ServerPlayer sPlayer) {
+        PerkCooldownHelper.removeAllCooldowns(oldPlayer, EnvType.SERVER);
+        if (newPlayer instanceof ServerPlayer sPlayer) {
             PacketDistributor.sendToPlayer(sPlayer, PktSyncPerkActivity.applyAll());
         }
     }
 
     public void clearServer() {
-        this.perkMap.getData(LogicalSide.SERVER).ifPresent(Map::clear);
+        this.perkMap.getData(EnvType.SERVER).ifPresent(Map::clear);
     }
 
     public void clearClient() {
-        this.perkMap.getData(LogicalSide.CLIENT).ifPresent(Map::clear);
+        this.perkMap.getData(EnvType.CLIENT).ifPresent(Map::clear);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public static <D extends AbstractPerk.Data> void clientChangePerkData(AbstractPerk<D> perk, D oldData, D newData) {
         Player player = Minecraft.getInstance().player;
         if (player == null) {
             return;
         }
 
-        PlayerProgress progress = ResearchManager.getProgress(player, LogicalSide.CLIENT);
+        PlayerProgress progress = ResearchManager.getProgress(player, EnvType.CLIENT);
         PlayerPerkData perkData = progress.getPerkData();
 
         if (!perkData.hasPerkAllocation(perk)) {
             return;
         }
         perkData.updateAllocatedPerkData(perk, oldData);
-        PerkApplicationManager.modifySource(player, LogicalSide.CLIENT, perk, Action.REMOVE);
+        PerkApplicationManager.modifySource(player, EnvType.CLIENT, perk, Action.REMOVE);
         perkData.updateAllocatedPerkData(perk, newData);
-        PerkApplicationManager.modifySource(player, LogicalSide.CLIENT, perk, Action.ADD);
+        PerkApplicationManager.modifySource(player, EnvType.CLIENT, perk, Action.ADD);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public static void clientClearAllPerks() {
         Player player = Minecraft.getInstance().player;
         if (player == null) {
             return;
         }
-        PlayerProgress progress = ResearchManager.getProgress(player, LogicalSide.CLIENT);
+        PlayerProgress progress = ResearchManager.getProgress(player, EnvType.CLIENT);
         if (!progress.isValid()) {
             return;
         }
 
         PerkAttributeMap attr = getOrCreateAttributes(player);
-        for (ModifierSource source : ModifierManager.getAppliedModifiers(player, LogicalSide.CLIENT)) {
+        for (ModifierSource source : ModifierManager.getAppliedModifiers(player, EnvType.CLIENT)) {
             if (source instanceof AbstractPerk) {
-                PerkApplicationManager.removeSource(attr, player, LogicalSide.CLIENT, source);
+                PerkApplicationManager.removeSource(attr, player, EnvType.CLIENT, source);
             }
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public static void clientRefreshAllPerks() {
         Player player = Minecraft.getInstance().player;
         if (player == null) {
             return;
         }
 
-        modifyAllPerks(player, LogicalSide.CLIENT, Action.ADD);
-        PerkCooldownHelper.removeAllCooldowns(player, LogicalSide.CLIENT);
+        modifyAllPerks(player, EnvType.CLIENT, Action.ADD);
+        PerkCooldownHelper.removeAllCooldowns(player, EnvType.CLIENT);
     }
 
-    private static void modifyAllPerks(Player player, LogicalSide side, Action action) {
+    private static void modifyAllPerks(Player player, EnvType side, Action action) {
         ResearchManager.getProgress(player, side).getPerkData().getEffectGrantingPerks()
                 .forEach(perk -> PerkApplicationManager.modifySource(player, side, perk, action));
     }

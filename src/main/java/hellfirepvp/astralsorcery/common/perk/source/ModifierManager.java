@@ -8,15 +8,13 @@
 
 package hellfirepvp.astralsorcery.common.perk.source;
 
+import cn.sh1rocu.astralsorcery.api.event.PlayerTickEvent;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -35,15 +33,16 @@ public class ModifierManager {
     private static final Map<UUID, Set<ModifierSource>> modifierCache = new HashMap<>();
     private static final Map<UUID, Set<ModifierSource>> modifierCacheClient = new HashMap<>();
 
-    private ModifierManager() {}
+    private ModifierManager() {
+    }
 
     public static ModifierManager getInstance() {
         return INSTANCE;
     }
 
-    public void attachEventListeners(IEventBus bus) {
-        bus.addListener(this::onPlayerTick);
-        bus.addListener(this::onDisconnect);
+    public void attachEventListeners() {
+        PlayerTickEvent.POST.register(this::onPlayerTick);
+        ServerPlayerEvents.LEAVE.register(this::onDisconnect);
     }
 
     private void onPlayerTick(PlayerTickEvent.Post event) {
@@ -55,8 +54,8 @@ public class ModifierManager {
     }
 
     @Nonnull
-    private static Set<ModifierSource> getModifiers(Player player, LogicalSide side) {
-        if (side.isClient()) {
+    private static Set<ModifierSource> getModifiers(Player player, EnvType side) {
+        if (side == EnvType.CLIENT) {
             return modifierCacheClient.computeIfAbsent(player.getUUID(), uuid -> new HashSet<>());
         } else {
             return modifierCache.computeIfAbsent(player.getUUID(), uuid -> new HashSet<>());
@@ -64,35 +63,35 @@ public class ModifierManager {
     }
 
     @Nonnull
-    public static Set<ModifierSource> getAppliedModifiers(Player player, LogicalSide side) {
+    public static Set<ModifierSource> getAppliedModifiers(Player player, EnvType side) {
         return new HashSet<>(getModifiers(player, side));
     }
 
-    public static void addModifier(Player player, LogicalSide side, ModifierSource source) {
+    public static void addModifier(Player player, EnvType side, ModifierSource source) {
         Set<ModifierSource> modifiers = getModifiers(player, side);
         if (!modifiers.contains(source) && modifiers.add(source)) {
             source.onApply(player, side);
         }
     }
 
-    public static void removeModifier(Player player, LogicalSide side, ModifierSource source) {
+    public static void removeModifier(Player player, EnvType side, ModifierSource source) {
         Set<ModifierSource> modifiers = getModifiers(player, side);
         if (modifiers.remove(source)) {
             source.onRemove(player, side);
         }
     }
 
-    public static boolean isModifierApplied(Player player, LogicalSide side, ModifierSource source) {
+    public static boolean isModifierApplied(Player player, EnvType side, ModifierSource source) {
         return getModifiers(player, side).contains(source);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public static void clearClientCache() {
         modifierCacheClient.clear();
     }
 
-    private void onDisconnect(PlayerEvent.PlayerLoggedOutEvent event) {
-        if (event.getEntity() instanceof ServerPlayer sPlayer) {
+    private void onDisconnect(Player player) {
+        if (player instanceof ServerPlayer sPlayer) {
             for (ModifierSourceProvider<?> sourceProvider : RegistriesAS.REGISTRY_PERK_MODIFIER_SOURCES) {
                 sourceProvider.removeModifiers(sPlayer);
             }

@@ -33,7 +33,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import net.neoforged.neoforge.common.extensions.IHolderExtension;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -62,7 +61,7 @@ public class RenderPageConstellationDetail extends RenderPage {
         boolean discovered = progress.hasDiscoveredConstellation(this.constellation);
 
         ResourceLocation id = this.constellation.getHolder()
-                .map(IHolderExtension::getKey)
+                .map(holder -> holder.unwrapKey().orElseThrow())
                 .map(ResourceKey::location)
                 .orElse(ResourceLocation.withDefaultNamespace("unknown"));
         String subtitleKey = String.format("tome.research.constellation.%s.%s.subtitle", id.getNamespace(), id.getPath());

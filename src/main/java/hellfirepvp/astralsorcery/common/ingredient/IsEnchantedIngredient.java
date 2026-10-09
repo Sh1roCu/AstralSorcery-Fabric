@@ -9,21 +9,22 @@
 package hellfirepvp.astralsorcery.common.ingredient;
 
 import com.mojang.serialization.MapCodec;
-import hellfirepvp.astralsorcery.common.lib.IngredientsAS;
+import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
-import net.minecraft.ChatFormatting;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.neoforged.neoforge.common.crafting.ICustomIngredient;
-import net.neoforged.neoforge.common.crafting.IngredientType;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -32,14 +33,35 @@ import java.util.stream.Stream;
  * Created by HellFirePvP
  * Date: 07.09.2026 / 10:00
  */
-public class IsEnchantedIngredient implements ICustomIngredient {
+public class IsEnchantedIngredient implements CustomIngredient {
 
     public static final IsEnchantedIngredient INSTANCE = new IsEnchantedIngredient();
     public static final MapCodec<IsEnchantedIngredient> CODEC = MapCodec.unit(INSTANCE);
+    public static final StreamCodec<RegistryFriendlyByteBuf, IsEnchantedIngredient> STREAM_CODEC = StreamCodec.unit(INSTANCE);
+
+    public static final CustomIngredientSerializer<IsEnchantedIngredient> SERIALIZER = new CustomIngredientSerializer<>() {
+        private static final ResourceLocation ID = AstralSorcery.key("is_enchanted");
+
+        @Override
+        public ResourceLocation getIdentifier() {
+            return ID;
+        }
+
+        @Override
+        public MapCodec<IsEnchantedIngredient> getCodec(boolean allowEmpty) {
+            return CODEC;
+        }
+
+        @Override
+        public StreamCodec<RegistryFriendlyByteBuf, IsEnchantedIngredient> getPacketCodec() {
+            return STREAM_CODEC;
+        }
+    };
 
     private static List<ItemStack> inputDisplayCache = null;
 
-    private IsEnchantedIngredient() {}
+    private IsEnchantedIngredient() {
+    }
 
     @Override
     public boolean test(ItemStack stack) {
@@ -48,8 +70,18 @@ public class IsEnchantedIngredient implements ICustomIngredient {
     }
 
     @Override
-    public Stream<ItemStack> getItems() {
-        return getDisplayCache().stream();
+    public List<ItemStack> getMatchingStacks() {
+        return getDisplayCache();
+    }
+
+    @Override
+    public boolean requiresTesting() {
+        return true;
+    }
+
+    @Override
+    public CustomIngredientSerializer<?> getSerializer() {
+        return SERIALIZER;
     }
 
     private static List<ItemStack> getDisplayCache() {
@@ -66,15 +98,5 @@ public class IsEnchantedIngredient implements ICustomIngredient {
 
     public static void clearDisplayCache() {
         inputDisplayCache = null;
-    }
-
-    @Override
-    public boolean isSimple() {
-        return false;
-    }
-
-    @Override
-    public IngredientType<?> getType() {
-        return IngredientsAS.IS_ENCHANTED.get();
     }
 }

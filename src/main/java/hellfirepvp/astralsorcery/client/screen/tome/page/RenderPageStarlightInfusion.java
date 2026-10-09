@@ -8,17 +8,17 @@
 
 package hellfirepvp.astralsorcery.client.screen.tome.page;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
 import hellfirepvp.astralsorcery.common.recipe.infusion.InfusionRecipe;
 import hellfirepvp.astralsorcery.common.research.ResearchNode;
 import hellfirepvp.astralsorcery.common.research.tome.TomePage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
 
 import javax.annotation.Nullable;
 
@@ -49,9 +49,9 @@ public class RenderPageStarlightInfusion extends RenderPageRecipe<InfusionRecipe
             this.renderOutput(guiGraphics, midX - 8, resultY - 8, 16, 16, recipe.getOutput());
 
             this.renderInput(guiGraphics, midX - 8, y + yOffset, recipe.getItemInput());
-            this.renderScaledItem(guiGraphics, midX - 8, y + yOffset + 12, ItemsAS.BLOCK_INFUSER.toStack(), 1.5F);
+            this.renderScaledItem(guiGraphics, midX - 8, y + yOffset + 12, ItemsAS.BLOCK_INFUSER.getDefaultInstance(), 1.5F);
 
-            FluidStack input = new FluidStack(recipe.getFluidInput(), FluidType.BUCKET_VOLUME);
+            FluidStack input = new FluidStack(recipe.getFluidInput(), FluidConstants.BUCKET);
             this.renderLiquidInput(guiGraphics, x + 61, y + 100, input);
             this.renderLiquidInput(guiGraphics, x + 79, y + 100, input);
             this.renderLiquidInput(guiGraphics, x + 97, y + 100, input);

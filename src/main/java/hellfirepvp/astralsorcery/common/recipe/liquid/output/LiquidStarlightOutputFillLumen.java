@@ -27,6 +27,8 @@ import hellfirepvp.astralsorcery.common.util.ItemUtil;
 import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -34,8 +36,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.List;
 
@@ -53,7 +53,8 @@ public class LiquidStarlightOutputFillLumen extends LiquidStarlightRecipeOutputM
     public static final StreamCodec<RegistryFriendlyByteBuf, LiquidStarlightOutputFillLumen> STREAM_CODEC = StreamCodec.unit(INSTANCE);
     public static final Type<LiquidStarlightOutputFillLumen> TYPE = new Type<>(CODEC, STREAM_CODEC);
 
-    private LiquidStarlightOutputFillLumen() {}
+    private LiquidStarlightOutputFillLumen() {
+    }
 
     public static LiquidStarlightOutputFillLumen getInstance() {
         return INSTANCE;
@@ -61,7 +62,7 @@ public class LiquidStarlightOutputFillLumen extends LiquidStarlightRecipeOutputM
 
     @Override
     public Type<?> getType() {
-        return LiquidStarlightRecipeOutputTypesAS.FILL_LUMEN.get();
+        return LiquidStarlightRecipeOutputTypesAS.FILL_LUMEN;
     }
 
     @Override
@@ -112,7 +113,7 @@ public class LiquidStarlightOutputFillLumen extends LiquidStarlightRecipeOutputM
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void playCraftingEffects(LiquidStarlightRecipe recipe, LiquidStarlightRecipeInput input, RandomSource rand, int craftingTick) {
         super.playCraftingEffects(recipe, input, rand, craftingTick);
 

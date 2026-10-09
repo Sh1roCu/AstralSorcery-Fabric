@@ -8,9 +8,9 @@
 
 package hellfirepvp.astralsorcery.common.util.tank;
 
+import cn.sh1rocu.astralsorcery.util.fluid.FluidStack;
 import com.mojang.serialization.Codec;
 import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
-import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -10,15 +10,15 @@ package hellfirepvp.astralsorcery.common.effect;
 
 import hellfirepvp.astralsorcery.common.lib.MobEffectsAS;
 import hellfirepvp.astralsorcery.common.util.MobEffectUtil;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -38,26 +38,26 @@ public class RevivalMobEffect extends BasicMobEffect {
     }
 
     @Override
-    public void attachEventListeners(IEventBus bus) {
-        super.attachEventListeners(bus);
-        bus.addListener(this::onDeath);
+    public void attachEventListeners() {
+        super.attachEventListeners();
+        ServerLivingEntityEvents.ALLOW_DEATH.register(this::onDeath);
     }
 
-    private void onDeath(LivingDeathEvent event) {
-        if (event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return;
+    private boolean onDeath(LivingEntity entity, DamageSource damageSource, float damageAmount) {
+        if (damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return true;
 
-        LivingEntity entity = event.getEntity();
-        if (!entity.hasEffect(MobEffectsAS.PHOENIX_BLESSING)) return;
+        if (!entity.hasEffect(MobEffectsAS.PHOENIX_BLESSING)) return true;
 
         Level level = entity.level();
-        if (level.isClientSide()) return;
+        if (level.isClientSide()) return true;
 
         MobEffectInstance inst = entity.getEffect(MobEffectsAS.PHOENIX_BLESSING);
-        if (inst == null || inst.getDuration() <= 0) return;
+        if (inst == null || inst.getDuration() <= 0) return true;
         int amplifier = inst.getAmplifier();
         int nextAmplifier = amplifier - 1;
 
-        event.setCanceled(true);
+        boolean cancelled = true;
+        // event.setCanceled(true);
 
         entity.setHealth(entity.getMaxHealth() / 3F);
         entity.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 600, 1));
@@ -67,5 +67,7 @@ public class RevivalMobEffect extends BasicMobEffect {
         if (nextAmplifier > 0) {
             entity.addEffect(MobEffectUtil.newAmplifier(inst, nextAmplifier));
         }
+
+        return !cancelled;
     }
 }

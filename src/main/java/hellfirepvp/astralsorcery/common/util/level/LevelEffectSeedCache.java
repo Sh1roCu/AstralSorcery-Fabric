@@ -8,16 +8,16 @@
 
 package hellfirepvp.astralsorcery.common.util.level;
 
+import cn.sh1rocu.astralsorcery.util.neoforge.network.PacketDistributor;
+import cn.sh1rocu.observerlib.ObserverLibFabric;
 import hellfirepvp.astralsorcery.common.network.play.PktRequestSeed;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +40,7 @@ public class LevelEffectSeedCache {
 
     public static long getServerWorldSeed(ResourceKey<Level> dim) {
         if (serverSeedLookup.containsKey(dim)) return serverSeedLookup.get(dim);
-        MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
+        MinecraftServer srv = ObserverLibFabric.getServer();
         if (srv == null) return -1;
         ServerLevel level = srv.getLevel(dim);
         if (level == null) return -1;
@@ -49,20 +49,20 @@ public class LevelEffectSeedCache {
         return randVal;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public static void clearClient() {
         activeSession++;
         clientSeedLookup.clear();
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public static void updateClientSeedCache(ResourceKey<Level> dim, int session, long seed) {
         if (activeSession == session) {
             clientSeedLookup.put(dim, seed);
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public static Optional<Long> getClientSeedIfPresent(ResourceKey<Level> dim) {
         if (dim == null) {
             return Optional.empty();

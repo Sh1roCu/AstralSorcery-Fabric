@@ -46,10 +46,10 @@ public interface CrystalToolItem extends CreativeTabItem {
     default void fillCreativeTab(Consumer<ItemStack> tabItems) {
         ItemStack stack = new ItemStack(this);
         stack.set(DataComponentsAS.CRYSTAL_ATTRIBUTES, CrystalAttributesComponent.defaultEmpty()
-                .setAttributeTier(CrystalPropertiesAS.SIZE.get(), CrystalPropertiesAS.SIZE.get().getMaxTier() * this.getCrystalCount())
-                .setAttributeTier(CrystalPropertiesAS.CUT.get(), CrystalPropertiesAS.CUT.get().getMaxTier() * this.getCrystalCount())
-                .setAttributeTier(CrystalPropertiesAS.TOOL_EFFICIENCY.get(), CrystalPropertiesAS.TOOL_EFFICIENCY.get().getMaxTier() * this.getCrystalCount())
-                .setAttributeTier(CrystalPropertiesAS.TOOL_DURABILITY.get(), CrystalPropertiesAS.TOOL_DURABILITY.get().getMaxTier() * this.getCrystalCount()));
+                .setAttributeTier(CrystalPropertiesAS.SIZE, CrystalPropertiesAS.SIZE.getMaxTier() * this.getCrystalCount())
+                .setAttributeTier(CrystalPropertiesAS.CUT, CrystalPropertiesAS.CUT.getMaxTier() * this.getCrystalCount())
+                .setAttributeTier(CrystalPropertiesAS.TOOL_EFFICIENCY, CrystalPropertiesAS.TOOL_EFFICIENCY.getMaxTier() * this.getCrystalCount())
+                .setAttributeTier(CrystalPropertiesAS.TOOL_DURABILITY, CrystalPropertiesAS.TOOL_DURABILITY.getMaxTier() * this.getCrystalCount()));
         this.reApplyModifiers(stack);
         tabItems.accept(stack);
     }

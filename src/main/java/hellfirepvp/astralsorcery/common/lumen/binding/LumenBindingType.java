@@ -15,7 +15,12 @@ import hellfirepvp.astralsorcery.common.component.StoredLumenComponent;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
 import hellfirepvp.astralsorcery.common.lumen.Lumen;
 import hellfirepvp.astralsorcery.common.util.RandomMobEffectInstance;
+import net.fabricmc.fabric.api.entity.FakePlayer;
+import net.fabricmc.fabric.api.item.v1.EquipmentSlotProvider;
+import net.fabricmc.fabric.api.tag.FabricTagKey;
+import net.fabricmc.fabric.impl.item.ItemExtensions;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
@@ -26,8 +31,6 @@ import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
-import net.neoforged.fml.common.asm.enumextension.ExtensionInfo;
-import net.neoforged.fml.common.asm.enumextension.IExtensibleEnum;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -94,7 +97,7 @@ public class LumenBindingType {
         IdentifierComponent.createOrOverwriteIdentifier(stack);
     }
 
-    public enum SlotType implements StringRepresentable, IExtensibleEnum {
+    public enum SlotType implements StringRepresentable/*, IExtensibleEnum*/ {
 
         HELMET(armorEquipment(EquipmentSlot.HEAD), wearing(EquipmentSlot.HEAD), Items.IRON_HELMET),
         CHESTPLATE(armorEquipment(EquipmentSlot.CHEST), wearing(EquipmentSlot.CHEST), Items.IRON_CHESTPLATE),
@@ -118,9 +121,12 @@ public class LumenBindingType {
             this.displayStack = displayStack;
         }
 
+        @SuppressWarnings("UnstableApiUsage")
         private static Predicate<ItemStack> armorEquipment(EquipmentSlot slot) {
             return stack -> {
-                if (stack.getEquipmentSlot() == slot) return true;
+                // TODO: this impl may cause NPE
+//                EquipmentSlotProvider provider = ((ItemExtensions) stack.getItem()).fabric_getEquipmentSlotProvider();
+//                if (provider != null && provider.getPreferredEquipmentSlot(null, stack) == slot) return true;
                 Equipable equipable = Equipable.get(stack);
                 if (equipable != null) {
                     return equipable.getEquipmentSlot() == slot;
@@ -150,8 +156,8 @@ public class LumenBindingType {
             return this.name().toLowerCase(Locale.ROOT);
         }
 
-        public static ExtensionInfo getExtensionInfo() {
-            return ExtensionInfo.nonExtended(SlotType.class);
-        }
+//        public static ExtensionInfo getExtensionInfo() {
+//            return ExtensionInfo.nonExtended(SlotType.class);
+//        }
     }
 }
