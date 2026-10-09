@@ -41,7 +41,7 @@ import static hellfirepvp.astralsorcery.common.lib.constants.PropertiesAS.Block.
  */
 public class BlocksAS {
 
-    public static final Set<Block> REGISTERED_BLOCKS = Sets.newHashSet();
+    public static final Set<Block> REGISTERED_BLOCKS = Sets.newLinkedHashSet();
 
     public static void init() {
 

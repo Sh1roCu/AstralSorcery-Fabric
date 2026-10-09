@@ -56,7 +56,7 @@ public class ItemsAS {
 
     }
 
-    public static final Set<Item> REGISTERED_ITEMS = Sets.newHashSet();
+    public static final Set<Item> REGISTERED_ITEMS = Sets.newLinkedHashSet();
 
     public static final Tier CRYSTAL_TOOL_TIER = new SimpleTier(BlockTags.INCORRECT_FOR_DIAMOND_TOOL,
             741, 4F, 1F, 26, () -> Ingredient.EMPTY);
