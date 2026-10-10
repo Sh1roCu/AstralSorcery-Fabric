@@ -57,9 +57,6 @@ public class PktSyncAuxiliaryLightManager extends PlayPacketHandler.ToClient<Pkt
     public void receive(Request payload, ClientPlayNetworking.Context context) {
         context.client().execute(() -> {
             Level level = context.player().level();
-            // Fabric
-            level.getLightEngine().checkBlock(payload.pos());
-
             // TODO?
 //            AuxiliaryLightManager lightMgr = level.getAuxLightManager(payload.pos());
 //            if (lightMgr == null) return;
