@@ -95,7 +95,7 @@ public class RenderAstrolabeOverlay {
     private static FloatPoint drawLineStart = null;
 
     /**
-     * Mirrors {@link net.minecraft.client.gui.Gui#renderSpyglassOverlay}
+     * Mirrors {@link net.minecraft.client.gui.Gui#renderSpyglassOverla}
      */
     public static void render(GuiGraphics guiGraphics, float scopeScale) {
         handleMouseState();
@@ -510,15 +510,16 @@ public class RenderAstrolabeOverlay {
         return Math.abs(center.x() - x) <= maxDistance && Math.abs(center.y() - y) <= maxDistance;
     }
 
-    public static boolean astrolabeMouseScroll(Screen screen, double mouseX, double mouseY, double scrollX, double scrollY) {
-        if (!Minecraft.getInstance().options.getCameraType().isFirstPerson()) return true;
+    public static void astrolabeMouseScroll(double scrollX, double scrollY, AtomicBoolean cancelled) {
+        if (!Minecraft.getInstance().options.getCameraType().isFirstPerson()) return;
         if (isDrawing()) {
             // event.setCanceled(true);
-            return false; // No adjusting angle while drawing
+            cancelled.set(true);
+            return; // No adjusting angle while drawing
         }
 
         Player player = Minecraft.getInstance().player;
-        if (player == null) return true;
+        if (player == null) return;
 
         if (player.isScoping() && player.getUseItem().is(ItemsAS.ASTROLABE)) {
             AstrolabeAngleComponent cmp = player.getUseItem().getOrDefault(DataComponentsAS.ASTROLABE_ANGLE, AstrolabeAngleComponent.DEFAULT);
@@ -526,9 +527,8 @@ public class RenderAstrolabeOverlay {
             player.getUseItem().set(DataComponentsAS.ASTROLABE_ANGLE, new AstrolabeAngleComponent(adjustedAngle, cmp.matchesAll()));
             PacketDistributor.sendToServer(PktAdjustAstrolabeAngle.adjustAngle(adjustedAngle));
             // event.setCanceled(true);
-            return false;
+            cancelled.set(true);
         }
-        return true;
     }
 
     public static void overrideFov(Minecraft client) {

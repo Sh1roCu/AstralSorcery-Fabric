@@ -65,8 +65,6 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.TooltipComponentCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
@@ -182,9 +180,6 @@ public class ClientProxy extends CommonProxy {
         ClientTickEvents.END_CLIENT_TICK.register(client -> this.effectTasks.onClientTick());
         ClientTickEvents.END_CLIENT_TICK.register(EffectHandler.getInstance()::tick);
         ClientTickEvents.END_CLIENT_TICK.register(ScreenEffectTicketManager.getInstance()::tick);
-        ScreenEvents.BEFORE_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
-            ScreenMouseEvents.allowMouseScroll(screen).register(RenderAstrolabeOverlay::astrolabeMouseScroll);
-        });
         ClientTickEvents.START_CLIENT_TICK.register(RenderAstrolabeOverlay::overrideFov);
         ClientTickEvents.START_CLIENT_TICK.register(FocalPointEffectHelper::onClientTick);
         ClientTickEvents.START_CLIENT_TICK.register(CameraManager.getInstance()::onClientTick);
