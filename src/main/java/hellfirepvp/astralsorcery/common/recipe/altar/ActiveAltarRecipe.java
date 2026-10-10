@@ -312,7 +312,7 @@ public class ActiveAltarRecipe extends ActiveRecipe<AltarRecipe> {
             if ((altar.getTileData().getTicksExisted() + 10) % 40 == 0) {
                 FluidStack drawn = this.drawnFluid.getOrDefault(fluidIndex, FluidStack.EMPTY);
 
-                long amtRequired = Math.min(250L, fluid.getAmount() - drawn.getAmount());
+                long amtRequired = Math.min(250 * 81L, fluid.getAmount() - drawn.getAmount());
                 FluidStack requested = fluid.copyWithAmount(amtRequired);
                 input.fluidDrawInstance.update(level, altarPos, requested);
                 if (input.fluidDrawInstance.consumeLiquid(level, altarPos, requested, true)) {

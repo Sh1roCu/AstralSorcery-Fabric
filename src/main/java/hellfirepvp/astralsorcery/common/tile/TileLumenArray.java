@@ -245,7 +245,8 @@ public class TileLumenArray extends TileEntityTick<TileLumenArray.Data> implemen
             starlightConsumptions = Math.max(lumenGenerationAttempts > 0 ? 1 : 0, Mth.ceil(starlightConsumptions * this.activeRecipe.getAttemptStarlightConsumption()));
             if (starlightConsumptions > 0) {
                 FluidStack newStarlight = starlight.copy();
-                newStarlight.shrink(starlightConsumptions);
+                // Fabric: mB->d
+                newStarlight.shrink(starlightConsumptions * 81L);
                 this.getTileData().getFluidContents().getTank(0).setContent(newStarlight);
                 this.getTileData().markForUpdate();
             }
