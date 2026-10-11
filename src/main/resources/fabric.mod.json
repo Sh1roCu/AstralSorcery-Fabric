@@ -24,6 +24,9 @@
     ],
     "jei_mod_plugin": [
       "hellfirepvp.astralsorcery.common.integration.jei.ASJeiPlugin"
+    ],
+    "jade": [
+      "hellfirepvp.astralsorcery.common.integration.jade.ASJadePlugin"
     ]
   },
   "mixins": [
