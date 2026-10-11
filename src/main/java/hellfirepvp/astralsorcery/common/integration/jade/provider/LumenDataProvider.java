@@ -3,13 +3,11 @@ package hellfirepvp.astralsorcery.common.integration.jade.provider;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.ClientProxy;
 import hellfirepvp.astralsorcery.common.lumen.ILumenHandler;
-import hellfirepvp.astralsorcery.common.lumen.Lumen;
 import hellfirepvp.astralsorcery.common.lumen.LumenStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
@@ -45,7 +43,6 @@ public enum LumenDataProvider implements IBlockComponentProvider, IServerDataPro
                     tooltip.add(helper.progress((float) amount / capacity, text, style, BoxStyle.getNestedBox(), true));
                 });
             }
-
         }
     }
 
