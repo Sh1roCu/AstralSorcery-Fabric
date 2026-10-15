@@ -1,12 +1,16 @@
 package cn.sh1rocu.astralsorcery.mixin.common;
 
 import cn.sh1rocu.astralsorcery.api.event.EntityJoinLevelEvent;
+import cn.sh1rocu.astralsorcery.api.event.EntityTickEvent;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.WritableLevelData;
@@ -29,5 +33,15 @@ public abstract class ServerLevelMixin extends Level {
         EntityJoinLevelEvent.EVENT.invoker().post(event);
         if (event.isCanceled())
             ci.cancel();
+    }
+
+    @WrapOperation(method = "tickNonPassenger", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;tick()V"))
+    private void as$preEntityTick(Entity instance, Operation<Void> original) {
+        var preEvent = new EntityTickEvent.Pre(instance);
+        EntityTickEvent.PRE.invoker().post(preEvent);
+        if (!preEvent.isCanceled()) {
+            original.call(instance);
+            EntityTickEvent.POST.invoker().post(new EntityTickEvent.Post(instance));
+        }
     }
 }

@@ -8,7 +8,6 @@
 
 package hellfirepvp.astralsorcery.common.util.tick;
 
-
 import net.minecraft.server.MinecraftServer;
 
 /**

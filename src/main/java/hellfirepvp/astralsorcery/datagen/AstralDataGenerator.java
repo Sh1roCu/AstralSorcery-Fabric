@@ -57,6 +57,7 @@ public class AstralDataGenerator {
         pack.addProvider(AstralFluidTagsProvider::new);
         pack.addProvider(AstralBlockTagsProvider::new);
         pack.addProvider(AstralItemTagsProvider::new);
+        pack.addProvider(AstralBlockEntityTagsProvider::new);
         pack.addProvider(AstralBiomeTagsProvider::new);
         pack.addProvider(AstralEntityTagsProvider::new);
         pack.addProvider(AstralConstellationTagsProvider::new);

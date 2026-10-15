@@ -1,10 +1,13 @@
 package cn.sh1rocu.astralsorcery.mixin.common;
 
+import cn.sh1rocu.astralsorcery.api.event.EntityTickEvent;
 import cn.sh1rocu.astralsorcery.api.extension.IEntityPersistentData;
 import cn.sh1rocu.astralsorcery.api.extension.IRunningEffectsBlock;
 import com.llamalad7.mixinextras.expression.Definition;
 import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -36,7 +39,7 @@ public abstract class EntityMixin implements IEntityPersistentData {
         return original && !(state.getBlock() instanceof IRunningEffectsBlock custom &&
                 custom.addRunningEffects(state, this.level, pos, (Entity) (Object) this));
     }
-    
+
     @Unique
     private CompoundTag as$persistentData;
 
@@ -63,4 +66,13 @@ public abstract class EntityMixin implements IEntityPersistentData {
         }
     }
 
+    @WrapOperation(method = "rideTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;tick()V"))
+    private void as$onEntityTick(Entity instance, Operation<Void> original) {
+        var preEvent = new EntityTickEvent.Pre(instance);
+        EntityTickEvent.PRE.invoker().post(preEvent);
+        if (!preEvent.isCanceled()) {
+            original.call(instance);
+            EntityTickEvent.POST.invoker().post(new EntityTickEvent.Post(instance));
+        }
+    }
 }

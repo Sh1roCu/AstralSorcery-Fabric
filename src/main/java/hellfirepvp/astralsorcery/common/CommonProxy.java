@@ -21,6 +21,7 @@ import hellfirepvp.astralsorcery.common.config.json.JsonConfigurationManager;
 import hellfirepvp.astralsorcery.common.config.json.data.AmuletEnchantmentDataRegistry;
 import hellfirepvp.astralsorcery.common.config.json.data.KnownTreeRegistry;
 import hellfirepvp.astralsorcery.common.config.json.data.PerkGemModifierRegistry;
+import hellfirepvp.astralsorcery.common.config.json.data.TileTickManipulationRegistry;
 import hellfirepvp.astralsorcery.common.config.server.*;
 import hellfirepvp.astralsorcery.common.constellation.level.LevelSkyHandler;
 import hellfirepvp.astralsorcery.common.data.sync.SyncDataManager;
@@ -68,6 +69,7 @@ import hellfirepvp.astralsorcery.common.starlight.transmission.StarlightTransmis
 import hellfirepvp.astralsorcery.common.tile.TileTreeBeacon;
 import hellfirepvp.astralsorcery.common.util.TreeGrowUtil;
 import hellfirepvp.astralsorcery.common.util.listener.ServerLifecycleListener;
+import hellfirepvp.astralsorcery.common.util.time.TimeStopController;
 import hellfirepvp.astralsorcery.common.visual.VisualEffectTypes;
 import hellfirepvp.observerlib.common.event.BlockChangeNotifier;
 import net.fabricmc.api.EnvType;
@@ -157,6 +159,7 @@ public class CommonProxy {
         JsonConfigurationManager.getInstance().addRegistry("amulet_enchantments", AmuletEnchantmentDataRegistry.getInstance());
         JsonConfigurationManager.getInstance().addRegistry("perk_gem_modifiers", PerkGemModifierRegistry.getInstance());
         JsonConfigurationManager.getInstance().addRegistry("known_trees", KnownTreeRegistry.getInstance());
+        JsonConfigurationManager.getInstance().addRegistry("tile_manipulation_blacklist", TileTickManipulationRegistry.getInstance());
     }
 
     public void initLifecycle() {
@@ -201,6 +204,7 @@ public class CommonProxy {
         LinkSessionHelper.attachEventListeners();
         StarlightTransmissionLevelHelper.getInstance().attachEventListeners();
         TreeGrowUtil.attachEventListeners();
+        TimeStopController.attachEventListeners();
         CelestialGatewaySyncData.attachListeners();
         PatreonManager.attachListeners();
         LumenBindingHitAddEffectEffect.attachEventListeners();
@@ -210,7 +214,6 @@ public class CommonProxy {
         LumenBindingDamageBurstEffect.attachEventListeners();
         LumenBindingExtendMobEffectsEffect.attachEventListeners();
         LumenBindingAoeCropGrowthEffect.attachEventListeners();
-        LumenBindingProjectileAccuracyEffect.attachEventListeners();
         LumenBindingUsageBlockBreak.attachEventListeners();
         LumenBindingUsageDamageDealt.attachEventListeners();
         LumenBindingUsageDamageTaken.attachEventListeners();

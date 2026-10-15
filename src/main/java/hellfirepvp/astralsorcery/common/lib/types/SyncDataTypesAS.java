@@ -13,14 +13,8 @@ import hellfirepvp.astralsorcery.common.data.sync.ClientData;
 import hellfirepvp.astralsorcery.common.data.sync.ClientSyncData;
 import hellfirepvp.astralsorcery.common.data.sync.ClientSyncDiffData;
 import hellfirepvp.astralsorcery.common.data.sync.SyncData;
-import hellfirepvp.astralsorcery.common.data.sync.client.CelestialGatewayClientData;
-import hellfirepvp.astralsorcery.common.data.sync.client.FocalPointClientData;
-import hellfirepvp.astralsorcery.common.data.sync.client.LightConnectionClientData;
-import hellfirepvp.astralsorcery.common.data.sync.client.PatreonEntityClientData;
-import hellfirepvp.astralsorcery.common.data.sync.server.CelestialGatewaySyncData;
-import hellfirepvp.astralsorcery.common.data.sync.server.FocalPointSyncData;
-import hellfirepvp.astralsorcery.common.data.sync.server.LightConnectionSyncData;
-import hellfirepvp.astralsorcery.common.data.sync.server.PatreonEntitySyncData;
+import hellfirepvp.astralsorcery.common.data.sync.client.*;
+import hellfirepvp.astralsorcery.common.data.sync.server.*;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import net.minecraft.core.Registry;
 
@@ -55,6 +49,14 @@ public class SyncDataTypesAS {
             register("patreon_entity", () ->
                     new SyncData.Type<>(PatreonEntitySyncData::new, PatreonEntityClientData::new,
                             PatreonEntitySyncData.ClientSync.STREAM_CODEC, PatreonEntitySyncData.ClientDiffSync.STREAM_CODEC));
+    public static final SyncData.Type<TimeStopEntitySyncData, TimeStopEntitySyncData.ClientSync, TimeStopEntitySyncData.ClientDiffSync, TimeStopEntityClientData> TIME_STOP_ENTITIES =
+            register("time_stop_entities", () ->
+                    new SyncData.Type<>(TimeStopEntitySyncData::new, TimeStopEntityClientData::new,
+                            TimeStopEntitySyncData.ClientSync.STREAM_CODEC, TimeStopEntitySyncData.ClientDiffSync.STREAM_CODEC));
+    public static final SyncData.Type<TimeStopZoneSyncData, TimeStopZoneSyncData.ClientSync, TimeStopZoneSyncData.ClientDiffSync, TimeStopZoneClientData> TIME_STOP_ZONES =
+            register("time_stop_zones", () ->
+                    new SyncData.Type<>(TimeStopZoneSyncData::new, TimeStopZoneClientData::new,
+                            TimeStopZoneSyncData.ClientSync.STREAM_CODEC, TimeStopZoneSyncData.ClientDiffSync.STREAM_CODEC));
 
     private static <D extends SyncData<SA, SD, C>, SA extends ClientSyncData<C>, SD extends ClientSyncDiffData<C>, C extends ClientData>
     SyncData.Type<D, SA, SD, C> register(String name, Supplier<SyncData.Type<D, SA, SD, C>> supplier) {

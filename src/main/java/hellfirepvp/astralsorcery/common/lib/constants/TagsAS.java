@@ -19,6 +19,7 @@ import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -62,6 +63,13 @@ public class TagsAS {
         public static final TagKey<Item> FUNCTIONAL_PERKTREE_SOCKETABLE_ITEM = itemTag("functional_perktree_socketable_item");
 
         public static final TagKey<Item> CURIOS_NECKLACE = TagKey.create(Registries.ITEM, Mods.TRINKETS.key("necklace"));
+
+    }
+
+    public static class BlockEntity {
+
+        public static final TagKey<BlockEntityType<?>> MAY_NOT_TICK_MANIPULATE =
+                TagKey.create(Registries.BLOCK_ENTITY_TYPE, AstralSorcery.key("may_not_tick_manipulate"));
 
     }
 

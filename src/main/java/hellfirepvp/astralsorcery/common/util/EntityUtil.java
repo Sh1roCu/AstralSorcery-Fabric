@@ -12,9 +12,6 @@ import cn.sh1rocu.observerlib.ObserverLibFabric;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
-import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -30,7 +27,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 
 /**
@@ -41,8 +41,6 @@ import java.util.function.Function;
  * Date: 07.09.2026 / 10:00
  */
 public class EntityUtil {
-
-    private static final Random rand = new Random();
 
     public static Optional<Player> getPlayer(UUID playerUUID, EnvType side) {
         return side == EnvType.CLIENT ? getPlayerClient(playerUUID) : getPlayerServer(playerUUID);
