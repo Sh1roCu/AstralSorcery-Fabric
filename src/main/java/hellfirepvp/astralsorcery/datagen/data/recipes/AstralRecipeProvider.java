@@ -45,14 +45,14 @@ public class AstralRecipeProvider extends FabricRecipeProvider {
     public void buildRecipes(RecipeOutput recipeOutput) {
         recipeOutput = new GeneratedRecipeBuffer.BufferedRecipeOutput(recipeOutput, this.registries);
 
-        AltarRecipeProvider.registerRecipes(recipeOutput);
+        AltarRecipeProvider.registerRecipes(recipeOutput, this.registries);
         FocalCombineRecipeProvider.registerRecipes(recipeOutput);
         FocalTransmutationRecipeProvider.registerRecipes(recipeOutput);
         LumenGenerationRecipeProvider.registerRecipes(recipeOutput);
         LumenCrystallizationRecipeProvider.registerRecipes(recipeOutput);
         LightwellRecipeProvider.registerRecipes(recipeOutput);
         InfusionRecipeProvider.registerRecipes(recipeOutput);
-        LiquidStarlightRecipeProvider.registerRecipes(recipeOutput);
+        LiquidStarlightRecipeProvider.registerRecipes(recipeOutput, this.registries);
         LiquidInteractionRecipeProvider.registerRecipes(recipeOutput);
 
         VanillaRecipeProvider.registerCraftingRecipes(recipeOutput);

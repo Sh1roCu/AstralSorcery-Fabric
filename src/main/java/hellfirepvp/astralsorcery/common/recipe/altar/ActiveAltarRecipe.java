@@ -195,7 +195,7 @@ public class ActiveAltarRecipe extends ActiveRecipe<AltarRecipe> {
         });
     }
 
-    public void tickTrackAdditionalInputs(TileAltar altar, ServerLevel level, BlockPos altarPos, Map<BaseConstellation, Float> aggregateStarlight) {
+    public void tickTrackAdditionalInputs(TileAltar altar, ServerLevel level, BlockPos altarPos, Set<BaseConstellation> starlight) {
         AltarRecipe recipe = this.getRecipe(level).orElse(null);
         if (recipe == null) return;
 
@@ -446,8 +446,7 @@ public class ActiveAltarRecipe extends ActiveRecipe<AltarRecipe> {
         }
 
         for (BaseConstellation cst : recipe.getRequiredStarlight()) {
-            float available = aggregateStarlight.getOrDefault(cst, 0F);
-            if (available <= 0) {
+            if (!starlight.contains(cst)) {
                 valid = false;
                 break;
             }

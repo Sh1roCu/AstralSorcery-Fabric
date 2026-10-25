@@ -14,6 +14,7 @@ import hellfirepvp.astralsorcery.common.perk.type.base.PerkAttributeType;
 import hellfirepvp.astralsorcery.common.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.util.DamageUtil;
+import hellfirepvp.astralsorcery.common.util.FlagExecutor;
 import hellfirepvp.astralsorcery.common.util.SidedHelper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -41,6 +42,7 @@ public class AttributeTypeDamageReflect extends PerkAttributeType {
     }
 
     private void onDamageTaken(LivingEntity entity, DamageSource source, float baseDamageTaken, float damageTaken, boolean blocked) {
+        if (FlagExecutor.isFlagSet(FlagExecutor.Flag.DAMAGE_REFLECT_ATTACK)) return;
         if (!(source.getEntity() instanceof LivingEntity attacker)) return;
         if (!(entity instanceof Player player)) return;
         EnvType side = SidedHelper.getSide(player);
@@ -56,8 +58,10 @@ public class AttributeTypeDamageReflect extends PerkAttributeType {
         float damageToReflect = damageTaken * reflectPercent;
         if (damageToReflect <= 0) return;
 
-        DamageUtil.shotgunAttack(attacker, e -> {
-            e.hurt(e.level().damageSources().thorns(player), damageToReflect);
+        FlagExecutor.run(FlagExecutor.Flag.DAMAGE_REFLECT_ATTACK, () -> {
+            DamageUtil.shotgunAttack(attacker, e -> {
+                e.hurt(e.level().damageSources().thorns(player), damageToReflect);
+            });
         });
     }
 }

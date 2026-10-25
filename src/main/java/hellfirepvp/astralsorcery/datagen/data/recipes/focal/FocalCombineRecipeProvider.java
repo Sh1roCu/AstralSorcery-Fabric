@@ -12,12 +12,12 @@ import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.ConstellationsAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
+import hellfirepvp.astralsorcery.common.lib.constants.TagsAS;
 import hellfirepvp.astralsorcery.common.recipe.builder.FocalCombineRecipeBuilder;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Blocks;
 
@@ -49,15 +49,15 @@ public class FocalCombineRecipeProvider {
                 .color(ColorWrapper.opaque(0x22BBFF))
                 .input(Ingredient.of(BlocksAS.MARBLE_RAW))
                 .input(Ingredient.of(BlocksAS.MARBLE_RAW))
-                .input(Ingredient.of(ItemsAS.AQUAMARINE))
-                .input(Ingredient.of(ItemsAS.AQUAMARINE))
+                .input(Ingredient.of(TagsAS.Items.GEMS_AQUAMARINE))
+                .input(Ingredient.of(TagsAS.Items.GEMS_AQUAMARINE))
                 .input(Ingredient.of(ConventionalItemTags.ENDER_PEARLS))
                 .outputs(ItemsAS.WAND)
                 .save(recipeOutput);
         FocalCombineRecipeBuilder.builder()
                 .duration(seconds(100))
                 .color(ColorsAS.STARMETAL)
-                .input(Ingredient.of(Items.RAW_IRON))
+                .input(Ingredient.of(ConventionalItemTags.IRON_RAW_MATERIALS))
                 .outputs(ItemsAS.RAW_STARMETAL)
                 .save(recipeOutput);
         FocalCombineRecipeBuilder.builder()

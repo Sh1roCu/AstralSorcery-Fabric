@@ -26,6 +26,8 @@ import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.Level;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import static hellfirepvp.astralsorcery.common.lib.constants.ColorsAS.*;
@@ -38,6 +40,8 @@ import static hellfirepvp.astralsorcery.common.lib.constants.ColorsAS.*;
  * Date: 07.09.2026 / 10:00
  */
 public class InitConstellations {
+
+    public static final Set<BaseConstellation> REGISTERED_CONSTELLATIONS = new HashSet<>();
 
     // ARA/Ara
     public static BaseConstellation aevitas() {
@@ -362,6 +366,8 @@ public class InitConstellations {
     }
 
     private static BaseConstellation register(String name, Supplier<BaseConstellation> supplier) {
-        return Registry.register(RegistriesAS.REGISTRY_CONSTELLATIONS, AstralSorcery.key(name), supplier.get());
+        var constellation = Registry.register(RegistriesAS.REGISTRY_CONSTELLATIONS, AstralSorcery.key(name), supplier.get());
+        REGISTERED_CONSTELLATIONS.add(constellation);
+        return constellation;
     }
 }

@@ -22,6 +22,8 @@ import net.minecraft.resources.ResourceKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Supplier;
 
 /**
@@ -35,6 +37,8 @@ public class LumenAS {
     public static void init() {
 
     }
+
+    public static final Set<DeferredLumen> REGISTERED_LUMEN = new HashSet<>();
 
     public static final DeferredLumen NONE = registerSimple("none", ColorWrapper.WHITE);
 
@@ -66,7 +70,9 @@ public class LumenAS {
 
     private static <T extends Lumen> DeferredLumen register(String name, Supplier<T> supplier) {
         Lumen lumen = Registry.register(RegistriesAS.REGISTRY_LUMEN, AstralSorcery.key(name), supplier.get());
-        return new DeferredLumen(lumen.getRegistryKey().orElseThrow());
+        var result = new DeferredLumen(lumen.getRegistryKey().orElseThrow());
+        REGISTERED_LUMEN.add(result);
+        return result;
     }
 
     public static class DeferredLumen implements LumenLike {

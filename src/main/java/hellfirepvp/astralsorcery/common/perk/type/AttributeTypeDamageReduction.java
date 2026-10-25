@@ -55,7 +55,7 @@ public class AttributeTypeDamageReduction extends PerkAttributeType {
             float result = newAmount;
 
             reduction = Mth.clamp(1F - reduction, 0F, 1F);
-            result = newAmount * reduction;
+            result = newAmount - newAmount * reduction;
 
             return result;
         }

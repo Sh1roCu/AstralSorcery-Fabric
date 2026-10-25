@@ -25,10 +25,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.random.Weight;
+import net.minecraft.util.random.WeightedEntry;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -148,6 +151,14 @@ public class CodecUtil {
                         leftCodec.decode(buf),
                         rightCodec.decode(buf)
                 )
+        );
+    }
+
+    public static <B extends ByteBuf, T> StreamCodec<B, WeightedEntry.Wrapper<T>> weightedEntryCodec(StreamCodec<B, T> entryCodec) {
+        return StreamCodec.composite(
+                entryCodec, WeightedEntry.Wrapper::data,
+                ByteBufCodecs.INT, wrapper -> wrapper.weight().asInt(),
+                (data, weight) -> new WeightedEntry.Wrapper<>(data, Weight.of(weight))
         );
     }
 

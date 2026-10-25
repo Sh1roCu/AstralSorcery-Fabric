@@ -33,20 +33,32 @@ public class AstralItemTagsProvider extends FabricTagProvider.ItemTagProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider provider) {
+        copy(TagsAS.Blocks.ORES_STARMETAL, TagsAS.Items.ORES_STARMETAL);
+        copy(TagsAS.Blocks.STORAGE_BLOCKS_RAW_STARMETAL, TagsAS.Items.STORAGE_BLOCKS_RAW_STARMETAL);
         copy(TagsAS.Blocks.INFUSED_WOOD, TagsAS.Items.INFUSED_WOOD);
         copy(TagsAS.Blocks.MARBLE, TagsAS.Items.MARBLE);
         copy(TagsAS.Blocks.SOOTY_MARBLE, TagsAS.Items.SOOTY_MARBLE);
+
+        getOrCreateTagBuilder(ConventionalItemTags.GEMS)
+                .addTag(TagsAS.Items.GEMS_AQUAMARINE);
         getOrCreateTagBuilder(TagsAS.Items.GEMS_AQUAMARINE)
                 .add(ItemsAS.AQUAMARINE.asItem());
+
+        getOrCreateTagBuilder(ConventionalItemTags.INGOTS)
+                .addTag(TagsAS.Items.INGOTS_STARMETAL);
+        getOrCreateTagBuilder(TagsAS.Items.INGOTS_STARMETAL)
+                .add(ItemsAS.STARMETAL_INGOT.asItem());
         getOrCreateTagBuilder(ConventionalItemTags.RAW_MATERIALS)
+                .addTag(TagsAS.Items.RAW_MATERIALS_STARMETAL);
+        getOrCreateTagBuilder(TagsAS.Items.RAW_MATERIALS_STARMETAL)
                 .add(ItemsAS.RAW_STARMETAL.asItem());
 
         getOrCreateTagBuilder(ItemTags.LECTERN_BOOKS)
                 .add(ItemsAS.TOME.asItem());
 
         getOrCreateTagBuilder(TagsAS.Items.CRYSTAL)
-                .forceAddTag(TagsAS.Items.CELESTIAL_CRYSTAL)
-                .forceAddTag(TagsAS.Items.ATTUNED_CRYSTAL)
+                .addTag(TagsAS.Items.CELESTIAL_CRYSTAL)
+                .addTag(TagsAS.Items.ATTUNED_CRYSTAL)
                 .add(ItemsAS.ROCK_CRYSTAL.asItem());
         getOrCreateTagBuilder(TagsAS.Items.CELESTIAL_CRYSTAL)
                 .add(ItemsAS.CELESTIAL_CRYSTAL.asItem())
@@ -59,7 +71,7 @@ public class AstralItemTagsProvider extends FabricTagProvider.ItemTagProvider {
                 .add(ItemsAS.ATTUNED_CELESTIAL_CRYSTAL.asItem());
 
         getOrCreateTagBuilder(TagsAS.Items.FUNCTIONAL_ALTAR_CONSTELLATION_ITEM)
-                .forceAddTag(TagsAS.Items.ATTUNED_CRYSTAL);
+                .addTag(TagsAS.Items.ATTUNED_CRYSTAL);
         getOrCreateTagBuilder(TagsAS.Items.FUNCTIONAL_ATTUNEABLE_ITEM)
                 .add(ItemsAS.ROCK_CRYSTAL.asItem())
                 .add(ItemsAS.CELESTIAL_CRYSTAL.asItem());

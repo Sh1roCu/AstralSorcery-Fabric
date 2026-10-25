@@ -14,6 +14,7 @@ import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
 import hellfirepvp.astralsorcery.common.lib.constants.TagsAS;
 import hellfirepvp.astralsorcery.common.recipe.builder.LightwellRecipeBuilder;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -29,7 +30,7 @@ import net.minecraft.world.level.material.Fluids;
 public class LightwellRecipeProvider {
 
     public static void registerRecipes(RecipeOutput recipeOutput) {
-        LightwellRecipeBuilder.builder(Ingredient.of(ItemsAS.AQUAMARINE), FluidsAS.LIQUID_STARLIGHT.getSource(), "_aquamarine")
+        LightwellRecipeBuilder.builder(Ingredient.of(TagsAS.Items.GEMS_AQUAMARINE), FluidsAS.LIQUID_STARLIGHT.getSource(), "_aquamarine")
                 .color(ColorWrapper.opaque(0x00A7FF))
                 .productionMultiplier(0.35F)
                 .shatterMultiplier(0.15F)
@@ -56,7 +57,7 @@ public class LightwellRecipeProvider {
                 .productionMultiplier(0.8F)
                 .shatterMultiplier(0.05F)
                 .save(recipeOutput);
-        LightwellRecipeBuilder.builder(Ingredient.of(Items.NETHERRACK), Fluids.LAVA, "_netherrack")
+        LightwellRecipeBuilder.builder(Ingredient.of(ConventionalItemTags.NETHERRACKS), Fluids.LAVA, "_netherrack")
                 .color(ColorWrapper.opaque(0xFF350C))
                 .productionMultiplier(0.4F)
                 .shatterMultiplier(0.04F)

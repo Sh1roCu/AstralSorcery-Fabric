@@ -12,6 +12,7 @@ import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.ConstellationsAS;
 import hellfirepvp.astralsorcery.common.lib.constants.ColorsAS;
 import hellfirepvp.astralsorcery.common.recipe.builder.FocalTransmutationRecipeBuilder;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
@@ -36,7 +37,7 @@ public class FocalTransmutationRecipeProvider {
                 .duration(seconds(20))
                 .color(ColorsAS.STARMETAL)
                 .outputs(BlocksAS.STARMETAL_ORE, 1)
-                .input(BlockPredicate.matchesTag(BlockTags.IRON_ORES))
+                .input(BlockPredicate.matchesTag(ConventionalBlockTags.IRON_ORES))
                 .inputDisplay(Blocks.IRON_ORE)
                 .save(recipeOutput);
 
@@ -94,7 +95,7 @@ public class FocalTransmutationRecipeProvider {
                 .color(ColorsAS.DYE_LIGHT_GRAY)
                 .outputs(Blocks.CLAY, 1)
                 .inputDisplay(Items.SAND)
-                .input(BlockPredicate.matchesTag(BlockTags.SAND))
+                .input(BlockPredicate.matchesTag(ConventionalBlockTags.SANDS))
                 .requiresFocusedStarlight()
                 .save(recipeOutput);
         FocalTransmutationRecipeBuilder.builder()
@@ -102,7 +103,7 @@ public class FocalTransmutationRecipeProvider {
                 .color(ColorsAS.DYE_YELLOW)
                 .outputs(Blocks.END_STONE, 1)
                 .inputDisplay(Items.SANDSTONE)
-                .input(BlockPredicate.matchesBlocks(Blocks.SANDSTONE))
+                .input(BlockPredicate.matchesTag(ConventionalBlockTags.SANDSTONE_BLOCKS))
                 .requiresFocusedStarlight()
                 .save(recipeOutput);
         FocalTransmutationRecipeBuilder.builder()
@@ -110,7 +111,7 @@ public class FocalTransmutationRecipeProvider {
                 .color(ColorsAS.DYE_LIME)
                 .outputs(Blocks.EMERALD_ORE, 1)
                 .inputDisplay(Items.DIAMOND_ORE)
-                .input(BlockPredicate.matchesBlocks(Blocks.DIAMOND_ORE))
+                .input(BlockPredicate.matchesTag(ConventionalBlockTags.DIAMOND_ORES))
                 .requiresFocusedStarlight()
                 .save(recipeOutput);
         FocalTransmutationRecipeBuilder.builder()
@@ -118,7 +119,7 @@ public class FocalTransmutationRecipeProvider {
                 .color(ColorsAS.DYE_WHITE)
                 .outputs(Blocks.CAKE, 1)
                 .inputDisplay(Items.PUMPKIN)
-                .input(BlockPredicate.matchesBlocks(Blocks.PUMPKIN))
+                .input(BlockPredicate.matchesTag(ConventionalBlockTags.NORMAL_PUMPKINS))
                 .requiresFocusedStarlight()
                 .save(recipeOutput);
     }

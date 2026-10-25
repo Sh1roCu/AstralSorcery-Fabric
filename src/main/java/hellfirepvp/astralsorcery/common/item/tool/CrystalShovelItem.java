@@ -49,7 +49,7 @@ public class CrystalShovelItem extends ShovelItem implements CrystalToolItem, IM
     }
 
     @Override
-    public void reApplyModifiers(ItemStack stack) {
+    public void reApplyAttackModifiers(ItemStack stack) {
     }
 
     @Override

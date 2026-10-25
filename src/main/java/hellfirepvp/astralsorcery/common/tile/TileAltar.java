@@ -92,7 +92,7 @@ public class TileAltar extends TileEntityNetwork<ForwardingStarlightReceiverNode
     private static final List<Integer> INNER_RELAY_SLOTS = List.of(6, 7, 8, 11, 13, 16, 17, 18);
     private static final List<Integer> OUTER_RELAY_SLOTS = IntStream.range(0, 25).filter(i -> i != 12 && !INNER_RELAY_SLOTS.contains(i)).boxed().toList();
 
-    private final Map<BaseConstellation, Float> aggregateStarlight = new HashMap<>();
+    private final Map<BaseConstellation, Integer> aggregateStarlight = new HashMap<>();
     private final ClientObject<PlayableSoundInstance> craftingSound = new ClientObject<>();
     private final ClientObject<PlayableSoundInstance> craftingWaitSound = new ClientObject<>();
 
@@ -147,7 +147,7 @@ public class TileAltar extends TileEntityNetwork<ForwardingStarlightReceiverNode
                 return;
             }
 
-            activeRecipe.tickTrackAdditionalInputs(this, level, this.getBlockPos(), this.aggregateStarlight);
+            activeRecipe.tickTrackAdditionalInputs(this, level, this.getBlockPos(), this.aggregateStarlight.keySet());
             activeRecipe.tick(level);
 
             if (activeRecipe.isFinished(level) && activeRecipe.consumeItemInputs(this.getTileData(), level, this.getBlockPos(), true)) {
@@ -193,7 +193,7 @@ public class TileAltar extends TileEntityNetwork<ForwardingStarlightReceiverNode
 
     public Optional<RecipeHolder<AltarRecipe>> findMatchingRecipe(Level level, @Nullable UUID playerUUID) {
         AltarCraftingInput input = this.createInput(level, playerUUID);
-        return RecipeFinder.of(level).findAltarRecipe(this.getLevel(), input);
+        return RecipeFinder.of(level).findAltarRecipe(input);
     }
 
     public AltarCraftingInput createInput(Level level, UUID playerUUID) {
@@ -206,13 +206,21 @@ public class TileAltar extends TileEntityNetwork<ForwardingStarlightReceiverNode
     }
 
     private void clearAggregatedStarlight() {
-        this.aggregateStarlight.clear();
+        Set<BaseConstellation> starlightTypes = Set.copyOf(this.aggregateStarlight.keySet());
+        for (BaseConstellation cst : starlightTypes) {
+            int tick = this.aggregateStarlight.getOrDefault(cst, 0);
+            tick--;
+            if (tick <= 0) {
+                this.aggregateStarlight.remove(cst);
+            } else {
+                this.aggregateStarlight.put(cst, tick);
+            }
+        }
     }
 
     @Override
     public void receiveStarlight(ServerLevel sLevel, StarlightTransmissionPacket packet) {
-        float amt = this.aggregateStarlight.getOrDefault(packet.constellation(), 0F);
-        this.aggregateStarlight.put(packet.constellation(), amt + packet.amount());
+        this.aggregateStarlight.put(packet.constellation(), 5);
     }
 
     @Override
@@ -526,6 +534,7 @@ public class TileAltar extends TileEntityNetwork<ForwardingStarlightReceiverNode
         private final ObserverRegistryObject requiredStructure;
         private final Supplier<ItemLike> altarItemSupplier;
         private final VoxelShape shape;
+        private final VoxelShape collisionShape;
         private final ContainerAltar.Type containerType;
 
         AltarType(ResearchTier requiredTier,
@@ -537,6 +546,7 @@ public class TileAltar extends TileEntityNetwork<ForwardingStarlightReceiverNode
             this.requiredStructure = requiredStructure;
             this.altarItemSupplier = altarItemSupplier;
             this.shape = shape;
+            this.collisionShape = Shapes.box(0, 0, 0, 1, shape.max(Direction.Axis.Y), 1);
             this.containerType = containerType;
         }
 
@@ -564,6 +574,10 @@ public class TileAltar extends TileEntityNetwork<ForwardingStarlightReceiverNode
 
         public VoxelShape getShape() {
             return this.shape;
+        }
+
+        public VoxelShape getCollisionShape() {
+            return this.collisionShape;
         }
 
         public ContainerAltar.Type getContainerType() {

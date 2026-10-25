@@ -49,7 +49,7 @@ public class CrystalPickaxeItem extends PickaxeItem implements CrystalToolItem, 
     }
 
     @Override
-    public void reApplyModifiers(ItemStack stack) {
+    public void reApplyAttackModifiers(ItemStack stack) {
     }
 
     @Override

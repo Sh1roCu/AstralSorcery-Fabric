@@ -12,7 +12,6 @@ import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -59,12 +58,9 @@ public class CrystalProperty implements Comparable<CrystalProperty> {
         return this.color;
     }
 
-    public Style getColorStyle() {
-        return Style.EMPTY.withColor(TextColor.fromRgb(this.getColor().getColor()));
-    }
-
-    public MutableComponent getName(int currentTier) {
-        return Component.translatable(this.unlocalizedName.get());
+    public MutableComponent getName(int currentTier, long tick) {
+        return Component.translatable(this.unlocalizedName.get())
+                .withStyle(Style.EMPTY.withColor(TextColor.fromRgb(this.getColor().getColor())));
     }
 
     public String getNameFormat() {

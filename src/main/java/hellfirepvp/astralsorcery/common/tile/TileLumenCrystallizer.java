@@ -109,12 +109,12 @@ public class TileLumenCrystallizer extends TileEntityTick<TileLumenCrystallizer.
 
         if (this.activeRecipe == null) {
             if (!catalyst.isEmpty()) {
-                this.activeRecipe = this.getTileData().findMatchingRecipe(catalyst)
+                this.activeRecipe = this.getTileData().findMatchingRecipe(level, catalyst)
                         .map(RecipeHolder::value)
                         .orElse(null);
             }
             if (cluster != null) {
-                this.activeRecipe = this.getTileData().findMatchingRecipe(cluster.getTileData().getLumen())
+                this.activeRecipe = this.getTileData().findMatchingRecipe(level, cluster.getTileData().getLumen())
                         .map(RecipeHolder::value)
                         .orElse(null);
             }
@@ -343,14 +343,12 @@ public class TileLumenCrystallizer extends TileEntityTick<TileLumenCrystallizer.
             return Iterables.getFirst(this.getLumenContents().getLumenStacks(), LumenStack.EMPTY);
         }
 
-        protected Optional<RecipeHolder<LumenCrystallizationRecipe>> findMatchingRecipe(ItemStack stack) {
-            return RecipeFinder.of()
-                    .flatMap(finder -> finder.findCrystallizationRecipe(stack));
+        protected Optional<RecipeHolder<LumenCrystallizationRecipe>> findMatchingRecipe(Level level, ItemStack stack) {
+            return RecipeFinder.of(level).findCrystallizationRecipe(stack);
         }
 
-        protected Optional<RecipeHolder<LumenCrystallizationRecipe>> findMatchingRecipe(Lumen lumen) {
-            return RecipeFinder.of()
-                    .flatMap(finder -> finder.findCrystallizationRecipe(lumen));
+        protected Optional<RecipeHolder<LumenCrystallizationRecipe>> findMatchingRecipe(Level level, Lumen lumen) {
+            return RecipeFinder.of(level).findCrystallizationRecipe(lumen);
         }
 
         protected FluidTankViewFactory newFluidTank() {
@@ -371,7 +369,7 @@ public class TileLumenCrystallizer extends TileEntityTick<TileLumenCrystallizer.
                     .stackSizeLimiter((slot, stack) -> 1)
                     .extractFilter((amount, existing) -> false)
                     .inputFilter((amount, toAdd) -> {
-                        var match = this.findMatchingRecipe(toAdd.toStack((int) amount));
+                        var match = this.findMatchingRecipe(this.getLevel(), toAdd.toStack((int) amount));
                         return match.isPresent() &&
                                 (this.getContainedLumen().isEmpty() || match.get().value().getLumenToCrystallize().equals(this.getContainedLumen().getLumen()));
                     })

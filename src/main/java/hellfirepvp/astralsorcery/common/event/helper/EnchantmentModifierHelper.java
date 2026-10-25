@@ -12,14 +12,19 @@ import cn.sh1rocu.astralsorcery.api.event.GetEnchantmentLevelEvent;
 import cn.sh1rocu.astralsorcery.api.event.PlayerTickEvent;
 import cn.sh1rocu.astralsorcery.util.neoforge.common.util.LogicalSidedProvider;
 import cn.sh1rocu.observerlib.ObserverLibFabric;
+import com.mojang.datafixers.util.Pair;
 import hellfirepvp.astralsorcery.common.Mods;
 import hellfirepvp.astralsorcery.common.component.EnchantmentModifierComponent;
-import hellfirepvp.astralsorcery.common.component.WeakPlayerReferenceComponent;
 import hellfirepvp.astralsorcery.common.enchantment.CombinedEnchantmentModifiers;
 import hellfirepvp.astralsorcery.common.event.DynamicEnchantmentEvent;
 import hellfirepvp.astralsorcery.common.integration.IntegrationCurios;
+import hellfirepvp.astralsorcery.common.item.base.ItemStackEquipmentReference;
 import hellfirepvp.astralsorcery.common.lib.DataComponentsAS;
 import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.item.v1.EnchantingContext;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -30,6 +35,7 @@ import net.minecraft.world.item.BookItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +64,7 @@ public class EnchantmentModifierHelper {
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             ItemStack stack = event.getEntity().getItemBySlot(slot);
             if (!stack.isEmpty() && canHaveModifiedEnchantments(stack)) {
-                stack.set(DataComponentsAS.WEAK_PLAYER_REFERENCE, new WeakPlayerReferenceComponent(playerId));
+                ItemStackEquipmentReference.setEquipmentReference(stack, playerId, slot);
             }
         }
     }
@@ -82,7 +88,7 @@ public class EnchantmentModifierHelper {
         CombinedEnchantmentModifiers toAdd = getModifiersToApply(hostStack);
 
         toAdd.getAddedToSpecific().forEach((ench, level) -> {
-            if (filter.test(ench)) {
+            if (filter.test(ench) && (hostStack.canBeEnchantedWith(ench, EnchantingContext.ACCEPTABLE) || hostStack.canBeEnchantedWith(ench, EnchantingContext.PRIMARY))) {
                 enchants.set(ench, enchants.getLevel(ench) + level);
             }
         });
@@ -122,33 +128,44 @@ public class EnchantmentModifierHelper {
     }
 
     private static Optional<Player> getPlayer(ItemStack heldTool) {
-        return getPlayerFromToolReference(heldTool).map(player -> {
-            for (EquipmentSlot slot : EquipmentSlot.values()) {
-                ItemStack equipped = player.getItemBySlot(slot);
-                if (ItemStack.isSameItemSameComponents(equipped, heldTool)) {
-                    return player;
-                }
+        return getPlayerFromToolReference(heldTool).map(reference -> {
+            Player player = reference.getFirst();
+            ItemStack equipped = player.getItemBySlot(reference.getSecond());
+            if (ItemStack.isSameItemSameComponents(equipped, heldTool)) {
+                return player;
             }
             return null;
         });
     }
 
-    private static Optional<Player> getPlayerFromToolReference(ItemStack tool) {
-        if (!tool.has(DataComponentsAS.WEAK_PLAYER_REFERENCE)) {
-            return Optional.empty();
-        }
+    private static Optional<Pair<Player, EquipmentSlot>> getPlayerFromToolReference(ItemStack tool) {
+        Pair<UUID, EquipmentSlot> reference = ItemStackEquipmentReference.getEquipmentReference(tool);
+        if (reference == null) return Optional.empty();
 
-        UUID playerId = tool.getOrDefault(DataComponentsAS.WEAK_PLAYER_REFERENCE, WeakPlayerReferenceComponent.NONE).playerUUID();
+        UUID playerId = reference.getFirst();
 
-        //Try server first, then client world lookup
-        MinecraftServer srv = ObserverLibFabric.getServer();
-        if (srv != null) {
-            return Optional.ofNullable(srv.getPlayerList().getPlayer(playerId));
+        EnvType side = FabricLoader.getInstance().getEnvironmentType();
+        if (side == EnvType.SERVER) {
+            MinecraftServer srv = ObserverLibFabric.getServer();
+            if (srv != null && srv.isSameThread()) {
+                return Optional.ofNullable(srv.getPlayerList().getPlayer(playerId))
+                        .map(player -> new Pair<>(player, reference.getSecond()));
+            }
         } else {
-            return LogicalSidedProvider.CLIENTWORLD.get(EnvType.CLIENT).map(level -> {
-                return level.getPlayerByUUID(playerId);
-            });
+            return LogicalSidedProvider.CLIENTWORLD.get(EnvType.CLIENT)
+                    .flatMap(level -> resolveClientReference(level, playerId))
+                    .map(player -> new Pair<>(player, reference.getSecond()));
         }
+
+        return Optional.empty();
+    }
+
+    @Environment(EnvType.CLIENT)
+    private static Optional<Player> resolveClientReference(Level clientLevel, UUID playerId) {
+        if (Minecraft.getInstance().isSameThread()) {
+            return Optional.ofNullable(clientLevel.getPlayerByUUID(playerId));
+        }
+        return Optional.empty();
     }
 
     private static List<ItemStack> findEnchantmentModifiers(Player player) {

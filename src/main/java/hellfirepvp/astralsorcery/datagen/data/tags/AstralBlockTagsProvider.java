@@ -54,11 +54,17 @@ public class AstralBlockTagsProvider extends FabricTagProvider.BlockTagProvider 
                         BlocksAS.MARBLE_RUNED
                 );
         this.getOrCreateTagBuilder(ConventionalBlockTags.ORES)
+                .addTag(TagsAS.Blocks.ORES_STARMETAL)
                 .add(
                         BlocksAS.ROCK_CRYSTAL_ORE,
-                        BlocksAS.AQUAMARINE_SHALE,
-                        BlocksAS.STARMETAL_ORE
+                        BlocksAS.AQUAMARINE_SHALE
                 );
+        this.getOrCreateTagBuilder(TagsAS.Blocks.ORES_STARMETAL)
+                .add(BlocksAS.STARMETAL_ORE);
+        this.getOrCreateTagBuilder(ConventionalBlockTags.STORAGE_BLOCKS)
+                .addTag(TagsAS.Blocks.STORAGE_BLOCKS_RAW_STARMETAL);
+        this.getOrCreateTagBuilder(TagsAS.Blocks.STORAGE_BLOCKS_RAW_STARMETAL)
+                .add(BlocksAS.RAW_STARMETAL_BLOCK);
         this.getOrCreateTagBuilder(TagsAS.Blocks.SOOTY_MARBLE)
                 .add(
                         BlocksAS.SOOTY_MARBLE_ARCH,

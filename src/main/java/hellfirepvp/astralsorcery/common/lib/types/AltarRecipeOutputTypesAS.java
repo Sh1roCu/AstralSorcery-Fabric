@@ -54,6 +54,8 @@ public class AltarRecipeOutputTypesAS {
             register("copy_data_components", () -> AltarOutputCopyDataComponents.TYPE);
     public static final AltarRecipeOutputModifier.Type<AltarOutputSetCrystalCount> SET_CRYSTAL_COUNT =
             register("set_crystal_count", () -> AltarOutputSetCrystalCount.TYPE);
+    public static final AltarRecipeOutputModifier.Type<AltarOutputEngraveLumen> ENGRAVE_LUMEN =
+            register("engrave_lumen", () -> AltarOutputEngraveLumen.TYPE);
 
     private static <T extends AltarRecipeOutputModifier> AltarRecipeOutputModifier.Type<T> register(String name, Supplier<AltarRecipeOutputModifier.Type<T>> supplier) {
         return Registry.register(RegistriesAS.REGISTRY_ALTAR_OUTPUT_MODIFIER_TYPES, AstralSorcery.key(name), supplier.get());

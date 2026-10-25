@@ -27,7 +27,6 @@ import hellfirepvp.astralsorcery.common.tile.base.TileEntityNetwork;
 import hellfirepvp.astralsorcery.common.tile.network.ForwardingStarlightReceiverNode;
 import hellfirepvp.astralsorcery.common.tile.network.provider.ForwardingStarlightReceiverNodeProvider;
 import hellfirepvp.astralsorcery.common.util.RecipeFinder;
-import hellfirepvp.astralsorcery.common.util.RecipeUtil;
 import hellfirepvp.astralsorcery.common.util.ServerSoundHelper;
 import hellfirepvp.astralsorcery.common.util.VectorUtil;
 import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
@@ -106,7 +105,7 @@ public class TileLightwell extends TileEntityNetwork<ForwardingStarlightReceiver
         }
 
         if (this.activeRecipe == null) {
-            this.activeRecipe = RecipeFinder.of(level).findLightwellRecipe(catalyst,this.getTileData().getContainedFluid())
+            this.activeRecipe = this.getTileData().findMatchingRecipe(level, catalyst)
                     .map(RecipeHolder::value)
                     .orElse(null);
         }
@@ -157,7 +156,7 @@ public class TileLightwell extends TileEntityNetwork<ForwardingStarlightReceiver
 
         ItemStack catalyst = this.getTileData().getInventory().getStackInSlot(0);
         if (!catalyst.isEmpty()) {
-            this.getTileData().findMatchingRecipe(catalyst).ifPresent(recipe -> {
+            this.getTileData().findMatchingRecipe(level, catalyst).ifPresent(recipe -> {
                 this.playCatalystEffect(recipe.value().getCatalystColor());
             });
         }
@@ -268,9 +267,8 @@ public class TileLightwell extends TileEntityNetwork<ForwardingStarlightReceiver
             return this.fluidContents.getTank(0).getContent();
         }
 
-        protected Optional<RecipeHolder<LightwellRecipe>> findMatchingRecipe(ItemStack stack) {
-            return RecipeFinder.of()
-                    .flatMap(finder -> finder.findLightwellRecipe(stack, this.getContainedFluid()));
+        protected Optional<RecipeHolder<LightwellRecipe>> findMatchingRecipe(Level level, ItemStack stack) {
+            return RecipeFinder.of(level).findLightwellRecipe(stack, this.getContainedFluid());
         }
 
         protected FluidTankViewFactory newFluidTank() {
@@ -289,7 +287,7 @@ public class TileLightwell extends TileEntityNetwork<ForwardingStarlightReceiver
                     .stackSizeLimiter((slot, stack) -> 1)
                     .extractFilter((amount, existing) -> false)
                     .inputFilter((amount, toAdd) -> {
-                        return this.findMatchingRecipe(toAdd.toStack((int) amount)).isPresent();
+                        return this.findMatchingRecipe(this.getLevel(), toAdd.toStack((int) amount)).isPresent();
                     })
                     .accessibleSides(Direction.DOWN);
         }

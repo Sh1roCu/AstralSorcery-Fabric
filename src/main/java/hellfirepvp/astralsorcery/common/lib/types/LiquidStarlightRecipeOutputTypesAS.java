@@ -42,6 +42,8 @@ public class LiquidStarlightRecipeOutputTypesAS {
             register("bind_lumen", () -> LiquidStarlightOutputBindLumen.TYPE);
     public static final LiquidStarlightRecipeOutputModifier.Type<LiquidStarlightOutputFillLumen> FILL_LUMEN =
             register("fill_lumen", () -> LiquidStarlightOutputFillLumen.TYPE);
+    public static final LiquidStarlightRecipeOutputModifier.Type<LiquidStarlightOutputEngraveLumen> ENGRAVE_LUMEN =
+            register("engrave_lumen", () -> LiquidStarlightOutputEngraveLumen.TYPE);
 
     private static <T extends LiquidStarlightRecipeOutputModifier> LiquidStarlightRecipeOutputModifier.Type<T> register(String name, Supplier<LiquidStarlightRecipeOutputModifier.Type<T>> supplier) {
         return Registry.register(RegistriesAS.REGISTRY_LIQUID_STARLIGHT_OUTPUT_MODIFIER_TYPES, AstralSorcery.key(name), supplier.get());

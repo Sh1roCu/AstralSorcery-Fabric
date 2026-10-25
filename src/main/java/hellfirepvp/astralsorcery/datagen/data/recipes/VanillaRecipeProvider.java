@@ -37,9 +37,9 @@ public class VanillaRecipeProvider {
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ItemsAS.TOME)
                 .pattern("A")
                 .pattern("B")
-                .define('A', ItemsAS.AQUAMARINE)
+                .define('A', TagsAS.Items.GEMS_AQUAMARINE)
                 .define('B', Items.BOOK)
-                .unlockedBy("has_aquamarine", has(ItemsAS.AQUAMARINE))
+                .unlockedBy("has_aquamarine", has(TagsAS.Items.GEMS_AQUAMARINE))
                 .save(recipeOutput);
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ItemsAS.ASTROLABE)
                 .pattern("GGG")
@@ -225,19 +225,12 @@ public class VanillaRecipeProvider {
                 .save(recipeOutput, RecipeBuilder.getDefaultRecipeId(BlocksAS.INFUSED_WOOD_ENGRAVED).withPrefix("infused_wood/"));
         ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, BlocksAS.INFUSED_WOOD_ENRICHED, 5)
                 .pattern(" W ")
-                .pattern("WWW")
-                .pattern(" W ")
-                .define('W', BlocksAS.INFUSED_WOOD_PLANKS)
-                .unlockedBy("has_infused_wood", has(ItemsAS.BLOCK_INFUSED_WOOD_RAW))
-                .save(recipeOutput, RecipeBuilder.getDefaultRecipeId(BlocksAS.INFUSED_WOOD_ENRICHED).withPrefix("infused_wood/"));
-        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, BlocksAS.INFUSED_WOOD_INFUSED, 2)
-                .pattern(" W ")
                 .pattern("WAW")
                 .pattern(" W ")
                 .define('W', BlocksAS.INFUSED_WOOD_PLANKS)
                 .define('A', TagsAS.Items.GEMS_AQUAMARINE)
                 .unlockedBy("has_infused_wood", has(ItemsAS.BLOCK_INFUSED_WOOD_RAW))
-                .save(recipeOutput, RecipeBuilder.getDefaultRecipeId(BlocksAS.INFUSED_WOOD_INFUSED).withPrefix("infused_wood/"));
+                .save(recipeOutput, RecipeBuilder.getDefaultRecipeId(BlocksAS.INFUSED_WOOD_ENRICHED).withPrefix("infused_wood/"));
         ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, BlocksAS.INFUSED_WOOD_SLAB, 6)
                 .pattern("WWW")
                 .define('W', BlocksAS.INFUSED_WOOD_PLANKS)

@@ -196,7 +196,8 @@ public class CrystalPropertyEvent extends BaseEvent {
         public enum Type /*implements IExtensibleEnum*/ {
 
             GROW_SIZE,
-            FORM_CRYSTAL_CLUSTER;
+            FORM_CRYSTAL_CLUSTER,
+            ENGRAVE_PROPERTY;
 
 //            public static ExtensionInfo getExtensionInfo() {
 //                return ExtensionInfo.nonExtended(Type.class);

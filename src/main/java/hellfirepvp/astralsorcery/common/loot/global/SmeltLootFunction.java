@@ -69,7 +69,7 @@ public class SmeltLootFunction {
         return generatedLoot.stream()
                 .filter(stack -> !stack.isEmpty())
                 .map(lootStack -> {
-                    return RecipeFinder.of(level).findSmeltingRecipe(level, lootStack).map(recipeHolder -> {
+                    return RecipeFinder.of(level).findSmeltingRecipe(lootStack).map(recipeHolder -> {
                         SingleRecipeInput input = new SingleRecipeInput(lootStack);
                         AbstractCookingRecipe recipe = recipeHolder.value();
                         ItemStack result = recipe.assemble(input, level.registryAccess());

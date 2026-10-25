@@ -162,13 +162,13 @@ public class AltarRecipe extends CustomRecipe<AltarRecipe, AltarCraftingInput> {
         return craftedOutputs;
     }
 
-    public List<ItemStack> getOutputsForDisplay(AltarCraftingInput input, HolderLookup.Provider registries) {
+    public List<ItemStack> getOutputsForDisplay(AltarCraftingInput input, HolderLookup.Provider registries, long tick) {
         List<ItemStack> craftedOutputs = this.getOutputs();
 
         for (AltarRecipeOutputModifier modifier : this.outputModifiers) {
             List<ItemStack> modifiedOutputs = new ArrayList<>();
             for (ItemStack output : craftedOutputs) {
-                modifiedOutputs.add(modifier.modifyOutputForDisplay(output.copy(), input, registries));
+                modifiedOutputs.add(modifier.modifyOutputForDisplay(output.copy(), input, registries, tick));
             }
             modifiedOutputs.removeIf(ItemStack::isEmpty);
             craftedOutputs = modifiedOutputs;

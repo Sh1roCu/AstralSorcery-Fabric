@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.focal.node;
 
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.client.ClientProxy;
@@ -36,6 +37,7 @@ import hellfirepvp.astralsorcery.common.tile.TileStarlightFocusCrystal;
 import hellfirepvp.astralsorcery.common.util.BiasedSuppliers;
 import hellfirepvp.astralsorcery.common.util.MiscUtil;
 import hellfirepvp.astralsorcery.common.util.VectorUtil;
+import hellfirepvp.astralsorcery.common.util.codec.CodecUtil;
 import hellfirepvp.astralsorcery.common.util.data.ColorWrapper;
 import hellfirepvp.astralsorcery.common.util.data.ColumnPos;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
@@ -77,36 +79,44 @@ import java.util.function.BiFunction;
 public class BasicFocalPointNode extends FocalPointNode {
 
     public static final MapCodec<BasicFocalPointNode> CODEC = RecordCodecBuilder.mapCodec(inst ->
-            commonFields(inst).apply(inst, BasicFocalPointNode::new));
+            commonFields(inst).and(
+                    CodecUtil.defaulted(Codec.BOOL, "didClearFlowers", () -> false, BasicFocalPointNode::didClearFlowers)
+            ).apply(inst, BasicFocalPointNode::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, BasicFocalPointNode> STREAM_CODEC = StreamCodec.composite(
-            ColumnPos.STREAM_CODEC,
-            BasicFocalPointNode::getPos,
-            ByteBufCodecs.registry(RegistriesAS.KEY_CONSTELLATIONS),
-            BasicFocalPointNode::getConstellation,
-            ByteBufCodecs.VAR_LONG,
-            FocalPointNode::getTicksExisted,
-            ByteBufCodecs.optional(BlockPos.STREAM_CODEC),
-            BasicFocalPointNode::getFocalPosition,
+            ColumnPos.STREAM_CODEC, BasicFocalPointNode::getPos,
+            ByteBufCodecs.registry(RegistriesAS.KEY_CONSTELLATIONS), BasicFocalPointNode::getConstellation,
+            ByteBufCodecs.VAR_LONG, FocalPointNode::getTicksExisted,
+            ByteBufCodecs.optional(BlockPos.STREAM_CODEC), BasicFocalPointNode::getFocalPosition,
+            ByteBufCodecs.BOOL, BasicFocalPointNode::didClearFlowers,
             BasicFocalPointNode::new);
 
     private final RandomSource rand = RandomSource.create();
     private final Set<BlockPos> activeTransmutationPositions = new HashSet<>();
     private ActiveFocalCombineRecipe activeCombineRecipe = null;
 
+    private boolean didClearFlowers = false;
+
     public BasicFocalPointNode(ColumnPos pos, BaseConstellation constellation) {
-        this(pos, constellation, 0L, Optional.empty());
+        this(pos, constellation, 0L, Optional.empty(), false);
     }
 
-    protected BasicFocalPointNode(ColumnPos pos, BaseConstellation constellation, long ticksExisted, Optional<BlockPos> focalPosition) {
+    protected BasicFocalPointNode(ColumnPos pos, BaseConstellation constellation, long ticksExisted, Optional<BlockPos> focalPosition, boolean didClearFlowers) {
         super(pos, constellation, ticksExisted, focalPosition);
+        this.didClearFlowers = didClearFlowers;
+    }
+
+    public boolean didClearFlowers() {
+        return this.didClearFlowers;
     }
 
     @Override
-    public void tick(ServerLevel sLevel) {
-        super.tick(sLevel);
-        if (this.getTicksExisted() <= 1) {
+    public void tick(ServerLevel sLevel, boolean isLoaded) {
+        super.tick(sLevel, isLoaded);
+        if (isLoaded && !this.didClearFlowers()) {
             this.clearFlowers(sLevel);
+            this.didClearFlowers = true;
+            this.markDirty(sLevel);
         }
 
         if (DayTimeHelper.isNight(sLevel)) {
