@@ -130,6 +130,12 @@ public class DataComponentsAS {
                     .networkSynchronized(ByteBufCodecs.fromCodecWithRegistriesTrusted(StoredPlayerProgressComponent.CODEC))
                     .build());
 
+    public static DataComponentType<VeiledItemStackComponent> VEILED =
+            register("veiled_item_stack", () -> DataComponentType.<VeiledItemStackComponent>builder()
+                    .persistent(VeiledItemStackComponent.CODEC)
+                    .networkSynchronized(VeiledItemStackComponent.STREAM_CODEC)
+                    .build());
+
     private static <T> DataComponentType<T> register(String name, Supplier<DataComponentType<T>> supplier) {
         return Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, AstralSorcery.key(name), supplier.get());
     }

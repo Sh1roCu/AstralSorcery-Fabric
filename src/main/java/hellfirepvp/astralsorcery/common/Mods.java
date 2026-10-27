@@ -30,7 +30,8 @@ public enum Mods {
     ASTRAL_SORCERY(AstralSorcery.MODID, true),
     DRACONIC_EVOLUTION("draconicevolution"),
     TRINKETS("trinkets"),
-    SIMULATED("simulated");
+    SIMULATED("simulated"),
+    BETTER_STRONGHOLDS("betterstrongholds");
 
     private final String modid;
     private final boolean loaded;

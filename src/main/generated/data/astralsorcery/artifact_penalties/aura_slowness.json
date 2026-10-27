@@ -1,0 +1,25 @@
+{
+  "effect": {
+    "type": "astralsorcery:effect_aura",
+    "effects": [
+      {
+        "ambient": true,
+        "duration": 100,
+        "id": "minecraft:slowness",
+        "show_icon": false
+      },
+      {
+        "ambient": true,
+        "duration": 100,
+        "id": "minecraft:mining_fatigue",
+        "show_icon": false
+      }
+    ],
+    "id": "astralsorcery:aura_slowness",
+    "range": 6
+  },
+  "selector": {
+    "conflicts": [],
+    "weight": 1
+  }
+}

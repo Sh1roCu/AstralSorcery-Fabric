@@ -24,6 +24,10 @@ import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -47,8 +51,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -67,6 +70,7 @@ public class ItemEntityArtifact extends ItemEntityChiselAttackable {
     private int triggerTimeout = 0;
     private int gracePulseTimeout = 1 * 20;
     private int forcedMoveTimeout = 0;
+    private final Set<UUID> spawnedMobs = new HashSet<>();
 
     public ItemEntityArtifact(EntityType<? extends ItemEntityArtifact> entityType, Level level) {
         super(entityType, level);
@@ -137,6 +141,18 @@ public class ItemEntityArtifact extends ItemEntityChiselAttackable {
         ItemStack stack = this.getItem().copy();
         stack.set(DataComponentsAS.ARTIFACT, component);
         this.setItem(stack);
+    }
+
+    public int getRemainingMobSpawns(ServerLevel sLevel) {
+        this.spawnedMobs.removeIf(uuid -> {
+            Entity entity = sLevel.getEntity(uuid);
+            return entity == null || !entity.isAlive();
+        });
+        return Math.max(0, ArtifactConfig.CONFIG.spawnedMobLimit.getAsInt() - this.spawnedMobs.size());
+    }
+
+    public void addSpawnedMob(Entity entity) {
+        this.spawnedMobs.add(entity.getUUID());
     }
 
     public void finishTriggerSuccess(ServerLevel sLevel) {
@@ -249,6 +265,16 @@ public class ItemEntityArtifact extends ItemEntityChiselAttackable {
                 if (this.activeTrigger != null) {
                     this.activeTrigger.tick(this, sLevel);
                 }
+
+                this.getArtifactComponent().ifPresent(component -> {
+                    if (!component.stability().mayTriggerPulse()) return;
+
+                    component.failureEffects().forEach(chancedEffect -> {
+                        if (chancedEffect.effect() instanceof ContinuousArtifactEffect continuousEffect) {
+                            continuousEffect.tickEffect(this.random, sLevel, this);
+                        }
+                    });
+                });
 
                 this.gracePulseTimeout--;
                 if (this.gracePulseTimeout <= 0) {
@@ -376,5 +402,22 @@ public class ItemEntityArtifact extends ItemEntityChiselAttackable {
     @Override
     protected boolean isValidAttackableStack(ItemStack stack) {
         return !stack.isEmpty();
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag compound) {
+        super.addAdditionalSaveData(compound);
+
+        ListTag spawnedMobs = new ListTag();
+        this.spawnedMobs.forEach(uuid -> spawnedMobs.add(NbtUtils.createUUID(uuid)));
+        compound.put("AS_SpawnedMobs", spawnedMobs);
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag compound) {
+        super.readAdditionalSaveData(compound);
+
+        this.spawnedMobs.clear();
+        compound.getList("AS_SpawnedMobs", Tag.TAG_INT_ARRAY).forEach(tag -> this.spawnedMobs.add(NbtUtils.loadUUID(tag)));
     }
 }

@@ -111,7 +111,12 @@ public class BlockUtil {
 
     private static void applyWorldState(Level level, boolean wasCapturingBlockStates, List<BlockSnapshot> previousCapturedStates) {
         var injection = (LevelInjection) level;
-        injection.as$getCapturedBlockSnapshots().forEach(snapshot -> {
+        List<BlockSnapshot> captured = List.copyOf(injection.as$getCapturedBlockSnapshots());
+        injection.as$setCapturingBlockSnapshots(wasCapturingBlockStates);
+        injection.as$getCapturedBlockSnapshots().clear();
+        injection.as$getCapturedBlockSnapshots().addAll(previousCapturedStates);
+
+        captured.forEach(snapshot -> {
             int flags = snapshot.getFlags();
             BlockState previous = snapshot.getState();
             BlockState newState = level.getBlockState(snapshot.getPos());
@@ -119,10 +124,6 @@ public class BlockUtil {
             newState.onPlace(level, snapshot.getPos(), previous, false);
             markAndNotifyBlock(level, snapshot.getPos(), level.getChunkAt(snapshot.getPos()), previous, newState, flags, Block.UPDATE_LIMIT);
         });
-
-        injection.as$setCapturingBlockSnapshots(wasCapturingBlockStates);
-        injection.as$getCapturedBlockSnapshots().clear();
-        injection.as$getCapturedBlockSnapshots().addAll(previousCapturedStates);
     }
 
     private static void restoreWorldState(Level level, boolean wasCapturingBlockStates, List<BlockSnapshot> previousCapturedStates) {
@@ -197,8 +198,7 @@ public class BlockUtil {
         }
     }
 
-    public record LevelChanges<T>(List<BlockSnapshot> capturedChanges, T value) {
-    }
+    public record LevelChanges<T>(List<BlockSnapshot> capturedChanges, T value) {}
 
     public static class TestBlockUseContext extends BlockPlaceContext {
 
